@@ -6,10 +6,10 @@ create table ACT_GE_PROPERTY (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
 insert into ACT_GE_PROPERTY
-values ('schema.version', '7.1.0-M6', 1);
+values ('schema.version', '9.1.1', 1);
 
 insert into ACT_GE_PROPERTY
-values ('schema.history', 'create(7.1.0-M6)', 1);
+values ('schema.history', 'create(9.1.1)', 1);
 
 insert into ACT_GE_PROPERTY
 values ('next.dbid', '1', 1);
@@ -210,6 +210,7 @@ create table ACT_RU_TASK (
     TENANT_ID_ varchar(255) default '',
     FORM_KEY_ varchar(255),
     CLAIM_TIME_ datetime(3),
+    CLAIM_TOKEN_ varchar(64),
     APP_VERSION_ integer,
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
@@ -223,6 +224,7 @@ create table ACT_RU_IDENTITYLINK (
     TASK_ID_ varchar(64),
     PROC_INST_ID_ varchar(64),
     PROC_DEF_ID_ varchar(64),
+    DETAILS_ LONGBLOB,
     primary key (ID_)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
@@ -294,12 +296,15 @@ create table ACT_RU_INTEGRATION (
 create index ACT_IDX_EXEC_BUSKEY on ACT_RU_EXECUTION(BUSINESS_KEY_);
 create index ACT_IDC_EXEC_ROOT on ACT_RU_EXECUTION(ROOT_PROC_INST_ID_);
 create index ACT_IDX_TASK_CREATE on ACT_RU_TASK(CREATE_TIME_);
+create index ACT_IDX_TASK_CLAIM_TOKEN on ACT_RU_TASK(CLAIM_TOKEN_);
 create index ACT_IDX_IDENT_LNK_USER on ACT_RU_IDENTITYLINK(USER_ID_);
 create index ACT_IDX_IDENT_LNK_GROUP on ACT_RU_IDENTITYLINK(GROUP_ID_);
+create index ACT_IDX_IDENT_LNK_TASK on ACT_RU_IDENTITYLINK(TASK_ID_ ASC);
 create index ACT_IDX_EVENT_SUBSCR_CONFIG_ on ACT_RU_EVENT_SUBSCR(CONFIGURATION_);
 create index ACT_IDX_VARIABLE_TASK_ID on ACT_RU_VARIABLE(TASK_ID_);
 create index ACT_IDX_ATHRZ_PROCEDEF on ACT_RU_IDENTITYLINK(PROC_DEF_ID_);
 create index ACT_IDX_INFO_PROCDEF on ACT_PROCDEF_INFO(PROC_DEF_ID_);
+create index ACT_IDX_RE_PROCDEF_DEPLOYMENT_ID on ACT_RE_PROCDEF(DEPLOYMENT_ID_ ASC, ID_ ASC);
 
 alter table ACT_GE_BYTEARRAY
     add constraint ACT_FK_BYTEARR_DEPL

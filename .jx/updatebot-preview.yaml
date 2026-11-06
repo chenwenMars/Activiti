@@ -1,0 +1,19 @@
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+        - https://github.com/Activiti/activiti-cloud
+      reusePullRequest: true
+      changes:
+        - regex:
+            pattern: "<activiti.version>(.*)</activiti.version>"
+            files:
+              - "**/pom.xml"
+        - command:
+            name: sh
+            args:
+              - -c
+              - |
+                set -eu
+                printf "build.run.id=%s\n" "${BUILD_RUN_ID:?BUILD_RUN_ID must be set}" > preview-build.properties

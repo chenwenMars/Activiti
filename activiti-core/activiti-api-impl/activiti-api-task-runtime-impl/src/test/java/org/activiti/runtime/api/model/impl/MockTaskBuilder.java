@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.model.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
-
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.Task;
 
@@ -126,7 +124,7 @@ public class MockTaskBuilder {
         when(task.getFormKey()).thenReturn(formKey);
         return this;
     }
-    
+
     public MockTaskBuilder withTaskDefinitionKey(String taskDefinitionKey) {
         when(task.getTaskDefinitionKey()).thenReturn(taskDefinitionKey);
         return this;
@@ -139,6 +137,11 @@ public class MockTaskBuilder {
 
     public MockTaskBuilder withBusinessKey(String businessKey) {
         when(task.getBusinessKey()).thenReturn(businessKey);
+        return this;
+    }
+
+    public MockTaskBuilder withTaskProcessRootProcessInstanceId(String taskProcessRootProcessInstanceId) {
+        when(task.getTaskProcessRootProcessInstanceId()).thenReturn(taskProcessRootProcessInstanceId);
         return this;
     }
 

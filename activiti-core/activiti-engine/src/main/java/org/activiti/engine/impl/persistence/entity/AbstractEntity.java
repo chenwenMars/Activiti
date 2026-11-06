@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,62 +19,61 @@ import org.activiti.engine.impl.db.HasRevision;
 
 /**
  * Abstract superclass for the common properties of all {@link Entity} implementations.
- * 
+ *
 
  */
 public abstract class AbstractEntity implements Entity, HasRevision {
 
-  protected String id;
-  protected int revision = 1;
-  
-  protected boolean isInserted;
-  protected boolean isUpdated;
-  protected boolean isDeleted;
-  
-  @Override
-  public String getId() {
-    return id;
-  }
-  
-  @Override
-  public void setId(String id) {
-    this.id = id;
-  }
-  
-  public int getRevisionNext() {
-    return revision + 1;
-  }
+    protected String id;
+    protected int revision = 1;
 
-  public int getRevision() {
-    return revision;
-  }
+    protected boolean isInserted;
+    protected boolean isUpdated;
+    protected boolean isDeleted;
 
-  public void setRevision(int revision) {
-    this.revision = revision;
-  }
+    @Override
+    public String getId() {
+        return id;
+    }
 
-  public boolean isInserted() {
-    return isInserted;
-  }
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
 
-  public void setInserted(boolean isInserted) {
-    this.isInserted = isInserted;
-  }
+    public int getRevisionNext() {
+        return revision + 1;
+    }
 
-  public boolean isUpdated() {
-    return isUpdated;
-  }
+    public int getRevision() {
+        return revision;
+    }
 
-  public void setUpdated(boolean isUpdated) {
-    this.isUpdated = isUpdated;
-  }
+    public void setRevision(int revision) {
+        this.revision = revision;
+    }
 
-  public boolean isDeleted() {
-    return isDeleted;
-  }
+    public boolean isInserted() {
+        return isInserted;
+    }
 
-  public void setDeleted(boolean isDeleted) {
-    this.isDeleted = isDeleted;
-  }
-  
+    public void setInserted(boolean isInserted) {
+        this.isInserted = isInserted;
+    }
+
+    public boolean isUpdated() {
+        return isUpdated;
+    }
+
+    public void setUpdated(boolean isUpdated) {
+        this.isUpdated = isUpdated;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 }

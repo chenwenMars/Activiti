@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +17,6 @@ package org.activiti.engine.impl.persistence.entity.data;
 
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.impl.TaskQueryImpl;
 import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.task.Task;
@@ -23,23 +25,21 @@ import org.activiti.engine.task.Task;
 
  */
 public interface TaskDataManager extends DataManager<TaskEntity> {
-  
-  List<TaskEntity> findTasksByExecutionId(final String executionId);
+    List<TaskEntity> findTasksByExecutionId(final String executionId);
 
-  List<TaskEntity> findTasksByProcessInstanceId(String processInstanceId);
+    List<TaskEntity> findTasksByProcessInstanceId(String processInstanceId);
 
-  List<Task> findTasksByQueryCriteria(TaskQueryImpl taskQuery);
-  
-  List<Task> findTasksAndVariablesByQueryCriteria(TaskQueryImpl taskQuery);
+    List<Task> findTasksByQueryCriteria(TaskQueryImpl taskQuery);
 
-  long findTaskCountByQueryCriteria(TaskQueryImpl taskQuery);
+    List<Task> findTasksAndVariablesByQueryCriteria(TaskQueryImpl taskQuery);
 
-  List<Task> findTasksByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
+    long findTaskCountByQueryCriteria(TaskQueryImpl taskQuery);
 
-  long findTaskCountByNativeQuery(Map<String, Object> parameterMap);
+    List<Task> findTasksByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
 
-  List<Task> findTasksByParentTaskId(String parentTaskId);
-  
-  void updateTaskTenantIdForDeployment(String deploymentId, String newTenantId);
-  
+    long findTaskCountByNativeQuery(Map<String, Object> parameterMap);
+
+    List<Task> findTasksByParentTaskId(String parentTaskId);
+
+    void updateTaskTenantIdForDeployment(String deploymentId, String newTenantId);
 }

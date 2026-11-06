@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.event.impl;
 
+import java.util.Optional;
 import org.activiti.api.process.model.events.BPMNActivityCancelledEvent;
 import org.activiti.api.runtime.event.impl.BPMNActivityCancelledEventImpl;
 import org.activiti.engine.delegate.event.ActivitiActivityEvent;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
 import org.activiti.runtime.api.model.impl.ToActivityConverter;
-
-import java.util.Optional;
 
 public class ToActivityCancelledConverter implements EventConverter<BPMNActivityCancelledEvent, ActivitiActivityEvent> {
 
@@ -36,7 +34,8 @@ public class ToActivityCancelledConverter implements EventConverter<BPMNActivity
     public Optional<BPMNActivityCancelledEvent> from(ActivitiActivityEvent internalEvent) {
         BPMNActivityCancelledEventImpl bpmnActivityCancelledEvent = null;
 
-        if (internalEvent.getActivityId() != null && !internalEvent.getActivityId().isEmpty()) { // we are making sure that it is a BPMN Activity
+        if (internalEvent.getActivityId() != null && !internalEvent.getActivityId().isEmpty()) {
+            // we are making sure that it is a BPMN Activity
             bpmnActivityCancelledEvent = new BPMNActivityCancelledEventImpl(toActivityConverter.from(internalEvent));
         }
 

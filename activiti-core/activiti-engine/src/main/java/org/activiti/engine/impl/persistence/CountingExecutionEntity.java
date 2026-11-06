@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,32 +22,30 @@ import org.activiti.engine.api.internal.Internal;
  */
 @Internal
 public interface CountingExecutionEntity {
-  
-  boolean isCountEnabled();
-  void setCountEnabled(boolean isCountEnabled);
-  
-  void setEventSubscriptionCount(int eventSubscriptionCount);
-  int getEventSubscriptionCount();
-  
-  void setTaskCount(int taskcount);
-  int getTaskCount();
-  
-  void setJobCount(int jobCount);
-  int getJobCount();
-  
-  void setTimerJobCount(int timerJobCount);
-  int getTimerJobCount();
-  
-  void setSuspendedJobCount(int suspendedJobCount);
-  int getSuspendedJobCount();
-  
-  void setDeadLetterJobCount(int deadLetterJobCount);
-  int getDeadLetterJobCount();
-  
-  void setVariableCount(int variableCount);
-  int getVariableCount();
-  
-  void setIdentityLinkCount(int identityLinkCount);
-  int getIdentityLinkCount();
-  
+    boolean isCountEnabled();
+    void setCountEnabled(boolean isCountEnabled);
+
+    void setEventSubscriptionCount(int eventSubscriptionCount);
+    int getEventSubscriptionCount();
+
+    void setTaskCount(int taskcount);
+    int getTaskCount();
+
+    void setJobCount(int jobCount);
+    int getJobCount();
+
+    void setTimerJobCount(int timerJobCount);
+    int getTimerJobCount();
+
+    void setSuspendedJobCount(int suspendedJobCount);
+    int getSuspendedJobCount();
+
+    void setDeadLetterJobCount(int deadLetterJobCount);
+    int getDeadLetterJobCount();
+
+    void setVariableCount(int variableCount);
+    int getVariableCount();
+
+    void setIdentityLinkCount(int identityLinkCount);
+    int getIdentityLinkCount();
 }

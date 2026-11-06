@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.spring.autodeployment;
 
 import org.activiti.core.common.spring.project.ApplicationUpgradeContextService;
@@ -24,8 +39,10 @@ public class NeverFailAutoDeploymentStrategy extends AbstractAutoDeploymentStrat
 
     @Override
     public void deployResources(String deploymentNameHint, Resource[] resources, RepositoryService repositoryService) {
-        DeploymentBuilder deploymentBuilder = repositoryService.createDeployment().enableDuplicateFiltering()
-                .name(deploymentNameHint);
+        DeploymentBuilder deploymentBuilder = repositoryService
+            .createDeployment()
+            .enableDuplicateFiltering()
+            .name(deploymentNameHint);
 
         int validProcessCount = 0;
         for (final Resource resource : resources) {
@@ -35,8 +52,10 @@ public class NeverFailAutoDeploymentStrategy extends AbstractAutoDeploymentStrat
                 validProcessCount++;
                 deploymentBuilder.addInputStream(resourceName, resource);
             } else {
-                LOGGER.error("The following resource wasn't included in the deployment since it is invalid:\n{}",
-                              resourceName);
+                LOGGER.error(
+                    "The following resource wasn't included in the deployment since it is invalid:\n{}",
+                    resourceName
+                );
             }
         }
 

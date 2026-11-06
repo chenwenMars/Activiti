@@ -1,552 +1,606 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.engine.test.api.event;
+
+import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.delegate.event.ActivitiEventType;
 import org.activiti.engine.event.EventLogEntry;
 import org.activiti.engine.impl.event.logger.EventLogger;
 import org.activiti.engine.impl.event.logger.handler.Fields;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
-import org.activiti.engine.impl.util.CollectionUtil;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
-
  */
 public class DatabaseEventLoggerTest extends PluggableActivitiTestCase {
 
-  protected EventLogger databaseEventLogger;
+    protected EventLogger databaseEventLogger;
 
-  protected ObjectMapper objectMapper = new ObjectMapper();
+    protected JsonMapper jsonMapper = new JsonMapper();
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
 
-    // Database event logger setup
-    databaseEventLogger = new EventLogger(processEngineConfiguration.getClock(), processEngineConfiguration.getObjectMapper());
-    runtimeService.addEventListener(databaseEventLogger);
-  }
-
-  @Override
-  protected void tearDown() throws Exception {
-
-    // Database event logger teardown
-    runtimeService.removeEventListener(databaseEventLogger);
-
-    super.tearDown();
-  }
-
-  @Deployment(resources = { "org/activiti/engine/test/api/event/DatabaseEventLoggerProcess.bpmn20.xml" })
-  public void testDatabaseEvents() throws IOException {
-
-    String testTenant = "testTenant";
-
-    String deploymentId = repositoryService.createDeployment()
-        .addClasspathResource("org/activiti/engine/test/api/event/DatabaseEventLoggerProcess.bpmn20.xml")
-        .tenantId(testTenant)
-        .deploy().getId();
-
-    // Run process to gather data
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKeyAndTenantId("DatabaseEventLoggerProcess", 
-        CollectionUtil.singletonMap("testVar", "helloWorld"), testTenant);
-
-    // Verify event log entries
-    List<EventLogEntry> eventLogEntries = managementService.getEventLogEntries(null, null);
-
-    String processDefinitionId = processInstance.getProcessDefinitionId();
-    Iterator<EventLogEntry> iterator = eventLogEntries.iterator();
-    while (iterator.hasNext()) {
-      EventLogEntry entry = iterator.next();
-      if (entry.getProcessDefinitionId() != null && !entry.getProcessDefinitionId().equals(processDefinitionId)) {
-        iterator.remove();
-      }
+        // Database event logger setup
+        databaseEventLogger = new EventLogger(
+            processEngineConfiguration.getClock(),
+            processEngineConfiguration.getObjectMapper()
+        );
+        runtimeService.addEventListener(databaseEventLogger);
     }
 
-    assertEquals(15, eventLogEntries.size());
+    @Override
+    protected void tearDown() throws Exception {
+        // Database event logger teardown
+        runtimeService.removeEventListener(databaseEventLogger);
 
-    long lastLogNr = -1;
-    for (int i = 0; i < eventLogEntries.size(); i++) {
-
-      EventLogEntry entry = eventLogEntries.get(i);
-
-      if (i == 0) {
-
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.VARIABLE_CREATED.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.PROCESS_INSTANCE_ID));
-        assertNotNull(data.get(Fields.VALUE_STRING));
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-      }
-
-      // process instance start
-      if (i == 1) {
-
-        assertNotNull(entry.getType());
-        assertEquals("PROCESSINSTANCE_START", entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.TENANT_ID));
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-        Map<String, Object> variableMap = (Map<String, Object>) data.get(Fields.VARIABLES);
-        assertEquals(1, variableMap.size());
-        assertEquals("helloWorld", variableMap.get("testVar"));
-
-        assertFalse(data.containsKey(Fields.NAME));
-        assertFalse(data.containsKey(Fields.BUSINESS_KEY));
-      }
-
-      // Activity started
-      if (i == 2 || i == 5 || i == 9 || i == 12) {
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.ACTIVITY_STARTED.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ACTIVITY_ID));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.PROCESS_INSTANCE_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.ACTIVITY_TYPE));
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-      }
-
-      // Leaving start
-      if (i == 3) {
-
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.ACTIVITY_COMPLETED.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ACTIVITY_ID));
-        assertEquals("startEvent1", data.get(Fields.ACTIVITY_ID));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.PROCESS_INSTANCE_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.ACTIVITY_TYPE));
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-      }
-
-      // Sequence flow taken
-      if (i == 4 || i == 7 || i == 8) {
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.SEQUENCEFLOW_TAKEN.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.SOURCE_ACTIVITY_ID));
-        assertNotNull(data.get(Fields.SOURCE_ACTIVITY_NAME));
-        assertNotNull(data.get(Fields.SOURCE_ACTIVITY_TYPE));
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-      }
-
-      // Leaving parallel gateway
-      if (i == 6) {
-
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.ACTIVITY_COMPLETED.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ACTIVITY_ID));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.PROCESS_INSTANCE_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.ACTIVITY_TYPE));
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-      }
-
-      // Tasks
-      if (i == 11 || i == 14) {
-
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.TASK_ASSIGNED.name(), entry.getType());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getExecutionId());
-        assertNotNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.NAME));
-        assertNotNull(data.get(Fields.ASSIGNEE));
-        assertNotNull(data.get(Fields.CREATE_TIME));
-        assertNotNull(data.get(Fields.PRIORITY));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.TENANT_ID));
-
-        assertFalse(data.containsKey(Fields.DESCRIPTION));
-        assertFalse(data.containsKey(Fields.CATEGORY));
-        assertFalse(data.containsKey(Fields.OWNER));
-        assertFalse(data.containsKey(Fields.DUE_DATE));
-        assertFalse(data.containsKey(Fields.FORM_KEY));
-        assertFalse(data.containsKey(Fields.USER_ID));
-
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-      }
-
-      if (i == 10 || i == 13) {
-
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.TASK_CREATED.name(), entry.getType());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getExecutionId());
-        assertNotNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.NAME));
-        assertNotNull(data.get(Fields.ASSIGNEE));
-        assertNotNull(data.get(Fields.CREATE_TIME));
-        assertNotNull(data.get(Fields.PRIORITY));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.TENANT_ID));
-
-        assertFalse(data.containsKey(Fields.DESCRIPTION));
-        assertFalse(data.containsKey(Fields.CATEGORY));
-        assertFalse(data.containsKey(Fields.OWNER));
-        assertFalse(data.containsKey(Fields.DUE_DATE));
-        assertFalse(data.containsKey(Fields.FORM_KEY));
-        assertFalse(data.containsKey(Fields.USER_ID));
-
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-      }
-
-      lastLogNr = entry.getLogNumber();
+        super.tearDown();
     }
 
-    // Completing two tasks
-    for (Task task : taskService.createTaskQuery().list()) {
-      Authentication.setAuthenticatedUserId(task.getAssignee());
-      Map<String, Object> varMap = new HashMap<String, Object>();
-      varMap.put("test", "test");
-      taskService.complete(task.getId(), varMap);
-      Authentication.setAuthenticatedUserId(null);
-    }
+    @Deployment(resources = { "org/activiti/engine/test/api/event/DatabaseEventLoggerProcess.bpmn20.xml" })
+    public void testDatabaseEvents() throws IOException {
+        String testTenant = "testTenant";
 
-    // Verify events
-    eventLogEntries = managementService.getEventLogEntries(lastLogNr, 100L);
-    assertEquals(17, eventLogEntries.size());
+        String deploymentId = repositoryService
+            .createDeployment()
+            .addClasspathResource("org/activiti/engine/test/api/event/DatabaseEventLoggerProcess.bpmn20.xml")
+            .tenantId(testTenant)
+            .deploy()
+            .getId();
 
-    for (int i = 0; i < eventLogEntries.size(); i++) {
+        // Run process to gather data
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKeyAndTenantId(
+            "DatabaseEventLoggerProcess",
+            singletonMap("testVar", "helloWorld"),
+            testTenant
+        );
 
-      EventLogEntry entry = eventLogEntries.get(i);
+        // Verify event log entries
+        List<EventLogEntry> eventLogEntries = managementService.getEventLogEntries(null, null);
 
-      // Task completion
-      if (i == 1 || i == 6) {
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.TASK_COMPLETED.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getExecutionId());
-        assertNotNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.NAME));
-        assertNotNull(data.get(Fields.ASSIGNEE));
-        assertNotNull(data.get(Fields.CREATE_TIME));
-        assertNotNull(data.get(Fields.PRIORITY));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.TENANT_ID));
-        assertNotNull(data.get(Fields.USER_ID));
-
-        Map<String, Object> variableMap = (Map<String, Object>) data.get(Fields.VARIABLES);
-        assertEquals(1, variableMap.size());
-        assertEquals("test", variableMap.get("test"));
-
-        assertFalse(data.containsKey(Fields.DESCRIPTION));
-        assertFalse(data.containsKey(Fields.CATEGORY));
-        assertFalse(data.containsKey(Fields.OWNER));
-        assertFalse(data.containsKey(Fields.DUE_DATE));
-        assertFalse(data.containsKey(Fields.FORM_KEY));
-
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-      }
-
-      // Activity Completed
-      if (i == 2 || i == 7 || i == 10 || i == 13) {
-        assertNotNull(entry.getType());
-        assertEquals(ActivitiEventType.ACTIVITY_COMPLETED.name(), entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNotNull(data.get(Fields.ACTIVITY_ID));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.PROCESS_INSTANCE_ID));
-        assertNotNull(data.get(Fields.EXECUTION_ID));
-        assertNotNull(data.get(Fields.ACTIVITY_TYPE));
-        assertNotNull(data.get(Fields.BEHAVIOR_CLASS));
-
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-
-        if (i == 2) {
-          assertEquals("userTask", data.get(Fields.ACTIVITY_TYPE));
-        } else if (i == 7) {
-          assertEquals("userTask", data.get(Fields.ACTIVITY_TYPE));
-        } else if (i == 10) {
-          assertEquals("parallelGateway", data.get(Fields.ACTIVITY_TYPE));
-        } else if (i == 13) {
-          assertEquals("endEvent", data.get(Fields.ACTIVITY_TYPE));
+        String processDefinitionId = processInstance.getProcessDefinitionId();
+        Iterator<EventLogEntry> iterator = eventLogEntries.iterator();
+        while (iterator.hasNext()) {
+            EventLogEntry entry = iterator.next();
+            if (entry.getProcessDefinitionId() != null && !entry.getProcessDefinitionId().equals(processDefinitionId)) {
+                iterator.remove();
+            }
         }
 
-      }
+        assertThat(eventLogEntries).hasSize(15);
 
-      // Sequence flow taken
-      if (i == 3 || i == 8 || i == 11) {
-        assertNotNull(entry.getType());
-        assertEquals(entry.getType(), ActivitiEventType.SEQUENCEFLOW_TAKEN.name());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
+        long lastLogNr = -1;
+        for (int i = 0; i < eventLogEntries.size(); i++) {
+            EventLogEntry entry = eventLogEntries.get(i);
 
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.SOURCE_ACTIVITY_ID));
-        assertNotNull(data.get(Fields.SOURCE_ACTIVITY_TYPE));
-        assertNotNull(data.get(Fields.SOURCE_ACTIVITY_BEHAVIOR_CLASS));
-        assertNotNull(data.get(Fields.TARGET_ACTIVITY_ID));
-        assertNotNull(data.get(Fields.TARGET_ACTIVITY_TYPE));
-        assertNotNull(data.get(Fields.TARGET_ACTIVITY_BEHAVIOR_CLASS));
+            if (i == 0) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.VARIABLE_CREATED.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
 
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-      }
-      
-      if (i == 14 || i == 15) {
-        assertNotNull(entry.getType());
-        assertEquals("VARIABLE_DELETED", entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNotNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
-      }
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_INSTANCE_ID)).isNotNull();
+                assertThat(data.get(Fields.VALUE_STRING)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
 
-      if (i == 16) {
-        assertNotNull(entry.getType());
-        assertEquals("PROCESSINSTANCE_END", entry.getType());
-        assertNotNull(entry.getProcessDefinitionId());
-        assertNotNull(entry.getProcessInstanceId());
-        assertNotNull(entry.getTimeStamp());
-        assertNull(entry.getExecutionId());
-        assertNull(entry.getTaskId());
+            // process instance start
+            if (i == 1) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo("PROCESSINSTANCE_START");
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNull();
+                assertThat(entry.getTaskId()).isNull();
 
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {});
-        assertNotNull(data.get(Fields.ID));
-        assertNotNull(data.get(Fields.PROCESS_DEFINITION_ID));
-        assertNotNull(data.get(Fields.TENANT_ID));
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
 
-        assertFalse(data.containsKey(Fields.NAME));
-        assertFalse(data.containsKey(Fields.BUSINESS_KEY));
+                Map<String, Object> variableMap = (Map<String, Object>) data.get(Fields.VARIABLES);
+                assertThat(variableMap).hasSize(1);
+                assertThat(variableMap.get("testVar")).isEqualTo("helloWorld");
 
-        assertEquals(testTenant, data.get(Fields.TENANT_ID));
-      }
+                assertThat(data.containsKey(Fields.NAME)).isFalse();
+                assertThat(data.containsKey(Fields.BUSINESS_KEY)).isFalse();
+            }
+
+            // Activity started
+            if (i == 2 || i == 5 || i == 9 || i == 12) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.ACTIVITY_STARTED.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_INSTANCE_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            // Leaving start
+            if (i == 3) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.ACTIVITY_COMPLETED.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.ACTIVITY_ID)).isEqualTo("startEvent1");
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_INSTANCE_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            // Sequence flow taken
+            if (i == 4 || i == 7 || i == 8) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.SEQUENCEFLOW_TAKEN.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.SOURCE_ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.SOURCE_ACTIVITY_NAME)).isNotNull();
+                assertThat(data.get(Fields.SOURCE_ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            // Leaving parallel gateway
+            if (i == 6) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.ACTIVITY_COMPLETED.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_INSTANCE_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            // Tasks
+            if (i == 11 || i == 14) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.TASK_ASSIGNED.name());
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNotNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.NAME)).isNotNull();
+                assertThat(data.get(Fields.ASSIGNEE)).isNotNull();
+                assertThat(data.get(Fields.CREATE_TIME)).isNotNull();
+                assertThat(data.get(Fields.PRIORITY)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isNotNull();
+
+                assertThat(data.containsKey(Fields.DESCRIPTION)).isFalse();
+                assertThat(data.containsKey(Fields.CATEGORY)).isFalse();
+                assertThat(data.containsKey(Fields.OWNER)).isFalse();
+                assertThat(data.containsKey(Fields.DUE_DATE)).isFalse();
+                assertThat(data.containsKey(Fields.FORM_KEY)).isFalse();
+                assertThat(data.containsKey(Fields.USER_ID)).isFalse();
+
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            if (i == 10 || i == 13) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.TASK_CREATED.name());
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNotNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.NAME)).isNotNull();
+                assertThat(data.get(Fields.ASSIGNEE)).isNotNull();
+                assertThat(data.get(Fields.CREATE_TIME)).isNotNull();
+                assertThat(data.get(Fields.PRIORITY)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isNotNull();
+
+                assertThat(data.containsKey(Fields.DESCRIPTION)).isFalse();
+                assertThat(data.containsKey(Fields.CATEGORY)).isFalse();
+                assertThat(data.containsKey(Fields.OWNER)).isFalse();
+                assertThat(data.containsKey(Fields.DUE_DATE)).isFalse();
+                assertThat(data.containsKey(Fields.FORM_KEY)).isFalse();
+                assertThat(data.containsKey(Fields.USER_ID)).isFalse();
+
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            lastLogNr = entry.getLogNumber();
+        }
+
+        // Completing two tasks
+        for (Task task : taskService.createTaskQuery().list()) {
+            Authentication.setAuthenticatedUserId(task.getAssignee());
+            taskService.complete(task.getId(), singletonMap("test", "test"));
+            Authentication.setAuthenticatedUserId(null);
+        }
+
+        // Verify events
+        eventLogEntries = managementService.getEventLogEntries(lastLogNr, 100L);
+        assertThat(eventLogEntries).hasSize(17);
+
+        for (int i = 0; i < eventLogEntries.size(); i++) {
+            EventLogEntry entry = eventLogEntries.get(i);
+
+            // Task completion
+            if (i == 1 || i == 6) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.TASK_COMPLETED.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNotNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.NAME)).isNotNull();
+                assertThat(data.get(Fields.ASSIGNEE)).isNotNull();
+                assertThat(data.get(Fields.CREATE_TIME)).isNotNull();
+                assertThat(data.get(Fields.PRIORITY)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isNotNull();
+                assertThat(data.get(Fields.USER_ID)).isNotNull();
+
+                Map<String, Object> variableMap = (Map<String, Object>) data.get(Fields.VARIABLES);
+                assertThat(variableMap).hasSize(1);
+                assertThat(variableMap.get("test")).isEqualTo("test");
+
+                assertThat(data.containsKey(Fields.DESCRIPTION)).isFalse();
+                assertThat(data.containsKey(Fields.CATEGORY)).isFalse();
+                assertThat(data.containsKey(Fields.OWNER)).isFalse();
+                assertThat(data.containsKey(Fields.DUE_DATE)).isFalse();
+                assertThat(data.containsKey(Fields.FORM_KEY)).isFalse();
+
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            // Activity Completed
+            if (i == 2 || i == 7 || i == 10 || i == 13) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo(ActivitiEventType.ACTIVITY_COMPLETED.name());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_INSTANCE_ID)).isNotNull();
+                assertThat(data.get(Fields.EXECUTION_ID)).isNotNull();
+                assertThat(data.get(Fields.ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.BEHAVIOR_CLASS)).isNotNull();
+
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+
+                if (i == 2) {
+                    assertThat(data.get(Fields.ACTIVITY_TYPE)).isEqualTo("userTask");
+                } else if (i == 7) {
+                    assertThat(data.get(Fields.ACTIVITY_TYPE)).isEqualTo("userTask");
+                } else if (i == 10) {
+                    assertThat(data.get(Fields.ACTIVITY_TYPE)).isEqualTo("parallelGateway");
+                } else if (i == 13) {
+                    assertThat(data.get(Fields.ACTIVITY_TYPE)).isEqualTo("endEvent");
+                }
+            }
+
+            // Sequence flow taken
+            if (i == 3 || i == 8 || i == 11) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(ActivitiEventType.SEQUENCEFLOW_TAKEN.name()).isEqualTo(entry.getType());
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.SOURCE_ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.SOURCE_ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.SOURCE_ACTIVITY_BEHAVIOR_CLASS)).isNotNull();
+                assertThat(data.get(Fields.TARGET_ACTIVITY_ID)).isNotNull();
+                assertThat(data.get(Fields.TARGET_ACTIVITY_TYPE)).isNotNull();
+                assertThat(data.get(Fields.TARGET_ACTIVITY_BEHAVIOR_CLASS)).isNotNull();
+
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+
+            if (i == 14 || i == 15) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo("VARIABLE_DELETED");
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNotNull();
+                assertThat(entry.getTaskId()).isNull();
+            }
+
+            if (i == 16) {
+                assertThat(entry.getType()).isNotNull();
+                assertThat(entry.getType()).isEqualTo("PROCESSINSTANCE_END");
+                assertThat(entry.getProcessDefinitionId()).isNotNull();
+                assertThat(entry.getProcessInstanceId()).isNotNull();
+                assertThat(entry.getTimeStamp()).isNotNull();
+                assertThat(entry.getExecutionId()).isNull();
+                assertThat(entry.getTaskId()).isNull();
+
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.ID)).isNotNull();
+                assertThat(data.get(Fields.PROCESS_DEFINITION_ID)).isNotNull();
+                assertThat(data.get(Fields.TENANT_ID)).isNotNull();
+
+                assertThat(data.containsKey(Fields.NAME)).isFalse();
+                assertThat(data.containsKey(Fields.BUSINESS_KEY)).isFalse();
+
+                assertThat(data.get(Fields.TENANT_ID)).isEqualTo(testTenant);
+            }
+        }
+
+        // Cleanup
+        for (EventLogEntry eventLogEntry : managementService.getEventLogEntries(null, null)) {
+            managementService.deleteEventLogEntry(eventLogEntry.getLogNumber());
+        }
+
+        repositoryService.deleteDeployment(deploymentId, true);
     }
 
-    // Cleanup
-    for (EventLogEntry eventLogEntry : managementService.getEventLogEntries(null, null)) {
-      managementService.deleteEventLogEntry(eventLogEntry.getLogNumber());
+    public void testDatabaseEventsNoTenant() throws IOException {
+        String deploymentId = repositoryService
+            .createDeployment()
+            .addClasspathResource("org/activiti/engine/test/api/event/DatabaseEventLoggerProcess.bpmn20.xml")
+            .deploy()
+            .getId();
+
+        // Run process to gather data
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(
+            "DatabaseEventLoggerProcess",
+            singletonMap("testVar", "helloWorld")
+        );
+
+        // Verify event log entries
+        List<EventLogEntry> eventLogEntries = managementService.getEventLogEntries(null, null);
+
+        String processDefinitionId = processInstance.getProcessDefinitionId();
+        Iterator<EventLogEntry> iterator = eventLogEntries.iterator();
+        while (iterator.hasNext()) {
+            EventLogEntry entry = iterator.next();
+            if (entry.getProcessDefinitionId() != null && !entry.getProcessDefinitionId().equals(processDefinitionId)) {
+                iterator.remove();
+            }
+        }
+
+        assertThat(eventLogEntries).hasSize(15);
+
+        for (int i = 0; i < eventLogEntries.size(); i++) {
+            EventLogEntry entry = eventLogEntries.get(i);
+
+            if (i == 0) {
+                assertThat(ActivitiEventType.VARIABLE_CREATED.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            // process instance start
+            if (i == 1) {
+                assertThat(entry.getType()).isEqualTo("PROCESSINSTANCE_START");
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            // Activity started
+            if (i == 2 || i == 5 || i == 9 || i == 12) {
+                assertThat(ActivitiEventType.ACTIVITY_STARTED.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            // Leaving start
+            if (i == 3) {
+                assertThat(ActivitiEventType.ACTIVITY_COMPLETED.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            // Sequence flow taken
+            if (i == 4 || i == 7 || i == 8) {
+                assertThat(ActivitiEventType.SEQUENCEFLOW_TAKEN.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            // Leaving parallel gateway
+            if (i == 6) {
+                assertThat(ActivitiEventType.ACTIVITY_COMPLETED.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            // Tasks
+            if (i == 11 || i == 14) {
+                assertThat(ActivitiEventType.TASK_ASSIGNED.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+
+            if (i == 10 || i == 13) {
+                assertThat(ActivitiEventType.TASK_CREATED.name()).isEqualTo(entry.getType());
+                Map<String, Object> data = jsonMapper.readValue(
+                    entry.getData(),
+                    new TypeReference<HashMap<String, Object>>() {}
+                );
+                assertThat(data.get(Fields.TENANT_ID)).isNull();
+            }
+        }
+
+        repositoryService.deleteDeployment(deploymentId, true);
+
+        // Cleanup
+        for (EventLogEntry eventLogEntry : managementService.getEventLogEntries(null, null)) {
+            managementService.deleteEventLogEntry(eventLogEntry.getLogNumber());
+        }
     }
 
-    repositoryService.deleteDeployment(deploymentId, true);
+    public void testStandaloneTaskEvents() throws StreamReadException, DatabindException, IOException {
+        Task task = taskService.newTask();
+        task.setAssignee("kermit");
+        task.setTenantId("myTenant");
+        taskService.saveTask(task);
 
-  }
+        taskService.setAssignee(task.getId(), "gonzo");
 
-  public void testDatabaseEventsNoTenant() throws IOException {
+        task = taskService.createTaskQuery().taskId(task.getId()).singleResult();
+        task.setAssignee("kermit");
+        taskService.saveTask(task);
 
-    String deploymentId = repositoryService.createDeployment().addClasspathResource("org/activiti/engine/test/api/event/DatabaseEventLoggerProcess.bpmn20.xml").deploy().getId();
+        List<EventLogEntry> events = managementService.getEventLogEntries(null, null);
+        assertThat(events).hasSize(4);
+        assertThat(events.getFirst().getType()).isEqualTo("TASK_CREATED");
+        assertThat(events.get(1).getType()).isEqualTo("TASK_ASSIGNED");
+        assertThat(events.get(2).getType()).isEqualTo("TASK_ASSIGNED");
+        assertThat(events.get(3).getType()).isEqualTo("TASK_ASSIGNED");
 
-    // Run process to gather data
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("DatabaseEventLoggerProcess", CollectionUtil.singletonMap("testVar", "helloWorld"));
+        for (EventLogEntry eventLogEntry : events) {
+            Map<String, Object> data = jsonMapper.readValue(
+                eventLogEntry.getData(),
+                new TypeReference<HashMap<String, Object>>() {}
+            );
+            assertThat(data.get(Fields.TENANT_ID)).isEqualTo("myTenant");
+        }
 
-    // Verify event log entries
-    List<EventLogEntry> eventLogEntries = managementService.getEventLogEntries(null, null);
-
-    String processDefinitionId = processInstance.getProcessDefinitionId();
-    Iterator<EventLogEntry> iterator = eventLogEntries.iterator();
-    while (iterator.hasNext()) {
-      EventLogEntry entry = iterator.next();
-      if (entry.getProcessDefinitionId() != null && !entry.getProcessDefinitionId().equals(processDefinitionId)) {
-        iterator.remove();
-      }
+        // Cleanup
+        taskService.deleteTask(task.getId(), true);
+        for (EventLogEntry eventLogEntry : managementService.getEventLogEntries(null, null)) {
+            managementService.deleteEventLogEntry(eventLogEntry.getLogNumber());
+        }
     }
-
-    assertEquals(15, eventLogEntries.size());
-    
-    for (int i = 0; i < eventLogEntries.size(); i++) {
-
-      EventLogEntry entry = eventLogEntries.get(i);
-
-      if (i == 0) {
-        assertEquals(entry.getType(), ActivitiEventType.VARIABLE_CREATED.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      // process instance start
-      if (i == 1) {
-        assertEquals("PROCESSINSTANCE_START", entry.getType());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      // Activity started
-      if (i == 2 || i == 5 || i == 9 || i == 12) {
-        assertEquals(entry.getType(), ActivitiEventType.ACTIVITY_STARTED.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      // Leaving start
-      if (i == 3) {
-        assertEquals(entry.getType(), ActivitiEventType.ACTIVITY_COMPLETED.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      // Sequence flow taken
-      if (i == 4 || i == 7 || i == 8) {
-        assertEquals(entry.getType(), ActivitiEventType.SEQUENCEFLOW_TAKEN.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      // Leaving parallel gateway
-      if (i == 6) {
-        assertEquals(entry.getType(), ActivitiEventType.ACTIVITY_COMPLETED.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      // Tasks
-      if (i == 11 || i == 14) {
-        assertEquals(entry.getType(), ActivitiEventType.TASK_ASSIGNED.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-      if (i == 10 || i == 13) {
-        assertEquals(entry.getType(), ActivitiEventType.TASK_CREATED.name());
-        Map<String, Object> data = objectMapper.readValue(entry.getData(), new TypeReference<HashMap<String, Object>>() {
-        });
-        assertNull(data.get(Fields.TENANT_ID));
-      }
-
-    }
-
-    repositoryService.deleteDeployment(deploymentId, true);
-
-    // Cleanup
-    for (EventLogEntry eventLogEntry : managementService.getEventLogEntries(null, null)) {
-      managementService.deleteEventLogEntry(eventLogEntry.getLogNumber());
-    }
-
-  }
-
-  public void testStandaloneTaskEvents() throws JsonParseException, JsonMappingException, IOException {
-
-    Task task = taskService.newTask();
-    task.setAssignee("kermit");
-    task.setTenantId("myTenant");
-    taskService.saveTask(task);
-    
-    taskService.setAssignee(task.getId(), "gonzo");
-    
-    task = taskService.createTaskQuery().taskId(task.getId()).singleResult();
-    task.setAssignee("kermit");
-    taskService.saveTask(task);
-
-    List<EventLogEntry> events = managementService.getEventLogEntries(null, null);
-    assertEquals(4, events.size());
-    assertEquals("TASK_CREATED", events.get(0).getType());
-    assertEquals("TASK_ASSIGNED", events.get(1).getType());
-    assertEquals("TASK_ASSIGNED", events.get(2).getType());
-    assertEquals("TASK_ASSIGNED", events.get(3).getType());
-
-    for (EventLogEntry eventLogEntry : events) {
-      Map<String, Object> data = objectMapper.readValue(eventLogEntry.getData(), new TypeReference<HashMap<String, Object>>() {
-      });
-      assertEquals("myTenant", data.get(Fields.TENANT_ID));
-    }
-
-    // Cleanup
-    taskService.deleteTask(task.getId(), true);
-    for (EventLogEntry eventLogEntry : managementService.getEventLogEntries(null, null)) {
-      managementService.deleteEventLogEntry(eventLogEntry.getLogNumber());
-    }
-
-  }
-
 }

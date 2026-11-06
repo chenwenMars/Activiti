@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,56 +31,68 @@ import org.activiti.engine.repository.ProcessDefinition;
  */
 public class SetProcessDefinitionCategoryCmd implements Command<Void> {
 
-  protected String processDefinitionId;
-  protected String category;
+    protected String processDefinitionId;
+    protected String category;
 
-  public SetProcessDefinitionCategoryCmd(String processDefinitionId, String category) {
-    this.processDefinitionId = processDefinitionId;
-    this.category = category;
-  }
-
-  public Void execute(CommandContext commandContext) {
-
-    if (processDefinitionId == null) {
-      throw new ActivitiIllegalArgumentException("Process definition id is null");
+    public SetProcessDefinitionCategoryCmd(String processDefinitionId, String category) {
+        this.processDefinitionId = processDefinitionId;
+        this.category = category;
     }
 
-    ProcessDefinitionEntity processDefinition = commandContext.getProcessDefinitionEntityManager().findById(processDefinitionId);
+    public Void execute(CommandContext commandContext) {
+        if (processDefinitionId == null) {
+            throw new ActivitiIllegalArgumentException("Process definition id is null");
+        }
 
-    if (processDefinition == null) {
-      throw new ActivitiObjectNotFoundException("No process definition found for id = '" + processDefinitionId + "'", ProcessDefinition.class);
+        ProcessDefinitionEntity processDefinition = commandContext
+            .getProcessDefinitionEntityManager()
+            .findById(processDefinitionId);
+
+        if (processDefinition == null) {
+            throw new ActivitiObjectNotFoundException(
+                "No process definition found for id = '" + processDefinitionId + "'",
+                ProcessDefinition.class
+            );
+        }
+
+        executeInternal(commandContext, processDefinition);
+        return null;
     }
-    
-    // Update category
-    processDefinition.setCategory(category);
 
-    // Remove process definition from cache, it will be refetched later
-    DeploymentCache<ProcessDefinitionCacheEntry> processDefinitionCache = commandContext.getProcessEngineConfiguration().getProcessDefinitionCache();
-    if (processDefinitionCache != null) {
-      processDefinitionCache.remove(processDefinitionId);
+    protected void executeInternal(CommandContext commandContext, ProcessDefinitionEntity processDefinition) {
+        // Update category
+        processDefinition.setCategory(category);
+
+        // Remove process definition from cache, it will be refetched later
+        DeploymentCache<ProcessDefinitionCacheEntry> processDefinitionCache = commandContext
+            .getProcessEngineConfiguration()
+            .getProcessDefinitionCache();
+        if (processDefinitionCache != null) {
+            processDefinitionCache.remove(processDefinitionId);
+        }
+
+        if (commandContext.getEventDispatcher().isEnabled()) {
+            commandContext
+                .getEventDispatcher()
+                .dispatchEvent(
+                    ActivitiEventBuilder.createEntityEvent(ActivitiEventType.ENTITY_UPDATED, processDefinition)
+                );
+        }
     }
 
-    if (commandContext.getEventDispatcher().isEnabled()) {
-      commandContext.getEventDispatcher().dispatchEvent(ActivitiEventBuilder.createEntityEvent(ActivitiEventType.ENTITY_UPDATED, processDefinition));
+    public String getProcessDefinitionId() {
+        return processDefinitionId;
     }
 
-    return null;
-  }
+    public void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
 
-  public String getProcessDefinitionId() {
-    return processDefinitionId;
-  }
+    public String getCategory() {
+        return category;
+    }
 
-  public void setProcessDefinitionId(String processDefinitionId) {
-    this.processDefinitionId = processDefinitionId;
-  }
-
-  public String getCategory() {
-    return category;
-  }
-
-  public void setCategory(String category) {
-    this.category = category;
-  }
-
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

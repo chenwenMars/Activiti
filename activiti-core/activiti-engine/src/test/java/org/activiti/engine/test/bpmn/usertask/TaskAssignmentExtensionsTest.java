@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,9 +15,11 @@
  */
 package org.activiti.engine.test.bpmn.usertask;
 
-import java.util.Arrays;
-import java.util.List;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.List;
 import org.activiti.bpmn.exceptions.XMLException;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.impl.test.TestHelper;
@@ -24,92 +29,88 @@ import org.activiti.engine.test.Deployment;
 
 /**
  * Testcase for the non-spec extensions to the task candidate use case.
- * 
+ *
 
  */
 public class TaskAssignmentExtensionsTest extends PluggableActivitiTestCase {
 
-  private static final String KERMIT = "kermit";
-  private static final List<String> KERMITSGROUPS = Arrays.asList("management","accountancy");
+    private static final String KERMIT = "kermit";
+    private static final List<String> KERMITSGROUPS = asList("management", "accountancy");
 
-  private static final String GONZO = "gonzo";
-  private static final List<String> GONZOSGROUPS = Arrays.asList();
+    private static final String GONZO = "gonzo";
+    private static final List<String> GONZOSGROUPS = asList();
 
-  private static final String FOZZIE = "fozzie";
-  private static final List<String> FOZZIESGROUPS = Arrays.asList("management");
+    private static final String FOZZIE = "fozzie";
+    private static final List<String> FOZZIESGROUPS = asList("management");
 
-  @Deployment
-  public void testAssigneeExtension() {
-    runtimeService.startProcessInstanceByKey("assigneeExtension");
-    List<Task> tasks = taskService.createTaskQuery().taskAssignee(KERMIT).list();
-    assertEquals(1, tasks.size());
-    assertEquals("my task", tasks.get(0).getName());
-  }
-
-  public void testDuplicateAssigneeDeclaration() {
-    try {
-      String resource = TestHelper.getBpmnProcessDefinitionResource(getClass(), "testDuplicateAssigneeDeclaration");
-      repositoryService.createDeployment().addClasspathResource(resource).deploy();
-      fail("Invalid BPMN 2.0 process should not parse, but it gets parsed successfully");
-    } catch (XMLException e) {
-      // Exception is to be expected
+    @Deployment
+    public void testAssigneeExtension() {
+        runtimeService.startProcessInstanceByKey("assigneeExtension");
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(KERMIT).list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("my task");
     }
-  }
 
-  @Deployment
-  public void testOwnerExtension() {
-    runtimeService.startProcessInstanceByKey("ownerExtension");
-    List<Task> tasks = taskService.createTaskQuery().taskOwner(GONZO).list();
-    assertEquals(1, tasks.size());
-    assertEquals("my task", tasks.get(0).getName());
-  }
+    public void testDuplicateAssigneeDeclaration() {
+        String resource = TestHelper.getBpmnProcessDefinitionResource(getClass(), "testDuplicateAssigneeDeclaration");
+        assertThatExceptionOfType(XMLException.class)
+            .as("Invalid BPMN 2.0 process should not parse, but it gets parsed successfully")
+            .isThrownBy(() -> repositoryService.createDeployment().addClasspathResource(resource).deploy());
+    }
 
-  @Deployment
-  public void testCandidateUsersExtension() {
-    runtimeService.startProcessInstanceByKey("candidateUsersExtension");
-    List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(KERMIT,KERMITSGROUPS).list();
-    assertEquals(1, tasks.size());
-    tasks = taskService.createTaskQuery().taskCandidateUser(GONZO,GONZOSGROUPS).list();
-    assertEquals(1, tasks.size());
-  }
+    @Deployment
+    public void testOwnerExtension() {
+        runtimeService.startProcessInstanceByKey("ownerExtension");
+        List<Task> tasks = taskService.createTaskQuery().taskOwner(GONZO).list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("my task");
+    }
 
-  @Deployment
-  public void testCandidateGroupsExtension() {
-    runtimeService.startProcessInstanceByKey("candidateGroupsExtension");
+    @Deployment
+    public void testCandidateUsersExtension() {
+        runtimeService.startProcessInstanceByKey("candidateUsersExtension");
+        List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(KERMIT, KERMITSGROUPS).list();
+        assertThat(tasks).hasSize(1);
+        tasks = taskService.createTaskQuery().taskCandidateUser(GONZO, GONZOSGROUPS).list();
+        assertThat(tasks).hasSize(1);
+    }
 
-    // Bugfix check: potentially the query could return 2 tasks since
-    // kermit is a member of the two candidate groups
-    List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(KERMIT,KERMITSGROUPS).list();
-    assertEquals(1, tasks.size());
-    assertEquals("make profit", tasks.get(0).getName());
+    @Deployment
+    public void testCandidateGroupsExtension() {
+        runtimeService.startProcessInstanceByKey("candidateGroupsExtension");
 
-    tasks = taskService.createTaskQuery().taskCandidateUser(FOZZIE,FOZZIESGROUPS).list();
-    assertEquals(1, tasks.size());
-    assertEquals("make profit", tasks.get(0).getName());
+        // Bugfix check: potentially the query could return 2 tasks since
+        // kermit is a member of the two candidate groups
+        List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(KERMIT, KERMITSGROUPS).list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("make profit");
 
-    // Test the task query find-by-candidate-group operation
-    TaskQuery query = taskService.createTaskQuery();
-    assertEquals(1, query.taskCandidateGroup("management").count());
-    assertEquals(1, query.taskCandidateGroup("accountancy").count());
-  }
+        tasks = taskService.createTaskQuery().taskCandidateUser(FOZZIE, FOZZIESGROUPS).list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("make profit");
 
-  // Test where the candidate user extension is used together
-  // with the spec way of defining candidate users
-  @Deployment
-  public void testMixedCandidateUserDefinition() {
-    runtimeService.startProcessInstanceByKey("mixedCandidateUser");
+        // Test the task query find-by-candidate-group operation
+        TaskQuery query = taskService.createTaskQuery();
+        assertThat(query.taskCandidateGroup("management").count()).isEqualTo(1);
+        assertThat(query.taskCandidateGroup("accountancy").count()).isEqualTo(1);
+    }
 
-    List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(KERMIT,KERMITSGROUPS).list();
-    assertEquals(1, tasks.size());
+    // Test where the candidate user extension is used together
+    // with the spec way of defining candidate users
+    @Deployment
+    public void testMixedCandidateUserDefinition() {
+        runtimeService.startProcessInstanceByKey("mixedCandidateUser");
 
-    tasks = taskService.createTaskQuery().taskCandidateUser(FOZZIE,FOZZIESGROUPS).list();
-    assertEquals(1, tasks.size());
+        List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(KERMIT, KERMITSGROUPS).list();
+        assertThat(tasks).hasSize(1);
 
-    tasks = taskService.createTaskQuery().taskCandidateUser(GONZO,GONZOSGROUPS).list();
-    assertEquals(1, tasks.size());
+        tasks = taskService.createTaskQuery().taskCandidateUser(FOZZIE, FOZZIESGROUPS).list();
+        assertThat(tasks).hasSize(1);
 
-    tasks = taskService.createTaskQuery().taskCandidateUser("mispiggy",null).list();
-    assertEquals(0, tasks.size());
-  }
+        tasks = taskService.createTaskQuery().taskCandidateUser(GONZO, GONZOSGROUPS).list();
+        assertThat(tasks).hasSize(1);
 
+        tasks = taskService.createTaskQuery().taskCandidateUser("mispiggy", null).list();
+        assertThat(tasks).hasSize(0);
+    }
 }

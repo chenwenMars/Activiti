@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
 import org.activiti.api.model.shared.model.VariableInstance;
+import org.activiti.api.runtime.shared.NotFoundException;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.runtime.shared.security.SecurityManager;
@@ -27,6 +27,7 @@ import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.builders.TaskPayloadBuilder;
 import org.activiti.api.task.model.impl.TaskImpl;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import org.activiti.api.task.model.payloads.AssignTasksPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.ClaimTaskPayload;
@@ -47,8 +48,9 @@ import org.activiti.runtime.api.model.impl.APITaskConverter;
 import org.activiti.runtime.api.model.impl.APIVariableInstanceConverter;
 import org.activiti.runtime.api.query.impl.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 
-@PreAuthorize("hasRole('ACTIVITI_ADMIN')")
+@PreAuthorize("hasAnyRole('ACTIVITI_ADMIN','APPLICATION_MANAGER')")
 public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
 
     private final TaskService taskService;
@@ -61,11 +63,13 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
 
     private final SecurityManager securityManager;
 
-    public TaskAdminRuntimeImpl(TaskService taskService,
-                                APITaskConverter taskConverter,
-                                APIVariableInstanceConverter variableInstanceConverter,
-                                TaskRuntimeHelper taskRuntimeHelper,
-                                SecurityManager securityManager) {
+    public TaskAdminRuntimeImpl(
+        TaskService taskService,
+        APITaskConverter taskConverter,
+        APIVariableInstanceConverter variableInstanceConverter,
+        TaskRuntimeHelper taskRuntimeHelper,
+        SecurityManager securityManager
+    ) {
         this.taskService = taskService;
         this.taskConverter = taskConverter;
         this.variableInstanceConverter = variableInstanceConverter;
@@ -80,13 +84,11 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
 
     @Override
     public Page<Task> tasks(Pageable pageable) {
-        return tasks(pageable,
-                TaskPayloadBuilder.tasks().build());
+        return tasks(pageable, TaskPayloadBuilder.tasks().build());
     }
 
     @Override
-    public Page<Task> tasks(Pageable pageable,
-                            GetTasksPayload getTasksPayload) {
+    public Page<Task> tasks(Pageable pageable, GetTasksPayload getTasksPayload) {
         TaskQuery taskQuery = taskService.createTaskQuery();
 
         if (getTasksPayload.getProcessInstanceId() != null) {
@@ -96,10 +98,31 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
             taskQuery = taskQuery.taskParentTaskId(getTasksPayload.getParentTaskId());
         }
 
-        List<Task> tasks = taskConverter.from(taskQuery.listPage(pageable.getStartIndex(),
-                pageable.getMaxItems()));
-        return new PageImpl<>(tasks,
-                Math.toIntExact(taskQuery.count()));
+        List<Task> tasks = taskConverter.from(taskQuery.listPage(pageable.getStartIndex(), pageable.getMaxItems()));
+        return new PageImpl<>(tasks, Math.toIntExact(taskQuery.count()));
+    }
+
+    @Override
+    public Task lastCreatedTaskByProcessInstanceIdAndTaskDefinitionKey(
+        String processInstanceId,
+        String taskDefinitionKey
+    ) {
+        TaskQuery taskQuery = taskService
+            .createTaskQuery()
+            .processInstanceId(processInstanceId)
+            .taskDefinitionKey(taskDefinitionKey)
+            .orderByTaskCreateTime()
+            .desc();
+        org.activiti.engine.task.Task task = taskQuery.singleResult();
+        if (task == null) {
+            throw new NotFoundException(
+                "Unable to find task by given processInstanceId: " +
+                    processInstanceId +
+                    " and taskDefinitionKey: " +
+                    taskDefinitionKey
+            );
+        }
+        return taskConverter.from(task);
     }
 
     @Override
@@ -109,13 +132,10 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
 
     @Override
     public Task delete(DeleteTaskPayload deleteTaskPayload) {
-
         //      we might need to create an empty shell with the task ID and Status only
         Task task = task(deleteTaskPayload.getTaskId());
 
-        TaskImpl deletedTaskData = new TaskImpl(task.getId(),
-                task.getName(),
-                Task.TaskStatus.CANCELLED);
+        TaskImpl deletedTaskData = new TaskImpl(task.getId(), task.getName(), Task.TaskStatus.CANCELLED);
 
         String authenticatedUserId = securityManager.getAuthenticatedUserId();
 
@@ -123,15 +143,15 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
             deleteTaskPayload.setReason("Task deleted by " + authenticatedUserId);
         }
 
-        taskService.deleteTask(deleteTaskPayload.getTaskId(),
-                deleteTaskPayload.getReason(),
-                true);
+        taskService.deleteTask(deleteTaskPayload.getTaskId(), deleteTaskPayload.getReason(), true);
         return deletedTaskData;
     }
 
     @Override
     public List<VariableInstance> variables(GetTaskVariablesPayload getTaskVariablesPayload) {
-        return variableInstanceConverter.from(taskRuntimeHelper.getInternalTaskVariables(getTaskVariablesPayload.getTaskId()).values());
+        return variableInstanceConverter.from(
+            taskRuntimeHelper.getInternalTaskVariables(getTaskVariablesPayload.getTaskId()).values()
+        );
     }
 
     @Override
@@ -148,23 +168,21 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
     public Task complete(CompleteTaskPayload completeTaskPayload) {
         Task task = task(completeTaskPayload.getTaskId());
         if (task == null) {
-            throw new IllegalStateException("Task with id: " + completeTaskPayload.getTaskId() + " cannot be completed because it cannot be found.");
+            throw new IllegalStateException(
+                "Task with id: " + completeTaskPayload.getTaskId() + " cannot be completed because it cannot be found."
+            );
         }
-        
+
         taskRuntimeHelper.handleCompleteTaskPayload(completeTaskPayload);
-        
-        TaskImpl competedTaskData = new TaskImpl(task.getId(),
-                task.getName(),
-                Task.TaskStatus.COMPLETED);
-        taskService.complete(completeTaskPayload.getTaskId(),
-                completeTaskPayload.getVariables(), true);
+
+        TaskImpl competedTaskData = new TaskImpl(task.getId(), task.getName(), Task.TaskStatus.COMPLETED);
+        taskService.complete(completeTaskPayload.getTaskId(), completeTaskPayload.getVariables(), true);
         return competedTaskData;
     }
 
     @Override
     public Task claim(ClaimTaskPayload claimTaskPayload) {
-        taskService.claim(claimTaskPayload.getTaskId(),
-                claimTaskPayload.getAssignee());
+        taskService.claim(claimTaskPayload.getTaskId(), claimTaskPayload.getAssignee());
 
         return task(claimTaskPayload.getTaskId());
     }
@@ -177,22 +195,33 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
 
     @Override
     public Task assign(AssignTaskPayload assignTaskPayload) {
-        //We need to release, claim for assigned task is not working!
-        taskService.unclaim(assignTaskPayload.getTaskId());
+        return assign(assignTaskPayload.getTaskId(), assignTaskPayload.getAssignee());
+    }
 
-        //Now assign a new user
-        taskService.claim(assignTaskPayload.getTaskId(),
-                assignTaskPayload.getAssignee());
+    @Transactional
+    @Override
+    public Page<Task> assignMultiple(AssignTasksPayload assignTasksPayload) {
+        if (assignTasksPayload != null && assignTasksPayload.getTaskIds() != null) {
+            List<Task> tasks = assignTasksPayload
+                .getTaskIds()
+                .stream()
+                .map(taskId -> assign(taskId, assignTasksPayload.getAssignee()))
+                .collect(Collectors.toList());
+            return new PageImpl<>(tasks, tasks.size());
+        }
+        return new PageImpl<>(List.of(), 0);
+    }
 
-        return task(assignTaskPayload.getTaskId());
+    private Task assign(String taskId, String assignee) {
+        taskService.setAssignee(taskId, assignee);
+        return task(taskId);
     }
 
     @Override
     public void addCandidateUsers(CandidateUsersPayload candidateUsersPayload) {
         if (candidateUsersPayload.getCandidateUsers() != null && !candidateUsersPayload.getCandidateUsers().isEmpty()) {
-            for ( String u : candidateUsersPayload.getCandidateUsers() ) {
-                taskService.addCandidateUser(candidateUsersPayload.getTaskId(),
-                        u);
+            for (String u : candidateUsersPayload.getCandidateUsers()) {
+                taskService.addCandidateUser(candidateUsersPayload.getTaskId(), u);
             }
         }
     }
@@ -200,29 +229,32 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
     @Override
     public void deleteCandidateUsers(CandidateUsersPayload candidateUsersPayload) {
         if (candidateUsersPayload.getCandidateUsers() != null && !candidateUsersPayload.getCandidateUsers().isEmpty()) {
-            for ( String u : candidateUsersPayload.getCandidateUsers() ) {
-                taskService.deleteCandidateUser(candidateUsersPayload.getTaskId(),
-                        u);
+            for (String u : candidateUsersPayload.getCandidateUsers()) {
+                taskService.deleteCandidateUser(candidateUsersPayload.getTaskId(), u);
             }
         }
     }
 
     @Override
     public void addCandidateGroups(CandidateGroupsPayload candidateGroupsPayload) {
-        if (candidateGroupsPayload.getCandidateGroups() != null && !candidateGroupsPayload.getCandidateGroups().isEmpty()) {
-            for ( String g : candidateGroupsPayload.getCandidateGroups() ) {
-                taskService.addCandidateGroup(candidateGroupsPayload.getTaskId(),
-                        g);
+        if (
+            candidateGroupsPayload.getCandidateGroups() != null &&
+            !candidateGroupsPayload.getCandidateGroups().isEmpty()
+        ) {
+            for (String g : candidateGroupsPayload.getCandidateGroups()) {
+                taskService.addCandidateGroup(candidateGroupsPayload.getTaskId(), g);
             }
         }
     }
 
     @Override
     public void deleteCandidateGroups(CandidateGroupsPayload candidateGroupsPayload) {
-        if (candidateGroupsPayload.getCandidateGroups() != null && !candidateGroupsPayload.getCandidateGroups().isEmpty()) {
-            for ( String g : candidateGroupsPayload.getCandidateGroups() ) {
-                taskService.deleteCandidateGroup(candidateGroupsPayload.getTaskId(),
-                        g);
+        if (
+            candidateGroupsPayload.getCandidateGroups() != null &&
+            !candidateGroupsPayload.getCandidateGroups().isEmpty()
+        ) {
+            for (String g : candidateGroupsPayload.getCandidateGroups()) {
+                taskService.deleteCandidateGroup(candidateGroupsPayload.getTaskId(), g);
             }
         }
     }
@@ -232,14 +264,13 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
         List<IdentityLink> identityLinks = getIdentityLinks(taskId);
         List<String> userCandidates = new ArrayList<>();
         if (identityLinks != null) {
-            for ( IdentityLink i : identityLinks ) {
+            for (IdentityLink i : identityLinks) {
                 if (i.getUserId() != null) {
                     if (i.getType().equals(IdentityLinkType.CANDIDATE)) {
                         userCandidates.add(i.getUserId());
                     }
                 }
             }
-
         }
         return userCandidates;
     }
@@ -249,14 +280,13 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
         List<IdentityLink> identityLinks = getIdentityLinks(taskId);
         List<String> groupCandidates = new ArrayList<>();
         if (identityLinks != null) {
-            for ( IdentityLink i : identityLinks ) {
+            for (IdentityLink i : identityLinks) {
                 if (i.getGroupId() != null) {
                     if (i.getType().equals(IdentityLinkType.CANDIDATE)) {
                         groupCandidates.add(i.getGroupId());
                     }
                 }
             }
-
         }
         return groupCandidates;
     }
@@ -264,5 +294,4 @@ public class TaskAdminRuntimeImpl implements TaskAdminRuntime {
     private List<IdentityLink> getIdentityLinks(String taskId) {
         return taskService.getIdentityLinksForTask(taskId);
     }
-
 }

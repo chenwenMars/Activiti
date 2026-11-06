@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.impl.persistence.entity.data.integration;
 
+import java.util.List;
+import org.activiti.engine.impl.IntegrationContextQueryImpl;
+import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.persistence.entity.data.AbstractDataManager;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
 
-public class MybatisIntegrationContextDataManager extends AbstractDataManager<IntegrationContextEntity> implements IntegrationContextDataManager {
+public class MybatisIntegrationContextDataManager
+    extends AbstractDataManager<IntegrationContextEntity>
+    implements IntegrationContextDataManager
+{
 
     public MybatisIntegrationContextDataManager(ProcessEngineConfigurationImpl processEngineConfiguration) {
         super(processEngineConfiguration);
@@ -37,4 +42,14 @@ public class MybatisIntegrationContextDataManager extends AbstractDataManager<In
         return IntegrationContextEntityImpl.class;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<IntegrationContextEntity> findByQueryCriteria(IntegrationContextQueryImpl query, Page page) {
+        return getDbSqlSession().selectList("selectIntegrationContextByQueryCriteria", query, page);
+    }
+
+    @Override
+    public long findCountByQueryCriteria(IntegrationContextQueryImpl query) {
+        return (Long) getDbSqlSession().selectOne("selectIntegrationContextCountByQueryCriteria", query);
+    }
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.bpmn.converter;
+
+import static org.activiti.bpmn.constants.BpmnXMLConstants.ATTRIBUTE_TASK_IMPLEMENTATION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.activiti.bpmn.constants.BpmnXMLConstants;
 import org.activiti.bpmn.model.BaseElement;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.ServiceTask;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.activiti.bpmn.constants.BpmnXMLConstants.ATTRIBUTE_TASK_IMPLEMENTATION;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
+@ExtendWith(MockitoExtension.class)
 public class ServiceTaskXMLConverterTest {
 
     private ServiceTaskXMLConverter converter = new ServiceTaskXMLConverter();
@@ -51,20 +50,18 @@ public class ServiceTaskXMLConverterTest {
     @Mock
     private ServiceTask serviceTask;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
     @Test
     public void convertXMLToElementShouldSetTheImplementationFromXMLImplementationAttribute() throws Exception {
         //given
-        given(reader.getAttributeValue(null,
-                                       BpmnXMLConstants.ATTRIBUTE_TASK_IMPLEMENTATION)).willReturn("myConnector");
+        given(
+            reader.getAttributeValue(
+                BpmnXMLConstants.ACTIVITI_EXTENSIONS_NAMESPACE,
+                BpmnXMLConstants.ATTRIBUTE_TASK_SERVICE_CLASS
+            )
+        ).willReturn("myConnector");
 
         //when
-        BaseElement element = converter.convertXMLToElement(reader,
-                                                            new BpmnModel());
+        BaseElement element = converter.convertXMLToElement(reader, new BpmnModel());
 
         //then
         assertThat(((ServiceTask) element).getImplementation()).isEqualTo("myConnector");
@@ -76,12 +73,9 @@ public class ServiceTaskXMLConverterTest {
         given(serviceTask.getImplementation()).willReturn("myConnectorImplementation");
 
         //when
-        converter.writeAdditionalAttributes(serviceTask,
-                                            bpmnModel,
-                                            writer);
+        converter.writeAdditionalAttributes(serviceTask, bpmnModel, writer);
 
         //then
-        verify(writer).writeAttribute(eq(ATTRIBUTE_TASK_IMPLEMENTATION),
-                                      eq("myConnectorImplementation"));
+        verify(writer).writeAttribute(eq(ATTRIBUTE_TASK_IMPLEMENTATION), eq("myConnectorImplementation"));
     }
 }

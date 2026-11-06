@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.task.runtime;
 
 import java.util.List;
-
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.task.model.Task;
+import org.activiti.api.task.model.payloads.AssignTaskPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.ClaimTaskPayload;
@@ -37,12 +36,10 @@ import org.activiti.api.task.model.payloads.UpdateTaskPayload;
 import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
 import org.activiti.api.task.runtime.conf.TaskRuntimeConfiguration;
 
-
 /**
  * User Based Integrations against the Task Runtime
  */
 public interface TaskRuntime {
-
     TaskRuntimeConfiguration configuration();
 
     /**
@@ -65,8 +62,7 @@ public interface TaskRuntime {
      *  - the authenticated user is the actual assignee
      *  - the user belongs to a group that is a candidate for the task
      */
-    Page<Task> tasks(Pageable pageable,
-                     GetTasksPayload getTasksPayload);
+    Page<Task> tasks(Pageable pageable, GetTasksPayload getTasksPayload);
 
     /**
      * Creates a task based on the following rules
@@ -76,6 +72,19 @@ public interface TaskRuntime {
      *  - If a group or list of groups is provided those groups are added as candidates for claiming the task
      */
     Task create(CreateTaskPayload createTaskPayload);
+
+    /**
+     * Gets the next available task for the authenticated user using the given identification strategy.
+     *
+     * @param taskIdentificationStrategy strategy to use; {@code null} uses the default strategy
+     * @return the next task for the authenticated user, or {@code null} if no suitable task is available
+     * @throws IllegalStateException if there is no authenticated user
+     * @throws IllegalArgumentException if the strategy is not supported
+     * @throws UnsupportedOperationException if this TaskRuntime implementation does not support this operation
+     */
+    default Task nextTask(TaskIdentificationStrategy taskIdentificationStrategy) {
+        throw new UnsupportedOperationException("nextTask is not supported by this TaskRuntime implementation");
+    }
 
     /**
      * Claim a task with the currently authenticated user
@@ -106,7 +115,7 @@ public interface TaskRuntime {
      * - This method also check that the task is assigned to the currently authenticated user
      */
     void save(SaveTaskPayload saveTaskPayload);
-    
+
     /**
      * Updates details of a task
      * - The authenticated user should be able to see the task in order to update its details
@@ -121,17 +130,24 @@ public interface TaskRuntime {
      * - this method returns a shallow Task with the necessary information to validate that the task was deleted
      */
     Task delete(DeleteTaskPayload deleteTaskPayload);
-    
+
     void createVariable(CreateTaskVariablePayload createTaskVariablePayload);
     void updateVariable(UpdateTaskVariablePayload updateTaskVariablePayload);
     List<VariableInstance> variables(GetTaskVariablesPayload getTaskVariablesPayload);
-    
+
     void addCandidateUsers(CandidateUsersPayload candidateUsersPayload);
     void deleteCandidateUsers(CandidateUsersPayload candidateUsersPayload);
-    
+
     void addCandidateGroups(CandidateGroupsPayload candidateGroupsPayload);
     void deleteCandidateGroups(CandidateGroupsPayload candidateGroupsPayload);
-    
+
     List<String> userCandidates(String taskId);
     List<String> groupCandidates(String taskId);
+
+    /**
+     * Assign a task that has been claimed before to a different user
+     * - Only the current assignee can perform the action
+     * - The new assignee should be part of the candidate users for this task
+     */
+    Task assign(AssignTaskPayload assignTaskPayload);
 }

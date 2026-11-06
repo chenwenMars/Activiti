@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,33 +20,33 @@ import org.activiti.engine.delegate.event.ActivitiSignalEvent;
 
 /**
  * An {@link ActivitiSignalEvent} implementation.
- * 
+ *
 
  */
 public class ActivitiSignalEventImpl extends ActivitiActivityEventImpl implements ActivitiSignalEvent {
 
-  protected String signalName;
-  protected Object signalData;
+    protected String signalName;
+    protected Object signalData;
 
-  public ActivitiSignalEventImpl(ActivitiEventType type) {
-    super(type);
-  }
+    public ActivitiSignalEventImpl(ActivitiEventType type) {
+        super(type);
+    }
 
-  @Override
-  public String getSignalName() {
-    return signalName;
-  }
+    @Override
+    public String getSignalName() {
+        return signalName;
+    }
 
-  public void setSignalName(String signalName) {
-    this.signalName = signalName;
-  }
+    public void setSignalName(String signalName) {
+        this.signalName = signalName;
+    }
 
-  @Override
-  public Object getSignalData() {
-    return signalData;
-  }
+    @Override
+    public Object getSignalData() {
+        return signalData;
+    }
 
-  public void setSignalData(Object signalData) {
-    this.signalData = signalData;
-  }
+    public void setSignalData(Object signalData) {
+        this.signalData = signalData;
+    }
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.spring.boot.tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,29 +27,28 @@ import org.activiti.api.task.runtime.TaskAdminRuntime;
 import org.activiti.api.task.runtime.TaskRuntime;
 import org.activiti.spring.boot.security.util.SecurityUtil;
 import org.activiti.spring.boot.test.util.TaskCleanUpUtil;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class TaskRuntimeClaimReleaseTest {
 
     @Autowired
     private TaskRuntime taskRuntime;
+
     @Autowired
     private TaskAdminRuntime taskAdminRuntime;
+
     @Autowired
     private SecurityUtil securityUtil;
 
     @Autowired
     private TaskCleanUpUtil taskCleanUpUtil;
 
-    @After
-    public void taskCleanUp(){
+    @AfterEach
+    public void taskCleanUp() {
         taskCleanUpUtil.cleanUpWithAdmin();
     }
 
@@ -42,15 +56,13 @@ public class TaskRuntimeClaimReleaseTest {
     public void should_ownerClaimATask_when_taskHasNotAssignOrCandidates() {
         securityUtil.logInAs("garth");
 
-        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create()
-                                                         .withName("group task")
-                                                         .build());
+        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create().withName("group task").build());
 
         // the owner should be able to see the created task
         Page<Task> tasks = taskRuntime.tasks(Pageable.of(0, 50));
 
         assertThat(tasks.getContent()).hasSize(1);
-        Task task = tasks.getContent().get(0);
+        Task task = tasks.getContent().getFirst();
 
         assertThat(task.getAssignee()).isNull();
         assertThat(task.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
@@ -72,15 +84,14 @@ public class TaskRuntimeClaimReleaseTest {
     public void should_claimAndRelease_when_userIsInCandidateGroup() {
         securityUtil.logInAs("garth");
 
-        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create()
-                .withName("group task")
-                .withCandidateGroup("activitiTeam")
-                .build());
+        Task standAloneTask = taskRuntime.create(
+            TaskPayloadBuilder.create().withName("group task").withCandidateGroup("activitiTeam").build()
+        );
 
         Page<Task> tasks = taskRuntime.tasks(Pageable.of(0, 50));
 
         assertThat(tasks.getContent()).hasSize(1);
-        Task task = tasks.getContent().get(0);
+        Task task = tasks.getContent().getFirst();
 
         assertThat(task.getAssignee()).isNull();
         assertThat(task.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
@@ -96,41 +107,39 @@ public class TaskRuntimeClaimReleaseTest {
         Task releasedTask = taskRuntime.release(TaskPayloadBuilder.release().withTaskId(claimedTask.getId()).build());
         assertThat(releasedTask.getAssignee()).isNull();
         assertThat(releasedTask.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
-
     }
 
     @Test
     public void should_throwIllegalStateException_when_releaseNotClaimedAndAssignedTask() {
         securityUtil.logInAs("garth");
 
-        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create()
+        Task standAloneTask = taskRuntime.create(
+            TaskPayloadBuilder.create()
                 .withName("group task")
                 .withCandidateUsers("garth")
                 .withCandidateGroup("activitiTeam")
-                .build());
-
+                .build()
+        );
 
         assertThat(standAloneTask.getAssignee()).isNull();
         assertThat(standAloneTask.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
 
         Throwable thrown = catchThrowable(() -> {
-                    // UnAuthorized release, task is not assigned
-                    taskRuntime.release(TaskPayloadBuilder.release().withTaskId(standAloneTask.getId()).build());
-                }
-        );
+            // UnAuthorized release, task is not assigned
+            taskRuntime.release(TaskPayloadBuilder.release().withTaskId(standAloneTask.getId()).build());
+        });
         assertThat(thrown)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("You cannot release a task that is not claimed");;
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("You cannot release a task that is not claimed");
     }
 
     @Test
     public void should_userViewATaskByCandidateGroup_when_itIsNotAssigned() {
         securityUtil.logInAs("garth");
 
-        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create()
-                                                         .withName("group task")
-                                                         .withCandidateGroup("activitiTeam")
-                                                         .build());
+        Task standAloneTask = taskRuntime.create(
+            TaskPayloadBuilder.create().withName("group task").withCandidateGroup("activitiTeam").build()
+        );
 
         assertThat(standAloneTask.getAssignee()).isNull();
         assertThat(standAloneTask.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
@@ -151,23 +160,25 @@ public class TaskRuntimeClaimReleaseTest {
         // UnAuthorized release, task is assigned not to you and hence not visible anymore
         securityUtil.logInAs("john");
 
-        Throwable throwable = catchThrowable(() ->
-                                                     taskRuntime.task(standAloneTask.getId()));
+        Throwable throwable = catchThrowable(() -> taskRuntime.task(standAloneTask.getId()));
 
         //then
         assertThat(throwable)
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("Unable to find task for the given id: " + standAloneTask.getId() + " for user: john (with groups: [activitiTeam] & with roles: [ACTIVITI_USER])");
+            .isInstanceOf(NotFoundException.class)
+            .hasMessage(
+                "Unable to find task for the given id: " +
+                    standAloneTask.getId() +
+                    " for user: john (with groups: [activitiTeam] & with roles: [ACTIVITI_USER])"
+            );
     }
 
     @Test
     public void should_throwNotFoundException_when_releaseTaskNotAssignedToLoggedUser() {
         securityUtil.logInAs("garth");
 
-        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create()
-                .withName("group task")
-                .withCandidateGroup("activitiTeam")
-                .build());
+        Task standAloneTask = taskRuntime.create(
+            TaskPayloadBuilder.create().withName("group task").withCandidateGroup("activitiTeam").build()
+        );
 
         assertThat(standAloneTask.getAssignee()).isNull();
         assertThat(standAloneTask.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
@@ -183,29 +194,31 @@ public class TaskRuntimeClaimReleaseTest {
         securityUtil.logInAs("john");
 
         Throwable throwable = catchThrowable(() ->
-                taskRuntime.release(TaskPayloadBuilder.release().withTaskId(standAloneTask.getId()).build()));
+            taskRuntime.release(TaskPayloadBuilder.release().withTaskId(standAloneTask.getId()).build())
+        );
 
         //then
         assertThat(throwable)
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("Unable to find task for the given id: " + standAloneTask.getId() + " for user: john (with groups: [activitiTeam] & with roles: [ACTIVITI_USER])");
+            .isInstanceOf(NotFoundException.class)
+            .hasMessage(
+                "Unable to find task for the given id: " +
+                    standAloneTask.getId() +
+                    " for user: john (with groups: [activitiTeam] & with roles: [ACTIVITI_USER])"
+            );
     }
 
     @Test
     public void should_throwIllegalStateException_when_ownerTryToReleaseATaskAssignedToSomeOneElse() {
         securityUtil.logInAs("garth");
 
-        Task standAloneTask = taskRuntime.create(TaskPayloadBuilder.create()
-                                                         .withName("group task")
-                                                         .withCandidateGroup("activitiTeam")
-                                                         .build());
-
+        Task standAloneTask = taskRuntime.create(
+            TaskPayloadBuilder.create().withName("group task").withCandidateGroup("activitiTeam").build()
+        );
 
         assertThat(standAloneTask.getAssignee()).isNull();
         assertThat(standAloneTask.getStatus()).isEqualTo(Task.TaskStatus.CREATED);
 
         securityUtil.logInAs("user");
-
 
         // Claim task
         Task claimedTask = taskRuntime.claim(TaskPayloadBuilder.claim().withTaskId(standAloneTask.getId()).build());
@@ -215,12 +228,13 @@ public class TaskRuntimeClaimReleaseTest {
         // UnAuthorized release, task is assigned not to you and hence not visible anymore
         securityUtil.logInAs("garth");
 
-        Throwable throwable = catchThrowable(() -> taskRuntime.release(TaskPayloadBuilder.release().withTaskId(standAloneTask.getId()).build()));
+        Throwable throwable = catchThrowable(() ->
+            taskRuntime.release(TaskPayloadBuilder.release().withTaskId(standAloneTask.getId()).build())
+        );
 
         //then
         assertThat(throwable)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("You cannot release a task where you are not the assignee");;
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessage("You cannot release a task where you are not the assignee");
     }
-
 }

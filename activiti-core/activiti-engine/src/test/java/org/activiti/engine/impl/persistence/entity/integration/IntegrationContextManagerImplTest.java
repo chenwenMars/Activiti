@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.impl.persistence.entity.integration;
-
-import org.activiti.engine.impl.persistence.entity.data.DataManager;
-import org.activiti.engine.impl.persistence.entity.data.integration.IntegrationContextDataManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-public class IntegrationContextManagerImplTest {
+import java.util.List;
+import org.activiti.engine.impl.IntegrationContextQueryImpl;
+import org.activiti.engine.impl.Page;
+import org.activiti.engine.impl.persistence.entity.data.DataManager;
+import org.activiti.engine.impl.persistence.entity.data.integration.IntegrationContextDataManager;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class IntegrationContextManagerImplTest {
 
     @InjectMocks
     private IntegrationContextManagerImpl manager;
@@ -36,13 +39,8 @@ public class IntegrationContextManagerImplTest {
     @Mock
     private IntegrationContextDataManager dataManager;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
-
     @Test
-    public void getDataManagerShouldReturnIntegrationContextDataManager() {
+    void getDataManagerShouldReturnIntegrationContextDataManager() {
         //when
         DataManager<IntegrationContextEntity> retrievedDataManager = manager.getDataManager();
 
@@ -51,7 +49,7 @@ public class IntegrationContextManagerImplTest {
     }
 
     @Test
-    public void findByIdShouldReturnResultFromDataManager() {
+    void findByIdShouldReturnResultFromDataManager() {
         //given
         IntegrationContextEntity entity = mock(IntegrationContextEntity.class);
         given(dataManager.findById("id")).willReturn(entity);
@@ -63,4 +61,25 @@ public class IntegrationContextManagerImplTest {
         assertThat(retrievedResult).isEqualTo(entity);
     }
 
+    @Test
+    void should_delegateToDataManager_when_findByQueryCriteriaIsCalled() {
+        var query = mock(IntegrationContextQueryImpl.class);
+        var page = mock(Page.class);
+        var entity = mock(IntegrationContextEntity.class);
+        given(dataManager.findByQueryCriteria(query, page)).willReturn(List.of(entity));
+
+        var result = manager.findByQueryCriteria(query, page);
+
+        assertThat(result).containsExactly(entity);
+    }
+
+    @Test
+    void should_delegateToDataManager_when_findCountByQueryCriteriaIsCalled() {
+        var query = mock(IntegrationContextQueryImpl.class);
+        given(dataManager.findCountByQueryCriteria(query)).willReturn(5L);
+
+        var result = manager.findCountByQueryCriteria(query);
+
+        assertThat(result).isEqualTo(5L);
+    }
 }

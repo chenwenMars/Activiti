@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.springframework.integration.gateway.MessagingGatewaySupport;
@@ -30,7 +32,6 @@ import org.springframework.messaging.support.MessageBuilder;
  * may ultimately return a reply message and that will signal the
  * execution.
  *
-
  */
 public class ActivitiInboundGateway extends MessagingGatewaySupport {
 
@@ -56,8 +57,7 @@ public class ActivitiInboundGateway extends MessagingGatewaySupport {
         this.sync.add(processInstanceId);
     }
 
-    public void execute(IntegrationActivityBehavior receiveTaskActivityBehavior,
-                        DelegateExecution execution) {
+    public void execute(IntegrationActivityBehavior receiveTaskActivityBehavior, DelegateExecution execution) {
         Map<String, Object> stringObjectMap = new HashMap<String, Object>();
         stringObjectMap.put(executionId, execution.getId());
 
@@ -77,9 +77,12 @@ public class ActivitiInboundGateway extends MessagingGatewaySupport {
         }
     }
 
-    public void signal(IntegrationActivityBehavior receiveTaskActivityBehavior, DelegateExecution execution, String signalName, Object data) {
+    public void signal(
+        IntegrationActivityBehavior receiveTaskActivityBehavior,
+        DelegateExecution execution,
+        String signalName,
+        Object data
+    ) {
         receiveTaskActivityBehavior.leave(execution);
     }
-
-
 }

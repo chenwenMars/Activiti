@@ -1,36 +1,42 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.spring.test.autodeployment;
+
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.InputStream;
-
 import org.activiti.core.common.spring.project.ApplicationUpgradeContextService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.DeploymentBuilder;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-public class AbstractAutoDeploymentStrategyTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public abstract class AbstractAutoDeploymentStrategyTest {
 
     @Mock
     protected RepositoryService repositoryServiceMock;
@@ -69,9 +75,6 @@ public class AbstractAutoDeploymentStrategyTest {
     protected File fileMock5;
 
     @Mock
-    private InputStream inputStreamMock;
-
-    @Mock
     private Deployment deploymentMock;
 
     @Mock
@@ -85,14 +88,10 @@ public class AbstractAutoDeploymentStrategyTest {
     protected final String resourceName4 = "/opt/processes/resourceName4.zip";
     protected final String resourceName5 = "/opt/processes/resourceName5.jar";
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
-        initMocks(this);
         when(resourceMock1.getPathWithinContext()).thenReturn(resourceName1);
-        when(resourceMock1.getFile()).thenReturn(fileMock1);
-
         when(resourceMock2.getDescription()).thenReturn(resourceName2);
-        when(resourceMock2.getFile()).thenReturn(fileMock2);
 
         when(resourceMock3.getFile()).thenReturn(fileMock3);
         when(fileMock3.getAbsolutePath()).thenReturn(resourceName3);
@@ -102,12 +101,6 @@ public class AbstractAutoDeploymentStrategyTest {
 
         when(resourceMock5.getFile()).thenReturn(fileMock5);
         when(fileMock5.getAbsolutePath()).thenReturn(resourceName5);
-
-        when(resourceMock1.getInputStream()).thenReturn(inputStreamMock);
-        when(resourceMock2.getInputStream()).thenReturn(inputStreamMock);
-        when(resourceMock3.getInputStream()).thenReturn(inputStreamMock);
-        when(resourceMock4.getInputStream()).thenReturn(inputStreamMock);
-        when(resourceMock5.getInputStream()).thenReturn(inputStreamMock);
 
         when(repositoryServiceMock.createDeployment()).thenReturn(deploymentBuilderMock);
         when(deploymentBuilderMock.enableDuplicateFiltering()).thenReturn(deploymentBuilderMock);

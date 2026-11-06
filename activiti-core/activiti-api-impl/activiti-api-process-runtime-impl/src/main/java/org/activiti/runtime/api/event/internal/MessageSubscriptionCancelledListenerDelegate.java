@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.event.internal;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.activiti.api.process.model.events.MessageSubscriptionCancelledEvent;
 import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListener;
 import org.activiti.engine.delegate.event.ActivitiEntityEvent;
@@ -33,8 +31,10 @@ public class MessageSubscriptionCancelledListenerDelegate implements ActivitiEve
 
     private ToMessageSubscriptionCancelledConverter converter;
 
-    public MessageSubscriptionCancelledListenerDelegate(List<ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent>> processRuntimeEventListeners,
-                                                        ToMessageSubscriptionCancelledConverter converter) {
+    public MessageSubscriptionCancelledListenerDelegate(
+        List<ProcessRuntimeEventListener<MessageSubscriptionCancelledEvent>> processRuntimeEventListeners,
+        ToMessageSubscriptionCancelledConverter converter
+    ) {
         this.processRuntimeEventListeners = processRuntimeEventListeners;
         this.converter = converter;
     }
@@ -42,10 +42,9 @@ public class MessageSubscriptionCancelledListenerDelegate implements ActivitiEve
     @Override
     public void onEvent(ActivitiEvent event) {
         if (isValidEvent(event)) {
-            converter.from((ActivitiEntityEvent) event)
-                    .ifPresent(convertedEvent -> {
-                        processRuntimeEventListeners.forEach(listener -> listener.onEvent(convertedEvent));
-                    });
+            converter.from((ActivitiEntityEvent) event).ifPresent(convertedEvent -> {
+                processRuntimeEventListeners.forEach(listener -> listener.onEvent(convertedEvent));
+            });
         }
     }
 
@@ -53,11 +52,11 @@ public class MessageSubscriptionCancelledListenerDelegate implements ActivitiEve
     public boolean isFailOnException() {
         return false;
     }
-    
+
     protected boolean isValidEvent(ActivitiEvent event) {
         return Optional.ofNullable(event)
-                       .filter(ActivitiEntityEvent.class::isInstance)
-                       .map(e -> ((ActivitiEntityEvent) event).getEntity() instanceof MessageEventSubscriptionEntity)
-                       .orElse(false);
+            .filter(ActivitiEntityEvent.class::isInstance)
+            .map(e -> ((ActivitiEntityEvent) event).getEntity() instanceof MessageEventSubscriptionEntity)
+            .orElse(false);
     }
 }

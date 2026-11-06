@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,10 +15,12 @@
  */
 package org.activiti.examples.task;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.ActivitiOptimisticLockingException;
 import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
@@ -28,139 +33,136 @@ import org.activiti.engine.task.Task;
  */
 public class StandaloneTaskTest extends PluggableActivitiTestCase {
 
+    public void testCreateToComplete() {
+        // Create and save task
+        Task task = taskService.newTask();
+        task.setName("testTask");
+        taskService.saveTask(task);
+        String taskId = task.getId();
 
-  public void testCreateToComplete() {
+        // Add user as candidate user
+        taskService.addCandidateUser(taskId, "kermit");
+        taskService.addCandidateUser(taskId, "gonzo");
 
-    // Create and save task
-    Task task = taskService.newTask();
-    task.setName("testTask");
-    taskService.saveTask(task);
-    String taskId = task.getId();
+        // Retrieve task list for kermit
+        List<Task> tasks = taskService.createTaskQuery().taskCandidateUser("kermit").list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("testTask");
 
-    // Add user as candidate user
-    taskService.addCandidateUser(taskId, "kermit");
-    taskService.addCandidateUser(taskId, "gonzo");
+        // Retrieve task list for gonzo
+        tasks = taskService.createTaskQuery().taskCandidateUser("gonzo").list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("testTask");
 
-    // Retrieve task list for kermit
-    List<Task> tasks = taskService.createTaskQuery().taskCandidateUser("kermit").list();
-    assertEquals(1, tasks.size());
-    assertEquals("testTask", tasks.get(0).getName());
+        task.setName("Update name");
+        taskService.saveTask(task);
+        tasks = taskService.createTaskQuery().taskCandidateUser("kermit").list();
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().getName()).isEqualTo("Update name");
 
-    // Retrieve task list for gonzo
-    tasks = taskService.createTaskQuery().taskCandidateUser("gonzo").list();
-    assertEquals(1, tasks.size());
-    assertEquals("testTask", tasks.get(0).getName());
+        // Claim task
+        taskService.claim(taskId, "kermit");
 
-    task.setName("Update name");
-    taskService.saveTask(task);
-    tasks = taskService.createTaskQuery().taskCandidateUser("kermit").list();
-    assertEquals(1, tasks.size());
-    assertEquals("Update name", tasks.get(0).getName());
+        // Tasks shouldn't appear in the candidate tasklists anymore
+        assertThat(taskService.createTaskQuery().taskCandidateUser("kermit").list().isEmpty()).isTrue();
+        assertThat(taskService.createTaskQuery().taskCandidateUser("gonzo").list().isEmpty()).isTrue();
 
-    // Claim task
-    taskService.claim(taskId, "kermit");
+        // Complete task
+        taskService.deleteTask(taskId, true);
 
-    // Tasks shouldn't appear in the candidate tasklists anymore
-    assertTrue(taskService.createTaskQuery().taskCandidateUser("kermit").list().isEmpty());
-    assertTrue(taskService.createTaskQuery().taskCandidateUser("gonzo").list().isEmpty());
-
-    // Complete task
-    taskService.deleteTask(taskId, true);
-
-    // Task should be removed from runtime data
-    // TODO: check for historic data when implemented!
-    assertNull(taskService.createTaskQuery().taskId(taskId).singleResult());
-  }
-
-  public void testOptimisticLockingThrownOnMultipleUpdates() {
-    Task task = taskService.newTask();
-    taskService.saveTask(task);
-    String taskId = task.getId();
-
-    // first modification
-    Task task1 = taskService.createTaskQuery().taskId(taskId).singleResult();
-    Task task2 = taskService.createTaskQuery().taskId(taskId).singleResult();
-
-    task1.setDescription("first modification");
-    taskService.saveTask(task1);
-
-    // second modification on the initial instance
-    task2.setDescription("second modification");
-    try {
-      taskService.saveTask(task2);
-      fail("should get an exception here as the task was modified by someone else.");
-    } catch (ActivitiOptimisticLockingException expected) {
-      // exception was thrown as expected
+        // Task should be removed from runtime data
+        // TODO: check for historic data when implemented!
+        assertThat(taskService.createTaskQuery().taskId(taskId).singleResult()).isNull();
     }
 
-    taskService.deleteTask(taskId, true);
-  }
+    public void testOptimisticLockingThrownOnMultipleUpdates() {
+        Task task = taskService.newTask();
+        taskService.saveTask(task);
+        String taskId = task.getId();
 
-  // See https://activiti.atlassian.net/browse/ACT-1290
-  public void testRevisionUpdatedOnSave() {
-    Task task = taskService.newTask();
-    taskService.saveTask(task);
-    assertEquals(1, ((TaskEntity) task).getRevision());
+        // first modification
+        Task task1 = taskService.createTaskQuery().taskId(taskId).singleResult();
+        Task task2 = taskService.createTaskQuery().taskId(taskId).singleResult();
 
-    task.setDescription("first modification");
-    taskService.saveTask(task);
-    assertEquals(2, ((TaskEntity) task).getRevision());
+        task1.setDescription("first modification");
+        taskService.saveTask(task1);
 
-    task.setDescription("second modification");
-    taskService.saveTask(task);
-    assertEquals(3, ((TaskEntity) task).getRevision());
+        // second modification on the initial instance
+        task2.setDescription("second modification");
+        assertThatExceptionOfType(ActivitiOptimisticLockingException.class)
+            .as("should get an exception here as the task was modified by someone else.")
+            .isThrownBy(() -> taskService.saveTask(task2));
 
-    taskService.deleteTask(task.getId(), true);
-  }
-
-  // See https://activiti.atlassian.net/browse/ACT-1290
-  public void testRevisionUpdatedOnSaveWhenFetchedUsingQuery() {
-    Task task = taskService.newTask();
-    taskService.saveTask(task);
-    assertEquals(1, ((TaskEntity) task).getRevision());
-
-    task.setAssignee("kermit");
-    taskService.saveTask(task);
-    assertEquals(2, ((TaskEntity) task).getRevision());
-
-    // Now fetch the task through the query api
-    task = taskService.createTaskQuery().singleResult();
-    assertEquals(2, ((TaskEntity) task).getRevision());
-    task.setPriority(1);
-    taskService.saveTask(task);
-
-    assertEquals(3, ((TaskEntity) task).getRevision());
-
-    taskService.deleteTask(task.getId(), true);
-  }
-  
-  public void testHistoricVariableOkOnUpdate() {
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
-  		// 1. create a task
-  		Task task = taskService.newTask();
-  		task.setName("test execution");
-  		task.setOwner("josOwner");
-  		task.setAssignee("JosAssignee");
-  		taskService.saveTask(task);
-  		 
-  		// 2. set task variables
-  		Map<String, Object> taskVariables = new HashMap<String, Object>();
-  		taskVariables.put("finishedAmount", 0);
-  		taskService.setVariables(task.getId(), taskVariables);
-  		 
-  		// 3. complete this task with a new variable
-  		Map<String, Object> finishVariables = new HashMap<String, Object>();
-  		finishVariables.put("finishedAmount", 40);
-  		taskService.complete(task.getId(), finishVariables);
-  		 
-  		// 4. get completed variable
-  		List<HistoricVariableInstance> hisVarList = historyService.createHistoricVariableInstanceQuery().taskId(task.getId()).list();
-  		assertEquals(1, hisVarList.size());
-  		assertEquals(40, hisVarList.get(0).getValue());
-  		
-  		// Cleanup
-  		historyService.deleteHistoricTaskInstance(task.getId());
+        taskService.deleteTask(taskId, true);
     }
-	}
 
+    // See https://activiti.atlassian.net/browse/ACT-1290
+    public void testRevisionUpdatedOnSave() {
+        Task task = taskService.newTask();
+        taskService.saveTask(task);
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(1);
+
+        task.setDescription("first modification");
+        taskService.saveTask(task);
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(2);
+
+        task.setDescription("second modification");
+        taskService.saveTask(task);
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(3);
+
+        taskService.deleteTask(task.getId(), true);
+    }
+
+    // See https://activiti.atlassian.net/browse/ACT-1290
+    public void testRevisionUpdatedOnSaveWhenFetchedUsingQuery() {
+        Task task = taskService.newTask();
+        taskService.saveTask(task);
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(1);
+
+        task.setAssignee("kermit");
+        taskService.saveTask(task);
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(2);
+
+        // Now fetch the task through the query api
+        task = taskService.createTaskQuery().singleResult();
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(2);
+        task.setPriority(1);
+        taskService.saveTask(task);
+
+        assertThat(((TaskEntity) task).getRevision()).isEqualTo(3);
+
+        taskService.deleteTask(task.getId(), true);
+    }
+
+    public void testHistoricVariableOkOnUpdate() {
+        if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.AUDIT)) {
+            // 1. create a task
+            Task task = taskService.newTask();
+            task.setName("test execution");
+            task.setOwner("josOwner");
+            task.setAssignee("JosAssignee");
+            taskService.saveTask(task);
+
+            // 2. set task variables
+            Map<String, Object> taskVariables = new HashMap<String, Object>();
+            taskVariables.put("finishedAmount", 0);
+            taskService.setVariables(task.getId(), taskVariables);
+
+            // 3. complete this task with a new variable
+            Map<String, Object> finishVariables = new HashMap<String, Object>();
+            finishVariables.put("finishedAmount", 40);
+            taskService.complete(task.getId(), finishVariables);
+
+            // 4. get completed variable
+            List<HistoricVariableInstance> hisVarList = historyService
+                .createHistoricVariableInstanceQuery()
+                .taskId(task.getId())
+                .list();
+            assertThat(hisVarList).hasSize(1);
+            assertThat(hisVarList.getFirst().getValue()).isEqualTo(40);
+
+            // Cleanup
+            historyService.deleteHistoricTaskInstance(task.getId());
+        }
+    }
 }

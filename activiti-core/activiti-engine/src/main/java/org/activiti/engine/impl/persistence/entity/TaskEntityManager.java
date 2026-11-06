@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,45 +17,46 @@ package org.activiti.engine.impl.persistence.entity;
 
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.api.internal.Internal;
 import org.activiti.engine.impl.TaskQueryImpl;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskInfo;
+
 @Internal
 public interface TaskEntityManager extends EntityManager<TaskEntity> {
+    void insert(TaskEntity taskEntity, ExecutionEntity execution);
 
-  void insert(TaskEntity taskEntity, ExecutionEntity execution);
-  
-  void changeTaskAssignee(TaskEntity taskEntity, String assignee);
-  
-  void changeTaskAssigneeNoEvents(TaskEntity taskEntity, String assignee);
-  
-  void changeTaskOwner(TaskEntity taskEntity, String owner);
+    void changeTaskAssignee(TaskEntity taskEntity, String assignee);
 
-  List<TaskEntity> findTasksByExecutionId(String executionId);
+    void changeTaskAssigneeNoEvents(TaskEntity taskEntity, String assignee);
 
-  List<TaskEntity> findTasksByProcessInstanceId(String processInstanceId);
+    void executeTaskAssigneeChangePostProcessingWithoutTaskUpdate(TaskEntity taskEntity);
 
-  List<Task> findTasksByQueryCriteria(TaskQueryImpl taskQuery);
+    void changeTaskOwner(TaskEntity taskEntity, String owner);
 
-  List<Task> findTasksAndVariablesByQueryCriteria(TaskQueryImpl taskQuery);
+    List<TaskEntity> findTasksByExecutionId(String executionId);
 
-  long findTaskCountByQueryCriteria(TaskQueryImpl taskQuery);
+    List<TaskEntity> findTasksByProcessInstanceId(String processInstanceId);
 
-  List<Task> findTasksByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
+    List<Task> findTasksByQueryCriteria(TaskQueryImpl taskQuery);
 
-  long findTaskCountByNativeQuery(Map<String, Object> parameterMap);
+    List<Task> findTasksAndVariablesByQueryCriteria(TaskQueryImpl taskQuery);
 
-  List<Task> findTasksByParentTaskId(String parentTaskId);
+    long findTaskCountByQueryCriteria(TaskQueryImpl taskQuery);
 
-  void updateTaskTenantIdForDeployment(String deploymentId, String newTenantId);
+    List<Task> findTasksByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
 
-  void deleteTask(String taskId, String deleteReason, boolean cascade);
+    long findTaskCountByNativeQuery(Map<String, Object> parameterMap);
 
-  void deleteTask(String taskId, String deleteReason, boolean cascade, boolean cancel);
-  
-  void deleteTasksByProcessInstanceId(String processInstanceId, String deleteReason, boolean cascade);
+    List<Task> findTasksByParentTaskId(String parentTaskId);
 
-  void deleteTask(TaskEntity task, String deleteReason, boolean cascade, boolean cancel);
+    void updateTaskTenantIdForDeployment(String deploymentId, String newTenantId);
 
+    void deleteTask(String taskId, String deleteReason, boolean cascade);
+
+    void deleteTask(String taskId, String deleteReason, boolean cascade, boolean cancel);
+
+    void deleteTasksByProcessInstanceId(String processInstanceId, String deleteReason, boolean cascade);
+
+    void deleteTask(TaskEntity task, String deleteReason, boolean cascade, boolean cancel);
 }

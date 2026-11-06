@@ -1,7 +1,21 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.engine.impl.agenda;
 
 import java.util.Collection;
-
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.persistence.entity.DeadLetterJobEntity;
@@ -29,15 +43,12 @@ import org.activiti.engine.impl.persistence.entity.VariableInstanceEntityManager
  */
 public class DestroyScopeOperation extends AbstractOperation {
 
-    public DestroyScopeOperation(CommandContext commandContext,
-                                 ExecutionEntity execution) {
-        super(commandContext,
-              execution);
+    public DestroyScopeOperation(CommandContext commandContext, ExecutionEntity execution) {
+        super(commandContext, execution);
     }
 
     @Override
     public void run() {
-
         // Find the actual scope that needs to be destroyed.
         // This could be the incoming execution, or the first parent execution where isScope = true
 
@@ -49,41 +60,39 @@ public class DestroyScopeOperation extends AbstractOperation {
         }
 
         ExecutionEntityManager executionEntityManager = commandContext.getExecutionEntityManager();
-        deleteAllChildExecutions(executionEntityManager,
-                                 scopeExecution);
+        deleteAllChildExecutions(executionEntityManager, scopeExecution);
 
         // Delete all scope tasks
         TaskEntityManager taskEntityManager = commandContext.getTaskEntityManager();
-        deleteAllScopeTasks(scopeExecution,
-                            taskEntityManager);
+        deleteAllScopeTasks(scopeExecution, taskEntityManager);
 
         // Delete all scope jobs
         TimerJobEntityManager timerJobEntityManager = commandContext.getTimerJobEntityManager();
-        deleteAllScopeJobs(scopeExecution,
-                           timerJobEntityManager);
-
+        deleteAllScopeJobs(scopeExecution, timerJobEntityManager);
 
         // Remove variables associated with this scope
         VariableInstanceEntityManager variableInstanceEntityManager = commandContext.getVariableInstanceEntityManager();
-        removeAllVariablesFromScope(scopeExecution,
-                                    variableInstanceEntityManager);
+        removeAllVariablesFromScope(scopeExecution, variableInstanceEntityManager);
 
-        commandContext.getHistoryManager().recordActivityEnd(scopeExecution,
-                                                             scopeExecution.getDeleteReason());
+        commandContext.getHistoryManager().recordActivityEnd(scopeExecution, scopeExecution.getDeleteReason());
         executionEntityManager.delete(scopeExecution);
     }
 
-    private void removeAllVariablesFromScope(ExecutionEntity scopeExecution,
-                                             VariableInstanceEntityManager variableInstanceEntityManager) {
-        Collection<VariableInstanceEntity> variablesForExecution = variableInstanceEntityManager.findVariableInstancesByExecutionId(scopeExecution.getId());
+    private void removeAllVariablesFromScope(
+        ExecutionEntity scopeExecution,
+        VariableInstanceEntityManager variableInstanceEntityManager
+    ) {
+        Collection<VariableInstanceEntity> variablesForExecution =
+            variableInstanceEntityManager.findVariableInstancesByExecutionId(scopeExecution.getId());
         for (VariableInstanceEntity variable : variablesForExecution) {
             variableInstanceEntityManager.delete(variable);
         }
     }
 
-    private void deleteAllScopeJobs(ExecutionEntity scopeExecution,
-                                    TimerJobEntityManager timerJobEntityManager) {
-        Collection<TimerJobEntity> timerJobsForExecution = timerJobEntityManager.findJobsByExecutionId(scopeExecution.getId());
+    private void deleteAllScopeJobs(ExecutionEntity scopeExecution, TimerJobEntityManager timerJobEntityManager) {
+        Collection<TimerJobEntity> timerJobsForExecution = timerJobEntityManager.findJobsByExecutionId(
+            scopeExecution.getId()
+        );
         for (TimerJobEntity job : timerJobsForExecution) {
             timerJobEntityManager.delete(job);
         }
@@ -95,33 +104,37 @@ public class DestroyScopeOperation extends AbstractOperation {
         }
 
         SuspendedJobEntityManager suspendedJobEntityManager = commandContext.getSuspendedJobEntityManager();
-        Collection<SuspendedJobEntity> suspendedJobsForExecution = suspendedJobEntityManager.findJobsByExecutionId(scopeExecution.getId());
+        Collection<SuspendedJobEntity> suspendedJobsForExecution = suspendedJobEntityManager.findJobsByExecutionId(
+            scopeExecution.getId()
+        );
         for (SuspendedJobEntity job : suspendedJobsForExecution) {
             suspendedJobEntityManager.delete(job);
         }
 
         DeadLetterJobEntityManager deadLetterJobEntityManager = commandContext.getDeadLetterJobEntityManager();
-        Collection<DeadLetterJobEntity> deadLetterJobsForExecution = deadLetterJobEntityManager.findJobsByExecutionId(scopeExecution.getId());
+        Collection<DeadLetterJobEntity> deadLetterJobsForExecution = deadLetterJobEntityManager.findJobsByExecutionId(
+            scopeExecution.getId()
+        );
         for (DeadLetterJobEntity job : deadLetterJobsForExecution) {
             deadLetterJobEntityManager.delete(job);
         }
     }
 
-    private void deleteAllScopeTasks(ExecutionEntity scopeExecution,
-                                     TaskEntityManager taskEntityManager) {
+    private void deleteAllScopeTasks(ExecutionEntity scopeExecution, TaskEntityManager taskEntityManager) {
         Collection<TaskEntity> tasksForExecution = taskEntityManager.findTasksByExecutionId(scopeExecution.getId());
         for (TaskEntity taskEntity : tasksForExecution) {
-            taskEntityManager.deleteTask(taskEntity,
-                                         execution.getDeleteReason(),
-                                         false,
-                                         false);
+            taskEntityManager.deleteTask(taskEntity, execution.getDeleteReason(), false, false);
         }
     }
 
-    private ExecutionEntityManager deleteAllChildExecutions(ExecutionEntityManager executionEntityManager,
-                                                            ExecutionEntity scopeExecution) {
+    private ExecutionEntityManager deleteAllChildExecutions(
+        ExecutionEntityManager executionEntityManager,
+        ExecutionEntity scopeExecution
+    ) {
         // Delete all child executions
-        Collection<ExecutionEntity> childExecutions = executionEntityManager.findChildExecutionsByParentExecutionId(scopeExecution.getId());
+        Collection<ExecutionEntity> childExecutions = executionEntityManager.findChildExecutionsByParentExecutionId(
+            scopeExecution.getId()
+        );
         for (ExecutionEntity childExecution : childExecutions) {
             executionEntityManager.deleteExecutionAndRelatedData(childExecution, execution.getDeleteReason());
         }

@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,8 +15,7 @@
  */
 package org.activiti.engine.impl.cfg;
 
-import javax.transaction.TransactionManager;
-
+import jakarta.transaction.TransactionManager;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.impl.cfg.jta.JtaTransactionContextFactory;
 import org.activiti.engine.impl.interceptor.CommandInterceptor;
@@ -24,33 +26,37 @@ import org.activiti.engine.impl.interceptor.JtaTransactionInterceptor;
  */
 public class JtaProcessEngineConfiguration extends ProcessEngineConfigurationImpl {
 
-  protected TransactionManager transactionManager;
+    protected TransactionManager transactionManager;
 
-  public JtaProcessEngineConfiguration() {
-    this.transactionsExternallyManaged = true;
-  }
-
-  @Override
-  public CommandInterceptor createTransactionInterceptor() {
-    if (transactionManager == null) {
-      throw new ActivitiException("transactionManager is required property for JtaProcessEngineConfiguration, use " + StandaloneProcessEngineConfiguration.class.getName() + " otherwise");
+    public JtaProcessEngineConfiguration() {
+        this.transactionsExternallyManaged = true;
     }
 
-    return new JtaTransactionInterceptor(transactionManager);
-  }
+    @Override
+    public CommandInterceptor createTransactionInterceptor() {
+        if (transactionManager == null) {
+            throw new ActivitiException(
+                "transactionManager is required property for JtaProcessEngineConfiguration, use " +
+                    StandaloneProcessEngineConfiguration.class.getName() +
+                    " otherwise"
+            );
+        }
 
-  @Override
-  public void initTransactionContextFactory() {
-    if (transactionContextFactory == null) {
-      transactionContextFactory = new JtaTransactionContextFactory(transactionManager);
+        return new JtaTransactionInterceptor(transactionManager);
     }
-  }
 
-  public TransactionManager getTransactionManager() {
-    return transactionManager;
-  }
+    @Override
+    public void initTransactionContextFactory() {
+        if (transactionContextFactory == null) {
+            transactionContextFactory = new JtaTransactionContextFactory(transactionManager);
+        }
+    }
 
-  public void setTransactionManager(TransactionManager transactionManager) {
-    this.transactionManager = transactionManager;
-  }
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    public void setTransactionManager(TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
 }

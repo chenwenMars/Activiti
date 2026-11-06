@@ -33,9 +33,11 @@
         }
       },
       "mappings": {
+        "Task_0v0jw9c": {
+          "mappingType": "MAP_ALL"
+        }
       },
-      "constants": {
-      }
+      "constants": {}
     }
   }
 }

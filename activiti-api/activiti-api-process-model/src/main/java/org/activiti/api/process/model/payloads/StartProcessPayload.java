@@ -1,9 +1,23 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.api.process.model.payloads;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import org.activiti.api.model.shared.Payload;
 
 public class StartProcessPayload implements Payload {
@@ -14,16 +28,20 @@ public class StartProcessPayload implements Payload {
     private String name;
     private String businessKey;
     private Map<String, Object> variables = new HashMap<>();
+    private String linkedProcessInstanceId;
+    private String linkedProcessInstanceType;
 
     public StartProcessPayload() {
         this.id = UUID.randomUUID().toString();
     }
 
-    public StartProcessPayload(String processDefinitionId,
-                               String processDefinitionKey,
-                               String name,
-                               String businessKey,
-                               Map<String, Object> variables) {
+    public StartProcessPayload(
+        String processDefinitionId,
+        String processDefinitionKey,
+        String name,
+        String businessKey,
+        Map<String, Object> variables
+    ) {
         this();
         this.processDefinitionId = processDefinitionId;
         this.processDefinitionKey = processDefinitionKey;
@@ -59,5 +77,21 @@ public class StartProcessPayload implements Payload {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLinkedProcessInstanceId() {
+        return linkedProcessInstanceId;
+    }
+
+    public void setLinkedProcessInstanceId(String linkedProcessInstanceId) {
+        this.linkedProcessInstanceId = linkedProcessInstanceId;
+    }
+
+    public String getLinkedProcessInstanceType() {
+        return linkedProcessInstanceType;
+    }
+
+    public void setLinkedProcessInstanceType(String linkedProcessInstanceType) {
+        this.linkedProcessInstanceType = linkedProcessInstanceType;
     }
 }

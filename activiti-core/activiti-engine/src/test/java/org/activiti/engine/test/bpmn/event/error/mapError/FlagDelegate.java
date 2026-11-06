@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,20 +22,19 @@ import org.activiti.engine.delegate.JavaDelegate;
 
  */
 public class FlagDelegate implements JavaDelegate {
-  static boolean visited;
 
-  public static void reset() {
-    visited = false;
-  }
+    static boolean visited;
 
-  public static boolean isVisited() {
-    return visited;
-  }
+    public static void reset() {
+        visited = false;
+    }
 
-  @Override
-  public void execute(DelegateExecution execution) {
-    visited = true;
+    public static boolean isVisited() {
+        return visited;
+    }
 
-  }
-
+    @Override
+    public void execute(DelegateExecution execution) {
+        visited = true;
+    }
 }

@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,19 +22,14 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
  */
 public abstract class AbstractProcessEngineConfigurator implements ProcessEngineConfigurator {
 
-  public static int DEFAULT_CONFIGURATOR_PRIORITY = 10000;
+    public static int DEFAULT_CONFIGURATOR_PRIORITY = 10000;
 
-  @Override
-  public int getPriority() {
-    return DEFAULT_CONFIGURATOR_PRIORITY;
-  }
-  
-  public void beforeInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
-    
-  }
-  
-  public void configure(ProcessEngineConfigurationImpl processEngineConfiguration) {
-    
-  }
+    @Override
+    public int getPriority() {
+        return DEFAULT_CONFIGURATOR_PRIORITY;
+    }
 
+    public void beforeInit(ProcessEngineConfigurationImpl processEngineConfiguration) {}
+
+    public void configure(ProcessEngineConfigurationImpl processEngineConfiguration) {}
 }

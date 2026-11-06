@@ -1,5 +1,5 @@
 {
-  "id":"taskVariableNoMapping",
+  "id": "taskVariableNoMapping",
   "extensions": {
     "Process_taskVariableNoMapping": {
       "properties": {
@@ -25,7 +25,11 @@
           "value": "outputmap1Value"
         }
       },
-      "mappings": {},
+      "mappings": {
+        "simpleTask": {
+          "mappingType": "MAP_ALL"
+        }
+      },
       "constants": {}
     }
   }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.spring.boot.process;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,14 +25,11 @@ import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.spring.boot.security.util.SecurityUtil;
 import org.activiti.spring.boot.test.util.ProcessCleanUpUtil;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class ProcessRuntimeMultipleInstancesIT {
 
@@ -33,7 +45,7 @@ public class ProcessRuntimeMultipleInstancesIT {
     @Autowired
     private ProcessCleanUpUtil processCleanUpUtil;
 
-    @After
+    @AfterEach
     public void cleanUp() {
         processCleanUpUtil.cleanUpWithAdmin();
     }
@@ -43,37 +55,27 @@ public class ProcessRuntimeMultipleInstancesIT {
         securityUtil.logInAs("user");
 
         ProcessInstance processInstance1 = processRuntime.start(
-            ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(PROCESS_MULTIPLE_INSTANCE_1)
-                .build());
+            ProcessPayloadBuilder.start().withProcessDefinitionKey(PROCESS_MULTIPLE_INSTANCE_1).build()
+        );
         assertThat(processInstance1).isNotNull();
 
-        List<VariableInstance> processInstance1Vars = processRuntime.variables(ProcessPayloadBuilder
-                                                                                   .variables()
-                                                                                   .withProcessInstanceId(processInstance1.getId())
-                                                                                   .build());
-        assertThat(processInstance1Vars).extracting(VariableInstance::getName,
-                                                    VariableInstance::getValue)
-            .containsOnly(tuple("name",
-                                "Kermit"));
+        List<VariableInstance> processInstance1Vars = processRuntime.variables(
+            ProcessPayloadBuilder.variables().withProcessInstanceId(processInstance1.getId()).build()
+        );
+        assertThat(processInstance1Vars)
+            .extracting(VariableInstance::getName, VariableInstance::getValue)
+            .containsOnly(tuple("name", "Kermit"));
 
         ProcessInstance processInstance2 = processRuntime.start(
-            ProcessPayloadBuilder
-                .start()
-                .withProcessDefinitionKey(PROCESS_MULTIPLE_INSTANCE_2)
-                .build());
+            ProcessPayloadBuilder.start().withProcessDefinitionKey(PROCESS_MULTIPLE_INSTANCE_2).build()
+        );
         assertThat(processInstance1).isNotNull();
 
-        List<VariableInstance> processInstance2Vars = processRuntime.variables(ProcessPayloadBuilder
-                                                                                   .variables()
-                                                                                   .withProcessInstanceId(processInstance2.getId())
-                                                                                   .build());
-        assertThat(processInstance2Vars).extracting(VariableInstance::getName,
-                                                    VariableInstance::getValue)
-            .containsOnly(tuple("lastName",
-                                "The Frog"));
-
-
+        List<VariableInstance> processInstance2Vars = processRuntime.variables(
+            ProcessPayloadBuilder.variables().withProcessInstanceId(processInstance2.getId()).build()
+        );
+        assertThat(processInstance2Vars)
+            .extracting(VariableInstance::getName, VariableInstance::getValue)
+            .containsOnly(tuple("lastName", "The Frog"));
     }
 }

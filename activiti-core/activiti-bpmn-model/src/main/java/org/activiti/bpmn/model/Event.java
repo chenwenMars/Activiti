@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,31 +17,47 @@ package org.activiti.bpmn.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class Event extends FlowNode {
 
-  protected List<EventDefinition> eventDefinitions = new ArrayList<EventDefinition>();
+    protected List<EventDefinition> eventDefinitions = new ArrayList<>();
 
-  public List<EventDefinition> getEventDefinitions() {
-    return eventDefinitions;
-  }
-
-  public void setEventDefinitions(List<EventDefinition> eventDefinitions) {
-    this.eventDefinitions = eventDefinitions;
-  }
-
-  public void addEventDefinition(EventDefinition eventDefinition) {
-    eventDefinitions.add(eventDefinition);
-  }
-
-  public void setValues(Event otherEvent) {
-    super.setValues(otherEvent);
-
-    eventDefinitions = new ArrayList<EventDefinition>();
-    if (otherEvent.getEventDefinitions() != null && !otherEvent.getEventDefinitions().isEmpty()) {
-      for (EventDefinition eventDef : otherEvent.getEventDefinitions()) {
-        eventDefinitions.add(eventDef.clone());
-      }
+    public List<EventDefinition> getEventDefinitions() {
+        return eventDefinitions;
     }
-  }
+
+    public void setEventDefinitions(List<EventDefinition> eventDefinitions) {
+        this.eventDefinitions = eventDefinitions;
+    }
+
+    public void addEventDefinition(EventDefinition eventDefinition) {
+        eventDefinitions.add(eventDefinition);
+    }
+
+    public void setValues(Event otherEvent) {
+        super.setValues(otherEvent);
+
+        eventDefinitions = new ArrayList<>();
+        if (otherEvent.getEventDefinitions() != null && !otherEvent.getEventDefinitions().isEmpty()) {
+            for (EventDefinition eventDef : otherEvent.getEventDefinitions()) {
+                eventDefinitions.add(eventDef.clone());
+            }
+        }
+    }
+
+    public boolean isLinkEvent() {
+        if (this.getEventDefinitions().size() == 1) {
+            return this.getEventDefinitions().getFirst() instanceof LinkEventDefinition;
+        }
+        return false;
+    }
+
+    public Optional<ErrorEventDefinition> getErrorEventDefinition() {
+        return eventDefinitions != null &&
+            !eventDefinitions.isEmpty() &&
+            eventDefinitions.getFirst() instanceof ErrorEventDefinition errorEventDefinition
+            ? Optional.of(errorEventDefinition)
+            : Optional.empty();
+    }
 }

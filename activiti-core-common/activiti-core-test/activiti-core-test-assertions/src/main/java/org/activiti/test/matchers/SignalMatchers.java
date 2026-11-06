@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,23 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.test.matchers;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.activiti.api.process.model.events.BPMNSignalEvent;
 import org.activiti.api.process.model.events.BPMNSignalReceivedEvent;
-
-import static org.assertj.core.api.Assertions.*;
 
 public class SignalMatchers {
 
     private String signalName;
 
     private SignalMatchers(String signalName) {
-
         this.signalName = signalName;
     }
 
@@ -40,15 +37,15 @@ public class SignalMatchers {
     public OperationScopeMatcher hasBeenReceived() {
         return (operationScope, events) -> {
             List<BPMNSignalReceivedEvent> flowTakenEvents = events
-                    .stream()
-                    .filter(event -> BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.equals(event.getEventType()))
-                    .map(BPMNSignalReceivedEvent.class::cast)
-                    .filter(event -> event.getEntity().getProcessInstanceId().equals(operationScope.getProcessInstanceId()))
-                    .collect(Collectors.toList());
+                .stream()
+                .filter(event -> BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED.equals(event.getEventType()))
+                .map(BPMNSignalReceivedEvent.class::cast)
+                .filter(event -> event.getEntity().getProcessInstanceId().equals(operationScope.getProcessInstanceId()))
+                .collect(Collectors.toList());
             assertThat(flowTakenEvents)
-                    .extracting(event -> event.getEntity().getSignalPayload().getName())
-                    .as("Unable to find event " + BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED)
-                    .contains(signalName);
+                .extracting(event -> event.getEntity().getSignalPayload().getName())
+                .as("Unable to find event " + BPMNSignalEvent.SignalEvents.SIGNAL_RECEIVED)
+                .contains(signalName);
         };
     }
 }

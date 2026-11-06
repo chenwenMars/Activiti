@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,7 +14,6 @@
  * limitations under the License.
  */
 package org.activiti.engine;
-
 
 import org.activiti.engine.api.internal.Internal;
 
@@ -37,29 +39,27 @@ import org.activiti.engine.api.internal.Internal;
  */
 @Internal
 public interface ProcessEngine {
+    /** the version of the activiti library */
+    public static String VERSION = "9.1.1"; // Note the extra -x at the end. To cater for snapshot releases with different database changes
 
-  /** the version of the activiti library */
-  public static String VERSION = "7.1.0-M6"; // Note the extra -x at the end. To cater for snapshot releases with different database changes
+    /**
+     * The name as specified in 'process-engine-name' in the activiti.cfg.xml configuration file. The default name for a process engine is 'default
+     */
+    String getName();
 
-  /**
-   * The name as specified in 'process-engine-name' in the activiti.cfg.xml configuration file. The default name for a process engine is 'default
-   */
-  String getName();
+    void close();
 
-  void close();
+    RepositoryService getRepositoryService();
 
-  RepositoryService getRepositoryService();
+    RuntimeService getRuntimeService();
 
-  RuntimeService getRuntimeService();
+    TaskService getTaskService();
 
-  TaskService getTaskService();
+    HistoryService getHistoryService();
 
-  HistoryService getHistoryService();
+    ManagementService getManagementService();
 
-  ManagementService getManagementService();
+    DynamicBpmnService getDynamicBpmnService();
 
-  DynamicBpmnService getDynamicBpmnService();
-
-  ProcessEngineConfiguration getProcessEngineConfiguration();
-
+    ProcessEngineConfiguration getProcessEngineConfiguration();
 }

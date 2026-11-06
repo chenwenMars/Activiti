@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,38 +25,37 @@ import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
  */
 public class DebugInfoEntityEventListener extends BaseEntityEventListener {
 
-  protected ProcessExecutionLogger processExecutionLogger;
+    protected ProcessExecutionLogger processExecutionLogger;
 
-  public DebugInfoEntityEventListener(ProcessExecutionLogger processExecutionLogger) {
-    this.processExecutionLogger = processExecutionLogger;
-  }
-
-  @Override
-  protected void onCreate(ActivitiEvent event) {
-    ExecutionEntity executionEntity = getExecutionEntity(event);
-    if (executionEntity != null) {
-      processExecutionLogger.executionCreated(executionEntity);
-      processExecutionLogger.addDebugInfo(new DebugInfoExecutionCreated(executionEntity));
+    public DebugInfoEntityEventListener(ProcessExecutionLogger processExecutionLogger) {
+        this.processExecutionLogger = processExecutionLogger;
     }
-  }
 
-  @Override
-  protected void onDelete(ActivitiEvent event) {
-    ExecutionEntity executionEntity = getExecutionEntity(event);
-    if (executionEntity != null) {
-      processExecutionLogger.executionDeleted(executionEntity);
-      processExecutionLogger.addDebugInfo(new DebugInfoExecutionDeleted(executionEntity));
+    @Override
+    protected void onCreate(ActivitiEvent event) {
+        ExecutionEntity executionEntity = getExecutionEntity(event);
+        if (executionEntity != null) {
+            processExecutionLogger.executionCreated(executionEntity);
+            processExecutionLogger.addDebugInfo(new DebugInfoExecutionCreated(executionEntity));
+        }
     }
-  }
 
-  protected ExecutionEntity getExecutionEntity(ActivitiEvent event) {
-    ActivitiEntityEvent entityEvent = (ActivitiEntityEvent) event;
-    Object entity = entityEvent.getEntity();
-    if (entity instanceof ExecutionEntity) {
-      ExecutionEntity executionEntity = (ExecutionEntity) entity;
-      return executionEntity;
+    @Override
+    protected void onDelete(ActivitiEvent event) {
+        ExecutionEntity executionEntity = getExecutionEntity(event);
+        if (executionEntity != null) {
+            processExecutionLogger.executionDeleted(executionEntity);
+            processExecutionLogger.addDebugInfo(new DebugInfoExecutionDeleted(executionEntity));
+        }
     }
-    return null;
-  }
 
+    protected ExecutionEntity getExecutionEntity(ActivitiEvent event) {
+        ActivitiEntityEvent entityEvent = (ActivitiEntityEvent) event;
+        Object entity = entityEvent.getEntity();
+        if (entity instanceof ExecutionEntity) {
+            ExecutionEntity executionEntity = (ExecutionEntity) entity;
+            return executionEntity;
+        }
+        return null;
+    }
 }

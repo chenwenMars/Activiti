@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,52 +20,49 @@ import java.util.List;
 
 /**
  * Structure containing meta data (column names, column types, etc.) about a certain database table.
- * 
+ *
 
  */
 public class TableMetaData {
 
-  protected String tableName;
+    protected String tableName;
 
-  protected List<String> columnNames = new ArrayList<String>();
+    protected List<String> columnNames = new ArrayList<String>();
 
-  protected List<String> columnTypes = new ArrayList<String>();
+    protected List<String> columnTypes = new ArrayList<String>();
 
-  public TableMetaData() {
+    public TableMetaData() {}
 
-  }
+    public TableMetaData(String tableName) {
+        this.tableName = tableName;
+    }
 
-  public TableMetaData(String tableName) {
-    this.tableName = tableName;
-  }
+    public void addColumnMetaData(String columnName, String columnType) {
+        columnNames.add(columnName);
+        columnTypes.add(columnType);
+    }
 
-  public void addColumnMetaData(String columnName, String columnType) {
-    columnNames.add(columnName);
-    columnTypes.add(columnType);
-  }
+    public String getTableName() {
+        return tableName;
+    }
 
-  public String getTableName() {
-    return tableName;
-  }
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
+    public List<String> getColumnNames() {
+        return columnNames;
+    }
 
-  public List<String> getColumnNames() {
-    return columnNames;
-  }
+    public void setColumnNames(List<String> columnNames) {
+        this.columnNames = columnNames;
+    }
 
-  public void setColumnNames(List<String> columnNames) {
-    this.columnNames = columnNames;
-  }
+    public List<String> getColumnTypes() {
+        return columnTypes;
+    }
 
-  public List<String> getColumnTypes() {
-    return columnTypes;
-  }
-
-  public void setColumnTypes(List<String> columnTypes) {
-    this.columnTypes = columnTypes;
-  }
-
+    public void setColumnTypes(List<String> columnTypes) {
+        this.columnTypes = columnTypes;
+    }
 }

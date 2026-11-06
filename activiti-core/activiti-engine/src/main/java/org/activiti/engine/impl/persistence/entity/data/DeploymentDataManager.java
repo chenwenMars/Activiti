@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +17,6 @@ package org.activiti.engine.impl.persistence.entity.data;
 
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.impl.DeploymentQueryImpl;
 import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.persistence.entity.DeploymentEntity;
@@ -24,19 +26,19 @@ import org.activiti.engine.repository.Deployment;
 
  */
 public interface DeploymentDataManager extends DataManager<DeploymentEntity> {
-  
-  DeploymentEntity findLatestDeploymentByName(String deploymentName);
+    DeploymentEntity findLatestDeploymentByName(String deploymentName);
 
-  long findDeploymentCountByQueryCriteria(DeploymentQueryImpl deploymentQuery);
+    DeploymentEntity findDeploymentByVersion(Integer version);
 
-  List<Deployment> findDeploymentsByQueryCriteria(DeploymentQueryImpl deploymentQuery, Page page);
+    long findDeploymentCountByQueryCriteria(DeploymentQueryImpl deploymentQuery);
 
-  List<String> getDeploymentResourceNames(String deploymentId);
+    List<Deployment> findDeploymentsByQueryCriteria(DeploymentQueryImpl deploymentQuery, Page page);
 
-  List<Deployment> findDeploymentsByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
+    List<String> getDeploymentResourceNames(String deploymentId);
 
-  long findDeploymentCountByNativeQuery(Map<String, Object> parameterMap);
+    List<Deployment> findDeploymentsByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
 
-  Deployment selectLatestDeployment(String deploymentName);
+    long findDeploymentCountByNativeQuery(Map<String, Object> parameterMap);
 
+    Deployment selectLatestDeployment(String deploymentName);
 }

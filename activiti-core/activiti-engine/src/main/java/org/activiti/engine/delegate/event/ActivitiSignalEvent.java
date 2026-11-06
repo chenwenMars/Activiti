@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,19 +17,17 @@ package org.activiti.engine.delegate.event;
 
 /**
  * An {@link ActivitiEvent} related to a signal being sent to an activity.
- * 
+ *
 
  */
 public interface ActivitiSignalEvent extends ActivitiActivityEvent {
+    /**
+     * @return the name of the signal. Returns null, if no specific signal name has been specified when signaling.
+     */
+    public String getSignalName();
 
-  /**
-   * @return the name of the signal. Returns null, if no specific signal name has been specified when signaling.
-   */
-  public String getSignalName();
-
-  /**
-   * @return the payload that was passed when signaling. Returns null, if no payload was passed.
-   */
-  public Object getSignalData();
-
+    /**
+     * @return the payload that was passed when signaling. Returns null, if no payload was passed.
+     */
+    public Object getSignalData();
 }

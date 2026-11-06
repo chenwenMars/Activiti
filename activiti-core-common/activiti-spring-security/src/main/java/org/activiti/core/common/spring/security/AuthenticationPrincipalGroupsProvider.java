@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,37 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.core.common.spring.security;
-
-import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
-import org.springframework.lang.NonNull;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+import org.activiti.api.runtime.shared.security.PrincipalGroupsProvider;
+import org.jspecify.annotations.NonNull;
 
 public class AuthenticationPrincipalGroupsProvider implements PrincipalGroupsProvider {
-    
+
     private final GrantedAuthoritiesResolver grantedAuthoritiesResolver;
     private final GrantedAuthoritiesGroupsMapper grantedAuthoritiesGroupsMapper;
 
-    public AuthenticationPrincipalGroupsProvider(@NonNull GrantedAuthoritiesResolver grantedAuthoritiesResolver,
-                                                  @NonNull GrantedAuthoritiesGroupsMapper grantedAuthoritiesGroupsMapper) {
+    public AuthenticationPrincipalGroupsProvider(
+        @NonNull GrantedAuthoritiesResolver grantedAuthoritiesResolver,
+        @NonNull GrantedAuthoritiesGroupsMapper grantedAuthoritiesGroupsMapper
+    ) {
         this.grantedAuthoritiesResolver = grantedAuthoritiesResolver;
         this.grantedAuthoritiesGroupsMapper = grantedAuthoritiesGroupsMapper;
     }
-    
+
     @Override
     public List<String> getGroups(@NonNull Principal principal) {
         return Optional.of(principal)
-                       .map(grantedAuthoritiesResolver::getAuthorities)
-                       .map(grantedAuthoritiesGroupsMapper::getGroups)
-                       .orElseThrow(this::securityException);
+            .map(grantedAuthoritiesResolver::getAuthorities)
+            .map(grantedAuthoritiesGroupsMapper::getGroups)
+            .orElseThrow(this::securityException);
     }
 
     protected SecurityException securityException() {
         return new SecurityException("Invalid principal groups");
-    }    
-
+    }
 }

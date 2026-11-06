@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,7 +16,6 @@
 package org.activiti.engine.impl.persistence.entity.data.impl;
 
 import java.util.List;
-
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.persistence.CachedEntityMatcher;
 import org.activiti.engine.impl.persistence.entity.HistoricIdentityLinkEntity;
@@ -25,33 +27,43 @@ import org.activiti.engine.impl.persistence.entity.data.impl.cachematcher.Histor
 /**
 
  */
-public class MybatisHistoricIdentityLinkDataManager extends AbstractDataManager<HistoricIdentityLinkEntity> implements HistoricIdentityLinkDataManager {
-  
-  protected CachedEntityMatcher<HistoricIdentityLinkEntity> historicIdentityLinksByProcInstMatcher = new HistoricIdentityLinksByProcInstMatcher();
+public class MybatisHistoricIdentityLinkDataManager
+    extends AbstractDataManager<HistoricIdentityLinkEntity>
+    implements HistoricIdentityLinkDataManager
+{
 
-  public MybatisHistoricIdentityLinkDataManager(ProcessEngineConfigurationImpl processEngineConfiguration) {
-    super(processEngineConfiguration);
-  }
+    protected CachedEntityMatcher<HistoricIdentityLinkEntity> historicIdentityLinksByProcInstMatcher =
+        new HistoricIdentityLinksByProcInstMatcher();
 
-  @Override
-  public Class<? extends HistoricIdentityLinkEntity> getManagedEntityClass() {
-    return HistoricIdentityLinkEntityImpl.class;
-  }
-  
-  @Override
-  public HistoricIdentityLinkEntity create() {
-    return new HistoricIdentityLinkEntityImpl();
-  }
-  
-  @Override
-  @SuppressWarnings("unchecked")
-  public List<HistoricIdentityLinkEntity> findHistoricIdentityLinksByTaskId(String taskId) {
-    return getDbSqlSession().selectList("selectHistoricIdentityLinksByTask", taskId);
-  }
+    public MybatisHistoricIdentityLinkDataManager(ProcessEngineConfigurationImpl processEngineConfiguration) {
+        super(processEngineConfiguration);
+    }
 
-  @Override
-  public List<HistoricIdentityLinkEntity> findHistoricIdentityLinksByProcessInstanceId(final String processInstanceId) {
-    return getList("selectHistoricIdentityLinksByProcessInstance", processInstanceId, historicIdentityLinksByProcInstMatcher, true);
-  }
-  
+    @Override
+    public Class<? extends HistoricIdentityLinkEntity> getManagedEntityClass() {
+        return HistoricIdentityLinkEntityImpl.class;
+    }
+
+    @Override
+    public HistoricIdentityLinkEntity create() {
+        return new HistoricIdentityLinkEntityImpl();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<HistoricIdentityLinkEntity> findHistoricIdentityLinksByTaskId(String taskId) {
+        return getDbSqlSession().selectList("selectHistoricIdentityLinksByTask", taskId);
+    }
+
+    @Override
+    public List<HistoricIdentityLinkEntity> findHistoricIdentityLinksByProcessInstanceId(
+        final String processInstanceId
+    ) {
+        return getList(
+            "selectHistoricIdentityLinksByProcessInstance",
+            processInstanceId,
+            historicIdentityLinksByProcInstMatcher,
+            true
+        );
+    }
 }

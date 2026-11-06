@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,9 +15,8 @@
  */
 package org.activiti.engine.impl.persistence.entity;
 
-import org.activiti.engine.api.internal.Internal;
-
 import java.util.Date;
+import org.activiti.engine.api.internal.Internal;
 
 /**
  * Stub of the common parts of a Job. You will normally work with a subclass of JobEntity, such as {@link TimerEntity} or {@link MessageEntity}.
@@ -22,12 +24,11 @@ import java.util.Date;
  */
 @Internal
 public interface TimerJobEntity extends AbstractJobEntity {
+    String getLockOwner();
 
-  String getLockOwner();
+    void setLockOwner(String claimedBy);
 
-  void setLockOwner(String claimedBy);
+    Date getLockExpirationTime();
 
-  Date getLockExpirationTime();
-
-  void setLockExpirationTime(Date claimedUntil);
+    void setLockExpirationTime(Date claimedUntil);
 }

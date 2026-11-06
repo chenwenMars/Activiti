@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.event.impl;
-
-import org.activiti.api.process.model.events.BPMNTimerExecutedEvent;
-import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
-import org.activiti.engine.delegate.event.ActivitiEntityEvent;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Optional;
+import org.activiti.api.process.model.events.BPMNTimerExecutedEvent;
+import org.activiti.api.runtime.model.impl.BPMNTimerImpl;
+import org.activiti.engine.delegate.event.ActivitiEntityEvent;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
 public class ToTimerExecutedConverterTest {
 
     @InjectMocks
@@ -38,11 +37,6 @@ public class ToTimerExecutedConverterTest {
 
     @Mock
     private BPMNTimerConverter bpmnTimerConverter;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void shouldReturnConvertedEventsWhenInternalEvenIsRelatedToTimers() {
@@ -68,10 +62,11 @@ public class ToTimerExecutedConverterTest {
     @Test
     public void shouldReturnEmptyOptionalWhenInternalEventIsNotRelatedToTimers() {
         //given
-        given(bpmnTimerConverter.isTimerRelatedEvent(mock(ActivitiEntityEvent.class))).willReturn(false);
+        ActivitiEntityEvent mockActivitiEntityEvent = mock(ActivitiEntityEvent.class);
+        given(bpmnTimerConverter.isTimerRelatedEvent(mockActivitiEntityEvent)).willReturn(false);
 
         //when
-        Optional<BPMNTimerExecutedEvent> optional = toTimerConverter.from(mock(ActivitiEntityEvent.class));
+        Optional<BPMNTimerExecutedEvent> optional = toTimerConverter.from(mockActivitiEntityEvent);
 
         //then
         assertThat(optional).isEmpty();

@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -10,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.spring.test.taskListener;
 
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.Deployment;
@@ -30,8 +33,7 @@ public class TaskListenerSpringTest extends SpringActivitiTestCase {
     private void cleanUp() {
         List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
         for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(),
-                                               true);
+            repositoryService.deleteDeployment(deployment.getId(), true);
         }
     }
 
@@ -47,15 +49,15 @@ public class TaskListenerSpringTest extends SpringActivitiTestCase {
         // Completing first task will set variable on process instance
         Task task = taskService.createTaskQuery().singleResult();
         taskService.complete(task.getId());
-        assertEquals("task1-complete",
-                     runtimeService.getVariable(processInstance.getId(),
-                                                "calledInExpression"));
+        assertThat(runtimeService.getVariable(processInstance.getId(), "calledInExpression")).isEqualTo(
+            "task1-complete"
+        );
 
         // Completing second task will set variable on process instance
         task = taskService.createTaskQuery().singleResult();
         taskService.complete(task.getId());
-        assertEquals("task2-notify",
-                     runtimeService.getVariable(processInstance.getId(),
-                                                "calledThroughNotify"));
+        assertThat(runtimeService.getVariable(processInstance.getId(), "calledThroughNotify")).isEqualTo(
+            "task2-notify"
+        );
     }
 }

@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +16,6 @@
 package org.activiti.engine.impl.persistence.entity;
 
 import java.util.Date;
-
 import org.activiti.engine.api.internal.Internal;
 import org.activiti.engine.impl.db.HasRevision;
 import org.activiti.engine.runtime.Job;
@@ -24,55 +26,53 @@ import org.activiti.engine.runtime.Job;
  */
 @Internal
 public interface AbstractJobEntity extends Job, Entity, HasRevision {
+    void setExecution(ExecutionEntity execution);
 
-  void setExecution(ExecutionEntity execution);
+    void setDuedate(Date duedate);
 
-  void setDuedate(Date duedate);
+    void setExecutionId(String executionId);
 
-  void setExecutionId(String executionId);
+    void setRetries(int retries);
 
-  void setRetries(int retries);
+    void setProcessInstanceId(String processInstanceId);
 
-  void setProcessInstanceId(String processInstanceId);
+    boolean isExclusive();
 
-  boolean isExclusive();
+    void setExclusive(boolean isExclusive);
 
-  void setExclusive(boolean isExclusive);
+    void setProcessDefinitionId(String processDefinitionId);
 
-  void setProcessDefinitionId(String processDefinitionId);
+    String getJobHandlerType();
 
-  String getJobHandlerType();
+    void setJobHandlerType(String jobHandlerType);
 
-  void setJobHandlerType(String jobHandlerType);
+    String getJobHandlerConfiguration();
 
-  String getJobHandlerConfiguration();
+    void setJobHandlerConfiguration(String jobHandlerConfiguration);
 
-  void setJobHandlerConfiguration(String jobHandlerConfiguration);
+    String getJobType();
 
-  String getJobType();
+    void setJobType(String jobType);
 
-  void setJobType(String jobType);
-  
-  String getRepeat();
+    String getRepeat();
 
-  void setRepeat(String repeat);
+    void setRepeat(String repeat);
 
-  Date getEndDate();
+    Date getEndDate();
 
-  void setEndDate(Date endDate);
+    void setEndDate(Date endDate);
 
-  int getMaxIterations();
+    int getMaxIterations();
 
-  void setMaxIterations(int maxIterations);
-  
-  String getExceptionStacktrace();
+    void setMaxIterations(int maxIterations);
 
-  void setExceptionStacktrace(String exception);
+    String getExceptionStacktrace();
 
-  void setExceptionMessage(String exceptionMessage);
+    void setExceptionStacktrace(String exception);
 
-  ByteArrayRef getExceptionByteArrayRef();
+    void setExceptionMessage(String exceptionMessage);
 
-  void setTenantId(String tenantId);
+    ByteArrayRef getExceptionByteArrayRef();
 
+    void setTenantId(String tenantId);
 }

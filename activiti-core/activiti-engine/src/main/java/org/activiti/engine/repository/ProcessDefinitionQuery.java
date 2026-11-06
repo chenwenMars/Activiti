@@ -1,11 +1,11 @@
 /*
- * Copyright 2020 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.repository;
 
+import java.util.List;
 import java.util.Set;
-
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.api.internal.Internal;
 import org.activiti.engine.query.Query;
@@ -27,7 +26,6 @@ import org.activiti.engine.query.Query;
  */
 @Internal
 public interface ProcessDefinitionQuery extends Query<ProcessDefinitionQuery, ProcessDefinition> {
-
     /**
      * Only select process definition with the given id.
      */
@@ -91,6 +89,11 @@ public interface ProcessDefinitionQuery extends Query<ProcessDefinitionQuery, Pr
     ProcessDefinitionQuery processDefinitionKeyLike(String processDefinitionKeyLike);
 
     /**
+     * Selects process definitions with id or key equals to processDefinitionIdOrKey
+     */
+    ProcessDefinitionQuery processDefinitionIdOrKey(String processDefinitionIdOrKey);
+
+    /**
      * Only select process definition with a certain version. Particulary useful when used in combination with {@link #processDefinitionKey(String)}
      */
     ProcessDefinitionQuery processDefinitionVersion(Integer processDefinitionVersion);
@@ -136,9 +139,15 @@ public interface ProcessDefinitionQuery extends Query<ProcessDefinitionQuery, Pr
     ProcessDefinitionQuery processDefinitionResourceNameLike(String resourceNameLike);
 
     /**
-     * Only selects process definitions which given userId is authoriezed to start
+     * Only selects process definitions which given userId is authorized to start
      */
     ProcessDefinitionQuery startableByUser(String userId);
+
+    /**
+     * Only selects process definitions which given group members are authorized to start
+     * If not set and startableByUser is set, the groups of that user will be used
+     */
+    ProcessDefinitionQuery startableByGroups(List<String> groupIds);
 
     /**
      * Only selects process definitions which are suspended
@@ -213,5 +222,4 @@ public interface ProcessDefinitionQuery extends Query<ProcessDefinitionQuery, Pr
      * Order by tenant id (needs to be followed by {@link #asc()} or {@link #desc()}).
      */
     ProcessDefinitionQuery orderByTenantId();
-
 }

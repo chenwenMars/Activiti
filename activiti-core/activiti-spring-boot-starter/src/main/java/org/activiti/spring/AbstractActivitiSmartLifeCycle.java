@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.spring;
 
 import org.slf4j.Logger;
@@ -8,19 +23,18 @@ import org.springframework.context.SmartLifecycle;
 public abstract class AbstractActivitiSmartLifeCycle implements SmartLifecycle, DisposableBean {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractActivitiSmartLifeCycle.class);
-    
+
     private Object lifeCycleMonitor = new Object();
     private boolean autoStartup = true;
     private int phase = DEFAULT_PHASE;
     private volatile boolean running = false;
-    
-    public AbstractActivitiSmartLifeCycle() {
-    }
-    
+
+    public AbstractActivitiSmartLifeCycle() {}
+
     public abstract void doStart();
 
     public abstract void doStop();
-    
+
     /**
      * Set whether to auto-start the activation after this component
      * has been initialized and the context has been refreshed.
@@ -58,15 +72,15 @@ public abstract class AbstractActivitiSmartLifeCycle implements SmartLifecycle, 
     public int getPhase() {
         return this.phase;
     }
-    
+
     @Override
     public void start() {
         synchronized (this.lifeCycleMonitor) {
             if (!this.running) {
                 logger.info("Starting...");
-                
+
                 doStart();
-                
+
                 this.running = true;
                 logger.info("Started.");
             }
@@ -79,7 +93,7 @@ public abstract class AbstractActivitiSmartLifeCycle implements SmartLifecycle, 
             if (this.running) {
                 logger.info("Stopping...");
                 doStop();
-                
+
                 this.running = false;
                 logger.info("Stopped.");
             }
@@ -103,5 +117,4 @@ public abstract class AbstractActivitiSmartLifeCycle implements SmartLifecycle, 
     public void destroy() {
         stop();
     }
-    
 }

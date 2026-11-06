@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,8 +15,9 @@
  */
 package org.activiti.examples.bpmn.usertask.taskassignee;
 
-import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -21,28 +25,27 @@ import org.activiti.engine.test.Deployment;
 
 /**
  * Simple process test to validate the current implementation prototype.
- * 
-
+ *
  */
 public class TaskAssigneeTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testTaskAssignee() {
+    @Deployment
+    public void testTaskAssignee() {
+        // Start process instance
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("taskAssigneeExampleProcess");
 
-    // Start process instance
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("taskAssigneeExampleProcess");
+        // Get task list
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee("kermit").list();
+        assertThat(tasks).hasSize(1);
+        Task myTask = tasks.getFirst();
+        assertThat(myTask.getName()).isEqualTo("Schedule meeting");
+        assertThat(myTask.getDescription()).isEqualTo(
+            "Schedule an engineering meeting for next week with the new hire."
+        );
 
-    // Get task list
-    List<Task> tasks = taskService.createTaskQuery().taskAssignee("kermit").list();
-    assertEquals(1, tasks.size());
-    Task myTask = tasks.get(0);
-    assertEquals("Schedule meeting", myTask.getName());
-    assertEquals("Schedule an engineering meeting for next week with the new hire.", myTask.getDescription());
-
-    // Complete task. Process is now finished
-    taskService.complete(myTask.getId());
-    // assert if the process instance completed
-    assertProcessEnded(processInstance.getId());
-  }
-
+        // Complete task. Process is now finished
+        taskService.complete(myTask.getId());
+        // assert if the process instance completed
+        assertProcessEnded(processInstance.getId());
+    }
 }

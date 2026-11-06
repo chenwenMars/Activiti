@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.runtime.event.impl;
 
 import java.util.Objects;
 import java.util.UUID;
-
 import org.activiti.api.model.shared.event.RuntimeEvent;
 
-public abstract class RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> implements RuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
+public abstract class RuntimeEventImpl<
+    ENTITY_TYPE,
+    EVENT_TYPE extends Enum<?>
+> implements RuntimeEvent<ENTITY_TYPE, EVENT_TYPE> {
 
     private String id;
     private Long timestamp;
@@ -44,9 +45,7 @@ public abstract class RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> 
         this.entity = entity;
     }
 
-    public RuntimeEventImpl(String id,
-                            Long timestamp,
-                            ENTITY_TYPE entity) {
+    public RuntimeEventImpl(String id, Long timestamp, ENTITY_TYPE entity) {
         this.id = id;
         this.timestamp = timestamp;
         this.entity = entity;
@@ -124,44 +123,47 @@ public abstract class RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> 
     protected void setEntity(ENTITY_TYPE entity) {
         this.entity = entity;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RuntimeEventImpl [id=")
-               .append(id)
-               .append(", timestamp=")
-               .append(timestamp)
-               .append(", processInstanceId=")
-               .append(processInstanceId)
-               .append(", processDefinitionId=")
-               .append(processDefinitionId)
-               .append(", processDefinitionKey=")
-               .append(processDefinitionKey)
-               .append(", processDefinitionVersion=")
-               .append(processDefinitionVersion)
-               .append(", businessKey=")
-               .append(businessKey)
-               .append(", parentProcessInstanceId=")
-               .append(parentProcessInstanceId)
-               .append(", entity=")
-               .append(entity)
-               .append("]");
+        builder
+            .append("RuntimeEventImpl [id=")
+            .append(id)
+            .append(", timestamp=")
+            .append(timestamp)
+            .append(", processInstanceId=")
+            .append(processInstanceId)
+            .append(", processDefinitionId=")
+            .append(processDefinitionId)
+            .append(", processDefinitionKey=")
+            .append(processDefinitionKey)
+            .append(", processDefinitionVersion=")
+            .append(processDefinitionVersion)
+            .append(", businessKey=")
+            .append(businessKey)
+            .append(", parentProcessInstanceId=")
+            .append(parentProcessInstanceId)
+            .append(", entity=")
+            .append(entity)
+            .append("]");
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(businessKey,
-                            entity,
-                            id,
-                            parentProcessInstanceId,
-                            processDefinitionId,
-                            processDefinitionKey,
-                            processDefinitionVersion,
-                            processInstanceId,
-                            timestamp,
-                            getEventType());
+        return Objects.hash(
+            businessKey,
+            entity,
+            id,
+            parentProcessInstanceId,
+            processDefinitionId,
+            processDefinitionKey,
+            processDefinitionVersion,
+            processInstanceId,
+            timestamp,
+            getEventType()
+        );
     }
 
     @Override
@@ -176,15 +178,16 @@ public abstract class RuntimeEventImpl<ENTITY_TYPE, EVENT_TYPE extends Enum<?>> 
             return false;
         }
         RuntimeEventImpl other = (RuntimeEventImpl) obj;
-        return Objects.equals(businessKey, other.businessKey) 
-                && Objects.equals(entity, other.entity)
-                && Objects.equals(id, other.id) 
-                && Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) 
-                && Objects.equals(processDefinitionId, other.processDefinitionId) 
-                && Objects.equals(processDefinitionKey, other.processDefinitionKey) 
-                && Objects.equals(processDefinitionVersion, other.processDefinitionVersion) 
-                && Objects.equals(processInstanceId, other.processInstanceId) 
-                && Objects.equals(timestamp, other.timestamp);
+        return (
+            Objects.equals(businessKey, other.businessKey) &&
+            Objects.equals(entity, other.entity) &&
+            Objects.equals(id, other.id) &&
+            Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
+            Objects.equals(processDefinitionId, other.processDefinitionId) &&
+            Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+            Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+            Objects.equals(processInstanceId, other.processInstanceId) &&
+            Objects.equals(timestamp, other.timestamp)
+        );
     }
-
 }

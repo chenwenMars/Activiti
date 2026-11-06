@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ThrowMessage {
+
     private String name;
     private Optional<Map<String, Object>> payload = Optional.empty();
     private Optional<String> businessKey = Optional.empty();
@@ -28,8 +32,7 @@ public class ThrowMessage {
         this.correlationKey = builder.correlationKey;
     }
 
-    ThrowMessage() {
-    }
+    ThrowMessage() {}
 
     public ThrowMessage(String name) {
         this.name = name;
@@ -38,7 +41,7 @@ public class ThrowMessage {
     public String getName() {
         return name;
     }
-    
+
     public Optional<Map<String, Object>> getPayload() {
         return payload;
     }
@@ -63,12 +66,11 @@ public class ThrowMessage {
      * Definition of a stage for staged builder.
      */
     public interface INameStage {
-
         /**
-        * Builder method for name parameter.
-        * @param name field to set
-        * @return builder
-        */
+         * Builder method for name parameter.
+         * @param name field to set
+         * @return builder
+         */
         public IBuildStage name(String name);
     }
 
@@ -76,32 +78,31 @@ public class ThrowMessage {
      * Definition of a stage for staged builder.
      */
     public interface IBuildStage {
-
         /**
-        * Builder method for payload parameter.
-        * @param payload field to set
-        * @return builder
-        */
+         * Builder method for payload parameter.
+         * @param payload field to set
+         * @return builder
+         */
         public IBuildStage payload(Optional<Map<String, Object>> payload);
 
         /**
-        * Builder method for businessKey parameter.
-        * @param businessKey field to set
-        * @return builder
-        */
+         * Builder method for businessKey parameter.
+         * @param businessKey field to set
+         * @return builder
+         */
         public IBuildStage businessKey(Optional<String> businessKey);
 
         /**
-        * Builder method for correlationKey parameter.
-        * @param correlationKey field to set
-        * @return builder
-        */
+         * Builder method for correlationKey parameter.
+         * @param correlationKey field to set
+         * @return builder
+         */
         public IBuildStage correlationKey(Optional<String> correlationKey);
 
         /**
-        * Builder method of the builder.
-        * @return built class
-        */
+         * Builder method of the builder.
+         * @return built class
+         */
         public ThrowMessage build();
     }
 
@@ -115,8 +116,7 @@ public class ThrowMessage {
         private Optional<String> businessKey = Optional.empty();
         private Optional<String> correlationKey = Optional.empty();
 
-        private ThrowMessagBuilder() {
-        }
+        private ThrowMessagBuilder() {}
 
         @Override
         public IBuildStage name(String name) {

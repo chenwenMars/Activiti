@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,10 +15,11 @@
  */
 package org.activiti.spring.test.executionListener;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -26,14 +30,15 @@ import org.springframework.test.context.ContextConfiguration;
 /**
 
  */
-@ContextConfiguration("classpath:org/activiti/spring/test/executionListener/TransactionDependentListenerTest-context.xml")
+@ContextConfiguration(
+    "classpath:org/activiti/spring/test/executionListener/TransactionDependentListenerTest-context.xml"
+)
 public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
 
     private void cleanUp() {
         List<org.activiti.engine.repository.Deployment> deployments = repositoryService.createDeploymentQuery().list();
         for (org.activiti.engine.repository.Deployment deployment : deployments) {
-            repositoryService.deleteDeployment(deployment.getId(),
-                                               true);
+            repositoryService.deleteDeployment(deployment.getId(), true);
         }
     }
 
@@ -44,21 +49,19 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
 
     @Deployment
     public void testOnClosedExecutionListenersWithRollback() {
-
         CurrentActivityTransactionDependentExecutionListener.clear();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("serviceTask1",
-                      false);
-        variables.put("serviceTask2",
-                      false);
-        variables.put("serviceTask3",
-                      true);
+        variables.put("serviceTask1", false);
+        variables.put("serviceTask2", false);
+        variables.put("serviceTask3", true);
 
         processEngineConfiguration.setAsyncExecutorActivate(false);
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess",
-                                                                                   variables);
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(
+            "transactionDependentExecutionListenerProcess",
+            variables
+        );
 
         // execute the only job that should be there 1 time
         try {
@@ -67,44 +70,35 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
             // expected; serviceTask3 throws exception
         }
 
-        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities = CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
-        assertEquals(1,
-                     currentActivities.size());
+        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities =
+            CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
+        assertThat(currentActivities).hasSize(1);
 
-        assertEquals("serviceTask1",
-                     currentActivities.get(0).getActivityId());
-        assertEquals("Service Task 1",
-                     currentActivities.get(0).getActivityName());
-        assertEquals(processInstance.getId(),
-                     currentActivities.get(0).getProcessInstanceId());
-        assertNotNull(currentActivities.get(0).getProcessInstanceId());
+        assertThat(currentActivities.getFirst().getActivityId()).isEqualTo("serviceTask1");
+        assertThat(currentActivities.getFirst().getActivityName()).isEqualTo("Service Task 1");
+        assertThat(currentActivities.getFirst().getProcessInstanceId()).isEqualTo(processInstance.getId());
+        assertThat(currentActivities.getFirst().getProcessInstanceId()).isNotNull();
 
-        assertEquals(1,
-                     managementService.createTimerJobQuery().processInstanceId(processInstance.getId()).count());
+        assertThat(
+            managementService.createTimerJobQuery().processInstanceId(processInstance.getId()).count()
+        ).isEqualTo(1);
         List<String> activeActivityIds = runtimeService.getActiveActivityIds(processInstance.getId());
-        assertEquals(1,
-                     activeActivityIds.size());
-        assertEquals("serviceTask2",
-                     activeActivityIds.get(0));
+        assertThat(activeActivityIds).hasSize(1);
+        assertThat(activeActivityIds.getFirst()).isEqualTo("serviceTask2");
     }
 
     @Deployment
     public void testOnCloseFailureExecutionListenersWithRollback() {
-
         CurrentActivityTransactionDependentExecutionListener.clear();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("serviceTask1",
-                      false);
-        variables.put("serviceTask2",
-                      false);
-        variables.put("serviceTask3",
-                      true);
+        variables.put("serviceTask1", false);
+        variables.put("serviceTask2", false);
+        variables.put("serviceTask3", true);
 
         processEngineConfiguration.setAsyncExecutorActivate(false);
 
-        runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess",
-                                                 variables);
+        runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess", variables);
 
         // execute the only job that should be there 1 time
         try {
@@ -113,116 +107,105 @@ public class ExecutionListenerOnTransactionTest extends SpringActivitiTestCase {
             // expected; serviceTask3 throws exception
         }
 
-        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities = CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
-        assertEquals(2,
-                     currentActivities.size());
+        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities =
+            CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
+        assertThat(currentActivities).hasSize(2);
 
         // the before commit listener
-        assertEquals("serviceTask1",
-                     currentActivities.get(0).getActivityId());
-        assertEquals("Service Task 1",
-                     currentActivities.get(0).getActivityName());
+        assertThat(currentActivities.getFirst().getActivityId()).isEqualTo("serviceTask1");
+        assertThat(currentActivities.getFirst().getActivityName()).isEqualTo("Service Task 1");
 
         // the before rolled-back listener
-        assertEquals("serviceTask3",
-                     currentActivities.get(1).getActivityId());
-        assertEquals("Service Task 3",
-                     currentActivities.get(1).getActivityName());
+        assertThat(currentActivities.get(1).getActivityId()).isEqualTo("serviceTask3");
+        assertThat(currentActivities.get(1).getActivityName()).isEqualTo("Service Task 3");
     }
 
     @Deployment
     public void testOnClosedExecutionListenersWithExecutionVariables() {
-
         CurrentActivityTransactionDependentExecutionListener.clear();
 
         runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess");
 
-        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities = CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
-        assertEquals(3,
-                     currentActivities.size());
+        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities =
+            CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
+        assertThat(currentActivities).hasSize(3);
 
-        assertEquals("serviceTask1",
-                     currentActivities.get(0).getActivityId());
-        assertEquals("Service Task 1",
-                     currentActivities.get(0).getActivityName());
-        assertEquals(0,
-                     currentActivities.get(0).getExecutionVariables().size());
+        assertThat(currentActivities.getFirst().getActivityId()).isEqualTo("serviceTask1");
+        assertThat(currentActivities.getFirst().getActivityName()).isEqualTo("Service Task 1");
+        assertThat(currentActivities.getFirst().getExecutionVariables()).hasSize(0);
 
-        assertEquals("serviceTask2",
-                     currentActivities.get(1).getActivityId());
-        assertEquals("Service Task 2",
-                     currentActivities.get(1).getActivityName());
-        assertEquals(1,
-                     currentActivities.get(1).getExecutionVariables().size());
-        assertEquals("test1",
-                     currentActivities.get(1).getExecutionVariables().get("injectedExecutionVariable"));
+        assertThat(currentActivities.get(1).getActivityId()).isEqualTo("serviceTask2");
+        assertThat(currentActivities.get(1).getActivityName()).isEqualTo("Service Task 2");
+        assertThat(currentActivities.get(1).getExecutionVariables()).hasSize(1);
+        assertThat(currentActivities.get(1).getExecutionVariables().get("injectedExecutionVariable")).isEqualTo(
+            "test1"
+        );
 
-        assertEquals("serviceTask3",
-                     currentActivities.get(2).getActivityId());
-        assertEquals("Service Task 3",
-                     currentActivities.get(2).getActivityName());
-        assertEquals(1,
-                     currentActivities.get(2).getExecutionVariables().size());
-        assertEquals("test2",
-                     currentActivities.get(2).getExecutionVariables().get("injectedExecutionVariable"));
+        assertThat(currentActivities.get(2).getActivityId()).isEqualTo("serviceTask3");
+        assertThat(currentActivities.get(2).getActivityName()).isEqualTo("Service Task 3");
+        assertThat(currentActivities.get(2).getExecutionVariables()).hasSize(1);
+        assertThat(currentActivities.get(2).getExecutionVariables().get("injectedExecutionVariable")).isEqualTo(
+            "test2"
+        );
     }
 
     @Deployment
-    public void testOnCloseFailureExecutionListenersWithTransactionalOperation() {
-
+    public void testOnCloseFailureExecutionListenersWithTransactionalOperation() throws InterruptedException {
         MyTransactionalOperationTransactionDependentExecutionListener.clear();
 
-        ProcessInstance firstProcessInstance = runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess");
+        ProcessInstance firstProcessInstance = runtimeService.startProcessInstanceByKey(
+            "transactionDependentExecutionListenerProcess"
+        );
         assertProcessEnded(firstProcessInstance.getId());
 
         if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
-            List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().list();
-            assertEquals(1,
-                         historicProcessInstances.size());
-            assertEquals("transactionDependentExecutionListenerProcess",
-                         historicProcessInstances.get(0).getProcessDefinitionKey());
+            List<HistoricProcessInstance> historicProcessInstances = historyService
+                .createHistoricProcessInstanceQuery()
+                .list();
+            assertThat(historicProcessInstances).hasSize(1);
+            assertThat(historicProcessInstances.getFirst().getProcessDefinitionKey()).isEqualTo(
+                "transactionDependentExecutionListenerProcess"
+            );
         }
 
-        ProcessInstance secondProcessInstance = runtimeService.startProcessInstanceByKey("secondTransactionDependentExecutionListenerProcess");
+        Thread.sleep(3);
+        ProcessInstance secondProcessInstance = runtimeService.startProcessInstanceByKey(
+            "secondTransactionDependentExecutionListenerProcess"
+        );
         assertProcessEnded(secondProcessInstance.getId());
 
         if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
             // first historic process instance was deleted by execution listener
-            List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().list();
-            assertEquals(1,
-                         historicProcessInstances.size());
-            assertEquals("secondTransactionDependentExecutionListenerProcess",
-                         historicProcessInstances.get(0).getProcessDefinitionKey());
+            List<HistoricProcessInstance> historicProcessInstances = historyService
+                .createHistoricProcessInstanceQuery()
+                .list();
+            assertThat(historicProcessInstances).hasSize(1);
+            assertThat(historicProcessInstances.getFirst().getProcessDefinitionKey()).isEqualTo(
+                "secondTransactionDependentExecutionListenerProcess"
+            );
         }
 
-        List<MyTransactionalOperationTransactionDependentExecutionListener.CurrentActivity> currentActivities = MyTransactionalOperationTransactionDependentExecutionListener.getCurrentActivities();
-        assertEquals(1,
-                     currentActivities.size());
+        List<MyTransactionalOperationTransactionDependentExecutionListener.CurrentActivity> currentActivities =
+            MyTransactionalOperationTransactionDependentExecutionListener.getCurrentActivities();
+        assertThat(currentActivities).hasSize(1);
 
-        assertEquals("serviceTask1",
-                     currentActivities.get(0).getActivityId());
-        assertEquals("Service Task 1",
-                     currentActivities.get(0).getActivityName());
+        assertThat(currentActivities.getFirst().getActivityId()).isEqualTo("serviceTask1");
+        assertThat(currentActivities.getFirst().getActivityName()).isEqualTo("Service Task 1");
     }
 
     @Deployment
     public void testOnClosedExecutionListenersWithCustomPropertiesResolver() {
-
         MyTransactionalOperationTransactionDependentExecutionListener.clear();
 
         runtimeService.startProcessInstanceByKey("transactionDependentExecutionListenerProcess");
 
-        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities = CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
-        assertEquals(1,
-                     currentActivities.size());
+        List<CurrentActivityTransactionDependentExecutionListener.CurrentActivity> currentActivities =
+            CurrentActivityTransactionDependentExecutionListener.getCurrentActivities();
+        assertThat(currentActivities).hasSize(1);
 
-        assertEquals("serviceTask1",
-                     currentActivities.get(0).getActivityId());
-        assertEquals("Service Task 1",
-                     currentActivities.get(0).getActivityName());
-        assertEquals(1,
-                     currentActivities.get(0).getCustomPropertiesMap().size());
-        assertEquals("serviceTask1",
-                     currentActivities.get(0).getCustomPropertiesMap().get("customProp1"));
+        assertThat(currentActivities.getFirst().getActivityId()).isEqualTo("serviceTask1");
+        assertThat(currentActivities.getFirst().getActivityName()).isEqualTo("Service Task 1");
+        assertThat(currentActivities.getFirst().getCustomPropertiesMap()).hasSize(1);
+        assertThat(currentActivities.getFirst().getCustomPropertiesMap().get("customProp1")).isEqualTo("serviceTask1");
     }
 }

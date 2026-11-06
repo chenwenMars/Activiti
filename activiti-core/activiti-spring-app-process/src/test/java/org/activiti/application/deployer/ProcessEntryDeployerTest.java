@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,26 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.application.deployer;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
 import org.activiti.application.ApplicationContent;
 import org.activiti.application.ApplicationEntry;
 import org.activiti.application.FileContent;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.DeploymentBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
-
+@ExtendWith(MockitoExtension.class)
 public class ProcessEntryDeployerTest {
 
     @InjectMocks
@@ -41,22 +41,14 @@ public class ProcessEntryDeployerTest {
     @Mock
     private RepositoryService repositoryService;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
-
     @Test
     public void deployEntriesShouldDelegateDeploymentToDeployBuilder() {
         //given
         ApplicationContent applicationContent = new ApplicationContent();
-        FileContent fileContent = new FileContent("process",
-                                              "any".getBytes());
-        applicationContent.add(new ApplicationEntry("processes",
-                                                    fileContent));
+        FileContent fileContent = new FileContent("process", "any".getBytes());
+        applicationContent.add(new ApplicationEntry("processes", fileContent));
 
-        DeploymentBuilder deploymentBuilder = mock(DeploymentBuilder.class,
-                                      Answers.RETURNS_SELF);
+        DeploymentBuilder deploymentBuilder = mock(DeploymentBuilder.class, Answers.RETURNS_SELF);
         given(repositoryService.createDeployment()).willReturn(deploymentBuilder);
 
         //when

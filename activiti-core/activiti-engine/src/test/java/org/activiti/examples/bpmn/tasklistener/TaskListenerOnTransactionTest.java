@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,10 +15,11 @@
  */
 package org.activiti.examples.bpmn.tasklistener;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.history.HistoryLevel;
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
@@ -28,154 +32,173 @@ import org.activiti.engine.test.Deployment;
  */
 public class TaskListenerOnTransactionTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testOnCompleteCommitted() {
-    CurrentTaskTransactionDependentTaskListener.clear();
+    @Deployment
+    public void testOnCompleteCommitted() {
+        CurrentTaskTransactionDependentTaskListener.clear();
 
-    Map<String, Object> variables = new HashMap<>();
-    variables.put("serviceTask1", false);
-    variables.put("serviceTask2", false);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("serviceTask1", false);
+        variables.put("serviceTask2", false);
 
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("taskListenersOnCompleteCommitted", variables);
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(
+            "taskListenersOnCompleteCommitted",
+            variables
+        );
 
-    // task 1 has committed listener
-    Task task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
+        // task 1 has committed listener
+        Task task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
 
-    // task 2 has rolled-back listener
-    task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
+        // task 2 has rolled-back listener
+        task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
 
-    List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks = CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
-    assertEquals(1, currentTasks.size());
+        List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks =
+            CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
+        assertThat(currentTasks).hasSize(1);
 
-    assertEquals("usertask1", currentTasks.get(0).getTaskId());
-    assertEquals("User Task 1", currentTasks.get(0).getTaskName());
-    assertEquals(processInstance.getId(), currentTasks.get(0).getProcessInstanceId());
-    assertNotNull(currentTasks.get(0).getProcessInstanceId());
-  }
-
-  @Deployment
-  public void testOnCompleteRolledBack() {
-    CurrentTaskTransactionDependentTaskListener.clear();
-
-    Map<String, Object> variables = new HashMap<>();
-    variables.put("serviceTask1", false);
-    variables.put("serviceTask2", false);
-    variables.put("serviceTask3", true);
-
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("taskListenersOnCompleteCommitted", variables);
-
-    // task 1 has before-commit listener
-    Task task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
-
-    // task 2 has rolled-back listener
-    task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
-
-    // task 3 has rolled-back listener
-    task = taskService.createTaskQuery().singleResult();
-
-    try {
-      taskService.complete(task.getId());
-    } catch (Exception ex) {
-
+        assertThat(currentTasks.getFirst().getTaskId()).isEqualTo("usertask1");
+        assertThat(currentTasks.getFirst().getTaskName()).isEqualTo("User Task 1");
+        assertThat(currentTasks.getFirst().getProcessInstanceId()).isEqualTo(processInstance.getId());
+        assertThat(currentTasks.getFirst().getProcessInstanceId()).isNotNull();
     }
 
-    List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks = CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
-    assertEquals(2, currentTasks.size());
+    @Deployment
+    public void testOnCompleteRolledBack() {
+        CurrentTaskTransactionDependentTaskListener.clear();
 
-    assertEquals("usertask1", currentTasks.get(0).getTaskId());
-    assertEquals("User Task 1", currentTasks.get(0).getTaskName());
-    assertEquals(processInstance.getId(), currentTasks.get(0).getProcessInstanceId());
-    assertNotNull(currentTasks.get(0).getProcessInstanceId());
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("serviceTask1", false);
+        variables.put("serviceTask2", false);
+        variables.put("serviceTask3", true);
 
-    assertEquals("usertask3", currentTasks.get(1).getTaskId());
-    assertEquals("User Task 3", currentTasks.get(1).getTaskName());
-    assertEquals(processInstance.getId(), currentTasks.get(1).getProcessInstanceId());
-    assertNotNull(currentTasks.get(1).getProcessInstanceId());
-  }
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(
+            "taskListenersOnCompleteCommitted",
+            variables
+        );
 
-  @Deployment
-  public void testOnCompleteExecutionVariables() {
+        // task 1 has before-commit listener
+        Task task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
 
-    CurrentTaskTransactionDependentTaskListener.clear();
+        // task 2 has rolled-back listener
+        task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
 
-    runtimeService.startProcessInstanceByKey("taskListenersOnCompleteExecutionVariables");
+        // task 3 has rolled-back listener
+        task = taskService.createTaskQuery().singleResult();
 
-    // task 1 has committed listener
-    Task task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
+        try {
+            taskService.complete(task.getId());
+        } catch (Exception ex) {}
 
-    // task 2 has committed listener
-    task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
+        List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks =
+            CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
+        assertThat(currentTasks).hasSize(2);
 
-    List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks = CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
-    assertEquals(2, currentTasks.size());
+        assertThat(currentTasks.getFirst().getTaskId()).isEqualTo("usertask1");
+        assertThat(currentTasks.getFirst().getTaskName()).isEqualTo("User Task 1");
+        assertThat(currentTasks.getFirst().getProcessInstanceId()).isEqualTo(processInstance.getId());
+        assertThat(currentTasks.getFirst().getProcessInstanceId()).isNotNull();
 
-    assertEquals("usertask1", currentTasks.get(0).getTaskId());
-    assertEquals("User Task 1", currentTasks.get(0).getTaskName());
-    assertEquals(1, currentTasks.get(1).getExecutionVariables().size());
-    assertEquals("test1", currentTasks.get(0).getExecutionVariables().get("injectedExecutionVariable"));
-
-    assertEquals("usertask2", currentTasks.get(1).getTaskId());
-    assertEquals("User Task 2", currentTasks.get(1).getTaskName());
-    assertEquals(1, currentTasks.get(1).getExecutionVariables().size());
-    assertEquals("test2", currentTasks.get(1).getExecutionVariables().get("injectedExecutionVariable"));
-  }
-
-  @Deployment
-  public void testOnCompleteTransactionalOperation() {
-    CurrentTaskTransactionDependentTaskListener.clear();
-
-    ProcessInstance firstProcessInstance = runtimeService.startProcessInstanceByKey("transactionDependentTaskListenerProcess");
-    assertProcessEnded(firstProcessInstance.getId());
-
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
-      List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().list();
-      assertEquals(1, historicProcessInstances.size());
-      assertEquals("transactionDependentTaskListenerProcess", historicProcessInstances.get(0).getProcessDefinitionKey());
+        assertThat(currentTasks.get(1).getTaskId()).isEqualTo("usertask3");
+        assertThat(currentTasks.get(1).getTaskName()).isEqualTo("User Task 3");
+        assertThat(currentTasks.get(1).getProcessInstanceId()).isEqualTo(processInstance.getId());
+        assertThat(currentTasks.get(1).getProcessInstanceId()).isNotNull();
     }
 
-    ProcessInstance secondProcessInstance = runtimeService.startProcessInstanceByKey("secondTransactionDependentTaskListenerProcess");
+    @Deployment
+    public void testOnCompleteExecutionVariables() {
+        CurrentTaskTransactionDependentTaskListener.clear();
 
-    Task task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
+        runtimeService.startProcessInstanceByKey("taskListenersOnCompleteExecutionVariables");
 
-    assertProcessEnded(secondProcessInstance.getId());
+        // task 1 has committed listener
+        Task task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
 
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
-      // first historic process instance was deleted by task listener
-      List<HistoricProcessInstance> historicProcessInstances = historyService.createHistoricProcessInstanceQuery().list();
-      assertEquals(1, historicProcessInstances.size());
-      assertEquals("secondTransactionDependentTaskListenerProcess", historicProcessInstances.get(0).getProcessDefinitionKey());
+        // task 2 has committed listener
+        task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
+
+        List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks =
+            CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
+        assertThat(currentTasks).hasSize(2);
+
+        assertThat(currentTasks.getFirst().getTaskId()).isEqualTo("usertask1");
+        assertThat(currentTasks.getFirst().getTaskName()).isEqualTo("User Task 1");
+        assertThat(currentTasks.get(1).getExecutionVariables()).hasSize(1);
+        assertThat(currentTasks.getFirst().getExecutionVariables().get("injectedExecutionVariable")).isEqualTo("test1");
+
+        assertThat(currentTasks.get(1).getTaskId()).isEqualTo("usertask2");
+        assertThat(currentTasks.get(1).getTaskName()).isEqualTo("User Task 2");
+        assertThat(currentTasks.get(1).getExecutionVariables()).hasSize(1);
+        assertThat(currentTasks.get(1).getExecutionVariables().get("injectedExecutionVariable")).isEqualTo("test2");
     }
 
-    List<MyTransactionalOperationTransactionDependentTaskListener.CurrentTask> currentTasks = MyTransactionalOperationTransactionDependentTaskListener.getCurrentTasks();
-    assertEquals(1, currentTasks.size());
+    @Deployment
+    public void testOnCompleteTransactionalOperation() {
+        CurrentTaskTransactionDependentTaskListener.clear();
 
-    assertEquals("usertask1", currentTasks.get(0).getTaskId());
-    assertEquals("User Task 1", currentTasks.get(0).getTaskName());
-  }
+        ProcessInstance firstProcessInstance = runtimeService.startProcessInstanceByKey(
+            "transactionDependentTaskListenerProcess"
+        );
+        assertProcessEnded(firstProcessInstance.getId());
 
-  @Deployment
-  public void testOnCompleteCustomPropertiesResolver() {
-    CurrentTaskTransactionDependentTaskListener.clear();
+        if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
+            List<HistoricProcessInstance> historicProcessInstances = historyService
+                .createHistoricProcessInstanceQuery()
+                .list();
+            assertThat(historicProcessInstances).hasSize(1);
+            assertThat(historicProcessInstances.getFirst().getProcessDefinitionKey()).isEqualTo(
+                "transactionDependentTaskListenerProcess"
+            );
+        }
 
-    runtimeService.startProcessInstanceByKey("transactionDependentTaskListenerProcess");
+        ProcessInstance secondProcessInstance = runtimeService.startProcessInstanceByKey(
+            "secondTransactionDependentTaskListenerProcess"
+        );
 
-    Task task = taskService.createTaskQuery().singleResult();
-    taskService.complete(task.getId());
+        Task task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
 
-    List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks = CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
-    assertEquals(1, currentTasks.size());
+        assertProcessEnded(secondProcessInstance.getId());
 
-    assertEquals("usertask1", currentTasks.get(0).getTaskId());
-    assertEquals("User Task 1", currentTasks.get(0).getTaskName());
-    assertEquals(1, currentTasks.get(0).getCustomPropertiesMap().size());
-    assertEquals("usertask1", currentTasks.get(0).getCustomPropertiesMap().get("customProp1"));
-  }
+        if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
+            // first historic process instance was deleted by task listener
+            List<HistoricProcessInstance> historicProcessInstances = historyService
+                .createHistoricProcessInstanceQuery()
+                .list();
+            assertThat(historicProcessInstances).hasSize(1);
+            assertThat(historicProcessInstances.getFirst().getProcessDefinitionKey()).isEqualTo(
+                "secondTransactionDependentTaskListenerProcess"
+            );
+        }
 
+        List<MyTransactionalOperationTransactionDependentTaskListener.CurrentTask> currentTasks =
+            MyTransactionalOperationTransactionDependentTaskListener.getCurrentTasks();
+        assertThat(currentTasks).hasSize(1);
+
+        assertThat(currentTasks.getFirst().getTaskId()).isEqualTo("usertask1");
+        assertThat(currentTasks.getFirst().getTaskName()).isEqualTo("User Task 1");
+    }
+
+    @Deployment
+    public void testOnCompleteCustomPropertiesResolver() {
+        CurrentTaskTransactionDependentTaskListener.clear();
+
+        runtimeService.startProcessInstanceByKey("transactionDependentTaskListenerProcess");
+
+        Task task = taskService.createTaskQuery().singleResult();
+        taskService.complete(task.getId());
+
+        List<CurrentTaskTransactionDependentTaskListener.CurrentTask> currentTasks =
+            CurrentTaskTransactionDependentTaskListener.getCurrentTasks();
+        assertThat(currentTasks).hasSize(1);
+
+        assertThat(currentTasks.getFirst().getTaskId()).isEqualTo("usertask1");
+        assertThat(currentTasks.getFirst().getTaskName()).isEqualTo("User Task 1");
+        assertThat(currentTasks.getFirst().getCustomPropertiesMap()).hasSize(1);
+        assertThat(currentTasks.getFirst().getCustomPropertiesMap().get("customProp1")).isEqualTo("usertask1");
+    }
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.runtime.model.impl;
 
 import java.util.Date;
 import java.util.Objects;
-
 import org.activiti.api.process.model.ProcessInstance;
 
 public class ProcessInstanceImpl extends ApplicationElementImpl implements ProcessInstance {
@@ -29,13 +27,15 @@ public class ProcessInstanceImpl extends ApplicationElementImpl implements Proce
     private String processDefinitionKey;
     private String initiator;
     private Date startDate;
+    private Date completedDate;
     private String businessKey;
     private ProcessInstanceStatus status;
     private String parentId;
     private Integer processDefinitionVersion;
+    private String processDefinitionName;
+    private String rootProcessInstanceId;
 
-    public ProcessInstanceImpl() {
-    }
+    public ProcessInstanceImpl() {}
 
     @Override
     public String getId() {
@@ -50,6 +50,11 @@ public class ProcessInstanceImpl extends ApplicationElementImpl implements Proce
     @Override
     public Date getStartDate() {
         return startDate;
+    }
+
+    @Override
+    public Date getCompletedDate() {
+        return completedDate;
     }
 
     @Override
@@ -86,7 +91,17 @@ public class ProcessInstanceImpl extends ApplicationElementImpl implements Proce
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
     }
-    
+
+    @Override
+    public String getProcessDefinitionName() {
+        return processDefinitionName;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -111,6 +126,10 @@ public class ProcessInstanceImpl extends ApplicationElementImpl implements Proce
         this.startDate = startDate;
     }
 
+    public void setCompletedDate(Date completedDate) {
+        this.completedDate = completedDate;
+    }
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -122,9 +141,17 @@ public class ProcessInstanceImpl extends ApplicationElementImpl implements Proce
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
-    
+
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
+    }
+
+    public void setProcessDefinitionName(String processDefinitionName) {
+        this.processDefinitionName = processDefinitionName;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     @Override
@@ -139,55 +166,79 @@ public class ProcessInstanceImpl extends ApplicationElementImpl implements Proce
             return false;
         }
         ProcessInstanceImpl that = (ProcessInstanceImpl) o;
-        return Objects.equals(id,
-                              that.id) &&
-                Objects.equals(name,
-                               that.name) &&
-                Objects.equals(processDefinitionId,
-                               that.processDefinitionId) &&
-                Objects.equals(processDefinitionKey,
-                               that.processDefinitionKey) &&
-                Objects.equals(initiator,
-                               that.initiator) &&
-                Objects.equals(startDate,
-                               that.startDate) &&
-                Objects.equals(businessKey,
-                               that.businessKey) &&
-                status == that.status &&
-                Objects.equals(parentId,
-                               that.parentId) &&
-                Objects.equals(processDefinitionVersion,
-                               that.processDefinitionVersion);
+        return (
+            Objects.equals(id, that.id) &&
+            Objects.equals(name, that.name) &&
+            Objects.equals(processDefinitionId, that.processDefinitionId) &&
+            Objects.equals(processDefinitionKey, that.processDefinitionKey) &&
+            Objects.equals(initiator, that.initiator) &&
+            Objects.equals(startDate, that.startDate) &&
+            Objects.equals(completedDate, that.completedDate) &&
+            Objects.equals(businessKey, that.businessKey) &&
+            status == that.status &&
+            Objects.equals(parentId, that.parentId) &&
+            Objects.equals(processDefinitionVersion, that.processDefinitionVersion) &&
+            Objects.equals(processDefinitionName, that.processDefinitionName)
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(),
-                            id,
-                            name,
-                            processDefinitionId,
-                            processDefinitionKey,
-                            initiator,
-                            startDate,
-                            businessKey,
-                            status,
-                            parentId,
-                            processDefinitionVersion);
+        return Objects.hash(
+            super.hashCode(),
+            id,
+            name,
+            processDefinitionId,
+            processDefinitionKey,
+            initiator,
+            startDate,
+            completedDate,
+            businessKey,
+            status,
+            parentId,
+            processDefinitionVersion,
+            processDefinitionName
+        );
     }
 
     @Override
     public String toString() {
-        return "ProcessInstance{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", processDefinitionId='" + processDefinitionId + '\'' +
-                ", processDefinitionKey='" + processDefinitionKey + '\'' +
-                ", parentId='" + parentId + '\'' +
-                ", initiator='" + initiator + '\'' +
-                ", startDate=" + startDate +
-                ", businessKey='" + businessKey + '\'' +
-                ", status=" + status +
-                ", processDefinitionVersion='" + processDefinitionVersion + '\'' +
-                '}';
+        return (
+            "ProcessInstance{" +
+            "id='" +
+            id +
+            '\'' +
+            ", name='" +
+            name +
+            '\'' +
+            ", processDefinitionId='" +
+            processDefinitionId +
+            '\'' +
+            ", processDefinitionKey='" +
+            processDefinitionKey +
+            '\'' +
+            ", parentId='" +
+            parentId +
+            '\'' +
+            ", initiator='" +
+            initiator +
+            '\'' +
+            ", startDate=" +
+            startDate +
+            ", completedDate=" +
+            completedDate +
+            ", businessKey='" +
+            businessKey +
+            '\'' +
+            ", status=" +
+            status +
+            ", processDefinitionVersion='" +
+            processDefinitionVersion +
+            '\'' +
+            ", processDefinitionName='" +
+            processDefinitionName +
+            '\'' +
+            '}'
+        );
     }
 }

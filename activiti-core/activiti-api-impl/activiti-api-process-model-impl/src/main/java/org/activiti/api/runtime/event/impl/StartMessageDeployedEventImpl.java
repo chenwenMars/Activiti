@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.runtime.event.impl;
 
 import org.activiti.api.process.model.ProcessDefinition;
@@ -21,21 +20,21 @@ import org.activiti.api.process.model.StartMessageDeploymentDefinition;
 import org.activiti.api.process.model.events.MessageDefinitionEvent;
 import org.activiti.api.process.model.events.StartMessageDeployedEvent;
 
-public class StartMessageDeployedEventImpl extends RuntimeEventImpl<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents> 
-                                           implements StartMessageDeployedEvent {
+public class StartMessageDeployedEventImpl
+    extends RuntimeEventImpl<StartMessageDeploymentDefinition, MessageDefinitionEvent.MessageDefinitionEvents>
+    implements StartMessageDeployedEvent
+{
 
     private StartMessageDeployedEventImpl(Builder builder) {
         this(builder.entity);
     }
 
-    StartMessageDeployedEventImpl() {
-    }
+    StartMessageDeployedEventImpl() {}
 
     public StartMessageDeployedEventImpl(StartMessageDeploymentDefinition startMessageEventSubscription) {
         super(startMessageEventSubscription);
-        
         ProcessDefinition processDefinition = startMessageEventSubscription.getProcessDefinition();
-        
+
         setProcessDefinitionId(processDefinition.getId());
         setProcessDefinitionKey(processDefinition.getKey());
         setProcessDefinitionVersion(processDefinition.getVersion());
@@ -44,7 +43,7 @@ public class StartMessageDeployedEventImpl extends RuntimeEventImpl<StartMessage
     public static Builder builder() {
         return new Builder();
     }
-    
+
     /**
      * Creates a builder to build {@link StartMessageDeployedEventImpl} and initialize it with the given object.
      * @param startMessageDeployedEventImpl to initialize the builder with
@@ -61,31 +60,28 @@ public class StartMessageDeployedEventImpl extends RuntimeEventImpl<StartMessage
 
         private StartMessageDeploymentDefinition entity;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         private Builder(StartMessageDeployedEventImpl startMessageDeployedEventImpl) {
             this.entity = startMessageDeployedEventImpl.getEntity();
         }
 
         /**
-        * Builder method for entity parameter.
-        * @param entity field to set
-        * @return builder
-        */
+         * Builder method for entity parameter.
+         * @param entity field to set
+         * @return builder
+         */
         public Builder withEntity(StartMessageDeploymentDefinition entity) {
             this.entity = entity;
             return this;
         }
 
         /**
-        * Builder method of the builder.
-        * @return built class
-        */
+         * Builder method of the builder.
+         * @return built class
+         */
         public StartMessageDeployedEventImpl build() {
             return new StartMessageDeployedEventImpl(this);
         }
     }
-
-
 }

@@ -1,23 +1,26 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.test.bpmn.event.timer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.Job;
@@ -28,314 +31,324 @@ import org.activiti.engine.task.TaskQuery;
 import org.activiti.engine.test.Deployment;
 
 /**
-
  */
 public class BoundaryTimerNonInterruptingEventTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testMultipleTimersOnUserTask() {
-    // Set the clock fixed
-    Date startTime = new Date();
+    @Deployment
+    public void testMultipleTimersOnUserTask() {
+        // Set the clock fixed
+        Date startTime = new Date();
 
-    // After process start, there should be 3 timers created
-    ProcessInstance pi = runtimeService.startProcessInstanceByKey("nonInterruptingTimersOnUserTask");
-    Task task1 = taskService.createTaskQuery().singleResult();
-    assertEquals("First Task", task1.getName());
+        // After process start, there should be 3 timers created
+        ProcessInstance pi = runtimeService.startProcessInstanceByKey("nonInterruptingTimersOnUserTask");
+        Task task1 = taskService.createTaskQuery().singleResult();
+        assertThat(task1.getName()).isEqualTo("First Task");
 
-    TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
-    List<Job> jobs = jobQuery.list();
-    assertEquals(2, jobs.size());
+        TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
+        List<Job> jobs = jobQuery.list();
+        assertThat(jobs).hasSize(2);
 
-    // After setting the clock to time '1 hour and 5 seconds', the first timer should fire
-    processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
-    Job job = managementService.createTimerJobQuery().executable().singleResult();
-    assertNotNull(job);
-    managementService.moveTimerToExecutableJob(job.getId());
-    managementService.executeJob(job.getId());
+        // After setting the clock to time '1 hour and 5 seconds', the first timer should fire
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (60 * 60 * 1000 + 5000)));
+        Job job = managementService.createTimerJobQuery().executable().singleResult();
+        assertThat(job).isNotNull();
+        managementService.moveTimerToExecutableJob(job.getId());
+        managementService.executeJob(job.getId());
 
-    // we still have one timer more to fire
-    assertEquals(1L, jobQuery.count());
+        // we still have one timer more to fire
+        assertThat(jobQuery.count()).isEqualTo(1L);
 
-    // and we are still in the first state, but in the second state as well!
-    assertEquals(2L, taskService.createTaskQuery().count());
-    List<Task> taskList = taskService.createTaskQuery().orderByTaskName().desc().list();
-    assertEquals("First Task", taskList.get(0).getName());
-    assertEquals("Escalation Task 1", taskList.get(1).getName());
+        // and we are still in the first state, but in the second state as well!
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(2L);
+        List<Task> taskList = taskService.createTaskQuery().orderByTaskName().desc().list();
+        assertThat(taskList.getFirst().getName()).isEqualTo("First Task");
+        assertThat(taskList.get(1).getName()).isEqualTo("Escalation Task 1");
 
-    // complete the task and end the forked execution
-    taskService.complete(taskList.get(1).getId());
+        // complete the task and end the forked execution
+        taskService.complete(taskList.get(1).getId());
 
-    // but we still have the original executions
-    assertEquals(1L, taskService.createTaskQuery().count());
-    assertEquals("First Task", taskService.createTaskQuery().singleResult().getName());
+        // but we still have the original executions
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(1L);
+        assertThat(taskService.createTaskQuery().singleResult().getName()).isEqualTo("First Task");
 
-    // After setting the clock to time '2 hour and 5 seconds', the second timer should fire
-    processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((2 * 60 * 60 * 1000) + 5000)));
-    waitForJobExecutorToProcessAllJobs(5000L, 25L);
+        // After setting the clock to time '2 hour and 5 seconds', the second timer should fire
+        processEngineConfiguration
+            .getClock()
+            .setCurrentTime(new Date(startTime.getTime() + (2 * 60 * 60 * 1000 + 5000)));
+        waitForJobExecutorToProcessAllJobs(5000L, 25L);
 
-    // no more timers to fire
-    assertEquals(0L, jobQuery.count());
+        // no more timers to fire
+        assertThat(jobQuery.count()).isEqualTo(0L);
 
-    // and we are still in the first state, but in the next escalation state as well
-    assertEquals(2L, taskService.createTaskQuery().count());
-    taskList = taskService.createTaskQuery().orderByTaskName().desc().list();
-    assertEquals("First Task", taskList.get(0).getName());
-    assertEquals("Escalation Task 2", taskList.get(1).getName());
+        // and we are still in the first state, but in the next escalation state as well
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(2L);
+        taskList = taskService.createTaskQuery().orderByTaskName().desc().list();
+        assertThat(taskList.getFirst().getName()).isEqualTo("First Task");
+        assertThat(taskList.get(1).getName()).isEqualTo("Escalation Task 2");
 
-    // This time we end the main task
-    taskService.complete(taskList.get(0).getId());
+        // This time we end the main task
+        taskService.complete(taskList.getFirst().getId());
 
-    // but we still have the escalation task
-    assertEquals(1L, taskService.createTaskQuery().count());
-    Task escalationTask = taskService.createTaskQuery().singleResult();
-    assertEquals("Escalation Task 2", escalationTask.getName());
+        // but we still have the escalation task
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(1L);
+        Task escalationTask = taskService.createTaskQuery().singleResult();
+        assertThat(escalationTask.getName()).isEqualTo("Escalation Task 2");
 
-    taskService.complete(escalationTask.getId());
+        taskService.complete(escalationTask.getId());
 
-    // now we are really done :-)
-    assertProcessEnded(pi.getId());
-  }
-
-  @Deployment
-  public void testJoin() {
-    // Set the clock fixed
-    Date startTime = new Date();
-
-    // After process start, there should be 3 timers created
-    ProcessInstance pi = runtimeService.startProcessInstanceByKey("testJoin");
-    Task task1 = taskService.createTaskQuery().singleResult();
-    assertEquals("Main Task", task1.getName());
-
-    TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
-    List<Job> jobs = jobQuery.list();
-    assertEquals(1, jobs.size());
-
-    // After setting the clock to time '1 hour and 5 seconds', the first timer should fire
-    processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
-    waitForJobExecutorToProcessAllJobs(5000L, 25L);
-
-    // timer has fired
-    assertEquals(0L, jobQuery.count());
-
-    // we now have both tasks
-    assertEquals(2L, taskService.createTaskQuery().count());
-
-    // end the first
-    taskService.complete(task1.getId());
-
-    // we now have one task left
-    assertEquals(1L, taskService.createTaskQuery().count());
-    Task task2 = taskService.createTaskQuery().singleResult();
-    assertEquals("Escalation Task", task2.getName());
-
-    // complete the task, the parallel gateway should fire
-    taskService.complete(task2.getId());
-
-    // and the process has ended
-    assertProcessEnded(pi.getId());
-  }
-
-  @Deployment
-  public void testTimerOnConcurrentTasks() {
-    String procId = runtimeService.startProcessInstanceByKey("nonInterruptingOnConcurrentTasks").getId();
-    assertEquals(2, taskService.createTaskQuery().count());
-
-    Job timer = managementService.createTimerJobQuery().singleResult();
-    managementService.moveTimerToExecutableJob(timer.getId());
-    managementService.executeJob(timer.getId());
-    assertEquals(3, taskService.createTaskQuery().count());
-
-    // Complete task that was reached by non interrupting timer
-    Task task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
-    taskService.complete(task.getId());
-    assertEquals(2, taskService.createTaskQuery().count());
-
-    // Complete other tasks
-    for (Task t : taskService.createTaskQuery().list()) {
-      taskService.complete(t.getId());
+        // now we are really done :-)
+        assertProcessEnded(pi.getId());
     }
-    assertProcessEnded(procId);
-  }
 
-  // Difference with previous test: now the join will be reached first
-  @Deployment(resources = { "org/activiti/engine/test/bpmn/event/timer/BoundaryTimerNonInterruptingEventTest.testTimerOnConcurrentTasks.bpmn20.xml" })
-  public void testTimerOnConcurrentTasks2() {
-    String procId = runtimeService.startProcessInstanceByKey("nonInterruptingOnConcurrentTasks").getId();
-    assertEquals(2, taskService.createTaskQuery().count());
+    @Deployment
+    public void testJoin() {
+        // Set the clock fixed
+        Date startTime = new Date();
 
-    Job timer = managementService.createTimerJobQuery().singleResult();
-    managementService.moveTimerToExecutableJob(timer.getId());
-    managementService.executeJob(timer.getId());
-    assertEquals(3, taskService.createTaskQuery().count());
+        // After process start, there should be 3 timers created
+        ProcessInstance pi = runtimeService.startProcessInstanceByKey("testJoin");
+        Task task1 = taskService.createTaskQuery().singleResult();
+        assertThat(task1.getName()).isEqualTo("Main Task");
 
-    // Complete 2 tasks that will trigger the join
-    Task task = taskService.createTaskQuery().taskDefinitionKey("firstTask").singleResult();
-    taskService.complete(task.getId());
-    task = taskService.createTaskQuery().taskDefinitionKey("secondTask").singleResult();
-    taskService.complete(task.getId());
-    assertEquals(1, taskService.createTaskQuery().count());
+        TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
+        List<Job> jobs = jobQuery.list();
+        assertThat(jobs).hasSize(1);
 
-    // Finally, complete the task that was created due to the timer
-    task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
-    taskService.complete(task.getId());
+        // After setting the clock to time '1 hour and 5 seconds', the first timer should fire
+        processEngineConfiguration.getClock().setCurrentTime(new Date(startTime.getTime() + (60 * 60 * 1000 + 5000)));
+        waitForJobExecutorToProcessAllJobs(5000L, 25L);
 
-    assertProcessEnded(procId);
-  }
+        // timer has fired
+        assertThat(jobQuery.count()).isEqualTo(0L);
 
-  @Deployment
-  public void testTimerWithCycle() throws Exception {
-    String processInstanceId = runtimeService.startProcessInstanceByKey("nonInterruptingCycle").getId();
+        // we now have both tasks
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(2L);
 
-    List<Job> jobs = managementService.createTimerJobQuery().processInstanceId(processInstanceId).list();
-    assertEquals(1, jobs.size());
-    
-    // boundary events
-    waitForJobExecutorToProcessAllJobs(2000, 100);
-    
-    // a new job must be prepared because there are indefinite number of repeats 1 hour interval");
-    assertEquals(1, managementService.createTimerJobQuery().processInstanceId(processInstanceId).count());
+        // end the first
+        taskService.complete(task1.getId());
 
-    moveByMinutes(60);
-    waitForJobExecutorToProcessAllJobs(2000, 100);
-    
-    // a new job must be prepared because there are indefinite number of repeats 1 hour interval");
-    assertEquals(1, managementService.createTimerJobQuery().processInstanceId(processInstanceId).count());
+        // we now have one task left
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(1L);
+        Task task2 = taskService.createTaskQuery().singleResult();
+        assertThat(task2.getName()).isEqualTo("Escalation Task");
 
-    Task task = taskService.createTaskQuery().taskDefinitionKey("task").singleResult();
-    taskService.complete(task.getId());
+        // complete the task, the parallel gateway should fire
+        taskService.complete(task2.getId());
 
-    moveByMinutes(60);
-    try {
-      waitForJobExecutorToProcessAllJobs(2000, 100);
-    } catch (Exception ex) {
-      fail("No more jobs since the user completed the task");
+        // and the process has ended
+        assertProcessEnded(pi.getId());
     }
-  }
 
-  @Deployment
-  /**
-   * see https://activiti.atlassian.net/browse/ACT-1173
-   */
-  public void testTimerOnEmbeddedSubprocess() {
-    String id = runtimeService.startProcessInstanceByKey("nonInterruptingTimerOnEmbeddedSubprocess").getId();
+    @Deployment
+    public void testTimerOnConcurrentTasks() {
+        String procId = runtimeService.startProcessInstanceByKey("nonInterruptingOnConcurrentTasks").getId();
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(2);
 
-    TaskQuery tq = taskService.createTaskQuery().taskAssignee("kermit");
+        Job timer = managementService.createTimerJobQuery().singleResult();
+        managementService.moveTimerToExecutableJob(timer.getId());
+        managementService.executeJob(timer.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(3);
 
-    assertEquals(1, tq.count());
+        // Complete task that was reached by non interrupting timer
+        Task task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
+        taskService.complete(task.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(2);
 
-    // Simulate timer
-    Job timer = managementService.createTimerJobQuery().singleResult();
-    managementService.moveTimerToExecutableJob(timer.getId());
-    managementService.executeJob(timer.getId());
+        // Complete other tasks
+        for (Task t : taskService.createTaskQuery().list()) {
+            taskService.complete(t.getId());
+        }
+        assertProcessEnded(procId);
+    }
 
-    tq = taskService.createTaskQuery().taskAssignee("kermit");
+    // Difference with previous test: now the join will be reached first
+    @Deployment(
+        resources = {
+            "org/activiti/engine/test/bpmn/event/timer/BoundaryTimerNonInterruptingEventTest.testTimerOnConcurrentTasks.bpmn20.xml",
+        }
+    )
+    public void testTimerOnConcurrentTasks2() {
+        String procId = runtimeService.startProcessInstanceByKey("nonInterruptingOnConcurrentTasks").getId();
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(2);
 
-    assertEquals(2, tq.count());
+        Job timer = managementService.createTimerJobQuery().singleResult();
+        managementService.moveTimerToExecutableJob(timer.getId());
+        managementService.executeJob(timer.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(3);
 
-    List<Task> tasks = tq.list();
+        // Complete 2 tasks that will trigger the join
+        Task task = taskService.createTaskQuery().taskDefinitionKey("firstTask").singleResult();
+        taskService.complete(task.getId());
+        task = taskService.createTaskQuery().taskDefinitionKey("secondTask").singleResult();
+        taskService.complete(task.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(1);
 
-    taskService.complete(tasks.get(0).getId());
-    taskService.complete(tasks.get(1).getId());
+        // Finally, complete the task that was created due to the timer
+        task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
+        taskService.complete(task.getId());
 
-    assertProcessEnded(id);
-  }
+        assertProcessEnded(procId);
+    }
 
-  @Deployment
-  /**
-   * see https://activiti.atlassian.net/browse/ACT-1106
-   */
-  public void testReceiveTaskWithBoundaryTimer() {
-    // Set the clock fixed
-    HashMap<String, Object> variables = new HashMap<String, Object>();
-    variables.put("timeCycle", "R/PT1H");
+    @Deployment
+    public void testTimerWithCycle() throws Exception {
+        String processInstanceId = runtimeService.startProcessInstanceByKey("nonInterruptingCycle").getId();
 
-    // After process start, there should be a timer created
-    ProcessInstance pi = runtimeService.startProcessInstanceByKey("nonInterruptingCycle", variables);
+        List<Job> jobs = managementService.createTimerJobQuery().processInstanceId(processInstanceId).list();
+        assertThat(jobs).hasSize(1);
 
-    TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
-    List<Job> jobs = jobQuery.list();
-    assertEquals(1, jobs.size());
+        // boundary events
+        waitForJobExecutorToProcessAllJobs(2000, 100);
 
-    // The Execution Query should work normally and find executions in state "task"
-    List<Execution> executions = runtimeService.createExecutionQuery().activityId("task").list();
-    assertEquals(1, executions.size());
-    List<String> activeActivityIds = runtimeService.getActiveActivityIds(executions.get(0).getId());
-    assertEquals(2, activeActivityIds.size());
-    Collections.sort(activeActivityIds);
-    assertEquals("task", activeActivityIds.get(0));
-    assertEquals("timer", activeActivityIds.get(1));
+        // a new job must be prepared because there are indefinite number of repeats 1 hour interval");
+        assertThat(managementService.createTimerJobQuery().processInstanceId(processInstanceId).count()).isEqualTo(1);
 
-    runtimeService.trigger(executions.get(0).getId());
+        moveByMinutes(60);
+        waitForJobExecutorToProcessAllJobs(2000, 100);
 
-    // // After setting the clock to time '1 hour and 5 seconds', the second
-    // timer should fire
-    // processEngineConfiguration.getClock().setCurrentTime(new
-    // Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
-    // waitForJobExecutorToProcessAllJobs(5000L, 25L);
-    // assertEquals(0L, jobQuery.count());
+        // a new job must be prepared because there are indefinite number of repeats 1 hour interval");
+        assertThat(managementService.createTimerJobQuery().processInstanceId(processInstanceId).count()).isEqualTo(1);
 
-    // which means the process has ended
-    assertProcessEnded(pi.getId());
-  }
+        Task task = taskService.createTaskQuery().taskDefinitionKey("task").singleResult();
+        taskService.complete(task.getId());
 
-  @Deployment
-  public void testTimerOnConcurrentSubprocess() {
-    String procId = runtimeService.startProcessInstanceByKey("testTimerOnConcurrentSubprocess").getId();
-    assertEquals(4, taskService.createTaskQuery().count());
+        moveByMinutes(60);
+        try {
+            waitForJobExecutorToProcessAllJobs(2000, 100);
+        } catch (Exception ex) {
+            fail("No more jobs since the user completed the task");
+        }
+    }
 
-    Job timer = managementService.createTimerJobQuery().singleResult();
-    managementService.moveTimerToExecutableJob(timer.getId());
-    managementService.executeJob(timer.getId());
-    assertEquals(5, taskService.createTaskQuery().count());
+    @Deployment
+    /**
+     * see https://activiti.atlassian.net/browse/ACT-1173
+     */
+    public void testTimerOnEmbeddedSubprocess() {
+        String id = runtimeService.startProcessInstanceByKey("nonInterruptingTimerOnEmbeddedSubprocess").getId();
 
-    // Complete 4 tasks that will trigger the join
-    Task task = taskService.createTaskQuery().taskDefinitionKey("sub1task1").singleResult();
-    taskService.complete(task.getId());
-    task = taskService.createTaskQuery().taskDefinitionKey("sub1task2").singleResult();
-    taskService.complete(task.getId());
-    task = taskService.createTaskQuery().taskDefinitionKey("sub2task1").singleResult();
-    taskService.complete(task.getId());
-    task = taskService.createTaskQuery().taskDefinitionKey("sub2task2").singleResult();
-    taskService.complete(task.getId());
-    assertEquals(1, taskService.createTaskQuery().count());
+        TaskQuery tq = taskService.createTaskQuery().taskAssignee("kermit");
 
-    // Finally, complete the task that was created due to the timer
-    task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
-    taskService.complete(task.getId());
+        assertThat(tq.count()).isEqualTo(1);
 
-    assertProcessEnded(procId);
-  }
+        // Simulate timer
+        Job timer = managementService.createTimerJobQuery().singleResult();
+        managementService.moveTimerToExecutableJob(timer.getId());
+        managementService.executeJob(timer.getId());
 
-  @Deployment(resources = "org/activiti/engine/test/bpmn/event/timer/BoundaryTimerNonInterruptingEventTest.testTimerOnConcurrentSubprocess.bpmn20.xml")
-  public void testTimerOnConcurrentSubprocess2() {
-    String procId = runtimeService.startProcessInstanceByKey("testTimerOnConcurrentSubprocess").getId();
-    assertEquals(4, taskService.createTaskQuery().count());
+        tq = taskService.createTaskQuery().taskAssignee("kermit");
 
-    Job timer = managementService.createTimerJobQuery().singleResult();
-    managementService.moveTimerToExecutableJob(timer.getId());
-    managementService.executeJob(timer.getId());
-    assertEquals(5, taskService.createTaskQuery().count());
+        assertThat(tq.count()).isEqualTo(2);
 
-    Task task = taskService.createTaskQuery().taskDefinitionKey("sub1task1").singleResult();
-    taskService.complete(task.getId());
-    task = taskService.createTaskQuery().taskDefinitionKey("sub1task2").singleResult();
-    taskService.complete(task.getId());
+        List<Task> tasks = tq.list();
 
-    // complete the task that was created due to the timer
-    task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
-    taskService.complete(task.getId());
+        taskService.complete(tasks.getFirst().getId());
+        taskService.complete(tasks.get(1).getId());
 
-    task = taskService.createTaskQuery().taskDefinitionKey("sub2task1").singleResult();
-    taskService.complete(task.getId());
-    task = taskService.createTaskQuery().taskDefinitionKey("sub2task2").singleResult();
-    taskService.complete(task.getId());
-    assertEquals(0, taskService.createTaskQuery().count());
+        assertProcessEnded(id);
+    }
 
-    assertProcessEnded(procId);
-  }
+    @Deployment
+    /**
+     * see https://activiti.atlassian.net/browse/ACT-1106
+     */
+    public void testReceiveTaskWithBoundaryTimer() {
+        // Set the clock fixed
+        HashMap<String, Object> variables = new HashMap<String, Object>();
+        variables.put("timeCycle", "R/PT1H");
 
-  private void moveByMinutes(int minutes) throws Exception {
-    processEngineConfiguration.getClock().setCurrentTime(new Date(processEngineConfiguration.getClock().getCurrentTime().getTime() + ((minutes * 60 * 1000))));
-  }
+        // After process start, there should be a timer created
+        ProcessInstance pi = runtimeService.startProcessInstanceByKey("nonInterruptingCycle", variables);
 
+        TimerJobQuery jobQuery = managementService.createTimerJobQuery().processInstanceId(pi.getId());
+        List<Job> jobs = jobQuery.list();
+        assertThat(jobs).hasSize(1);
+
+        // The Execution Query should work normally and find executions in state "task"
+        List<Execution> executions = runtimeService.createExecutionQuery().activityId("task").list();
+        assertThat(executions).hasSize(1);
+        List<String> activeActivityIds = runtimeService.getActiveActivityIds(executions.getFirst().getId());
+        assertThat(activeActivityIds).hasSize(2);
+        Collections.sort(activeActivityIds);
+        assertThat(activeActivityIds.getFirst()).isEqualTo("task");
+        assertThat(activeActivityIds.get(1)).isEqualTo("timer");
+
+        runtimeService.trigger(executions.getFirst().getId());
+
+        // // After setting the clock to time '1 hour and 5 seconds', the second
+        // timer should fire
+        // processEngineConfiguration.getClock().setCurrentTime(new
+        // Date(startTime.getTime() + ((60 * 60 * 1000) + 5000)));
+        // waitForJobExecutorToProcessAllJobs(5000L, 25L);
+        // assertThat(jobQuery.count()).isEqualTo(0L);
+
+        // which means the process has ended
+        assertProcessEnded(pi.getId());
+    }
+
+    @Deployment
+    public void testTimerOnConcurrentSubprocess() {
+        String procId = runtimeService.startProcessInstanceByKey("testTimerOnConcurrentSubprocess").getId();
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(4);
+
+        Job timer = managementService.createTimerJobQuery().singleResult();
+        managementService.moveTimerToExecutableJob(timer.getId());
+        managementService.executeJob(timer.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(5);
+
+        // Complete 4 tasks that will trigger the join
+        Task task = taskService.createTaskQuery().taskDefinitionKey("sub1task1").singleResult();
+        taskService.complete(task.getId());
+        task = taskService.createTaskQuery().taskDefinitionKey("sub1task2").singleResult();
+        taskService.complete(task.getId());
+        task = taskService.createTaskQuery().taskDefinitionKey("sub2task1").singleResult();
+        taskService.complete(task.getId());
+        task = taskService.createTaskQuery().taskDefinitionKey("sub2task2").singleResult();
+        taskService.complete(task.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(1);
+
+        // Finally, complete the task that was created due to the timer
+        task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
+        taskService.complete(task.getId());
+
+        assertProcessEnded(procId);
+    }
+
+    @Deployment(
+        resources = "org/activiti/engine/test/bpmn/event/timer/BoundaryTimerNonInterruptingEventTest.testTimerOnConcurrentSubprocess.bpmn20.xml"
+    )
+    public void testTimerOnConcurrentSubprocess2() {
+        String procId = runtimeService.startProcessInstanceByKey("testTimerOnConcurrentSubprocess").getId();
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(4);
+
+        Job timer = managementService.createTimerJobQuery().singleResult();
+        managementService.moveTimerToExecutableJob(timer.getId());
+        managementService.executeJob(timer.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(5);
+
+        Task task = taskService.createTaskQuery().taskDefinitionKey("sub1task1").singleResult();
+        taskService.complete(task.getId());
+        task = taskService.createTaskQuery().taskDefinitionKey("sub1task2").singleResult();
+        taskService.complete(task.getId());
+
+        // complete the task that was created due to the timer
+        task = taskService.createTaskQuery().taskDefinitionKey("timerFiredTask").singleResult();
+        taskService.complete(task.getId());
+
+        task = taskService.createTaskQuery().taskDefinitionKey("sub2task1").singleResult();
+        taskService.complete(task.getId());
+        task = taskService.createTaskQuery().taskDefinitionKey("sub2task2").singleResult();
+        taskService.complete(task.getId());
+        assertThat(taskService.createTaskQuery().count()).isEqualTo(0);
+
+        assertProcessEnded(procId);
+    }
+
+    private void moveByMinutes(int minutes) throws Exception {
+        processEngineConfiguration
+            .getClock()
+            .setCurrentTime(
+                new Date(processEngineConfiguration.getClock().getCurrentTime().getTime() + minutes * 60 * 1000)
+            );
+    }
 }

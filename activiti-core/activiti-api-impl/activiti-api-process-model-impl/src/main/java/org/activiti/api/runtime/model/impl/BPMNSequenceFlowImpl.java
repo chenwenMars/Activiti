@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.runtime.model.impl;
 
 import java.util.Objects;
-
 import org.activiti.api.process.model.BPMNSequenceFlow;
 
 public class BPMNSequenceFlowImpl extends BPMNElementImpl implements BPMNSequenceFlow {
@@ -29,12 +27,9 @@ public class BPMNSequenceFlowImpl extends BPMNElementImpl implements BPMNSequenc
     private String targetActivityName;
     private String targetActivityType;
 
-    public BPMNSequenceFlowImpl() {
-    }
+    public BPMNSequenceFlowImpl() {}
 
-    public BPMNSequenceFlowImpl(String elementId,
-                            String sourceActivityElementId,
-                            String targetActivityElementId) {
+    public BPMNSequenceFlowImpl(String elementId, String sourceActivityElementId, String targetActivityElementId) {
         this.setElementId(elementId);
         this.sourceActivityElementId = sourceActivityElementId;
         this.targetActivityElementId = targetActivityElementId;
@@ -85,7 +80,7 @@ public class BPMNSequenceFlowImpl extends BPMNElementImpl implements BPMNSequenc
     public void setTargetActivityType(String targetActivityType) {
         this.targetActivityType = targetActivityType;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -95,39 +90,45 @@ public class BPMNSequenceFlowImpl extends BPMNElementImpl implements BPMNSequenc
             return false;
         }
         BPMNSequenceFlowImpl that = (BPMNSequenceFlowImpl) o;
-        return Objects.equals(getElementId(),
-                              that.getElementId()) &&
-                Objects.equals(sourceActivityElementId,
-                               that.getSourceActivityElementId()) &&
-                Objects.equals(sourceActivityType,
-                               that.getSourceActivityType()) &&
-                Objects.equals(sourceActivityName,
-                               that.getSourceActivityName()) &&
-                Objects.equals(targetActivityElementId,
-                               that.getTargetActivityElementId()) &&
-                Objects.equals(targetActivityType,
-                                  that.getTargetActivityType()) &&
-                Objects.equals(targetActivityName,
-                                  that.getTargetActivityName());
+        return (
+            Objects.equals(getElementId(), that.getElementId()) &&
+            Objects.equals(sourceActivityElementId, that.getSourceActivityElementId()) &&
+            Objects.equals(sourceActivityType, that.getSourceActivityType()) &&
+            Objects.equals(sourceActivityName, that.getSourceActivityName()) &&
+            Objects.equals(targetActivityElementId, that.getTargetActivityElementId()) &&
+            Objects.equals(targetActivityType, that.getTargetActivityType()) &&
+            Objects.equals(targetActivityName, that.getTargetActivityName())
+        );
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(getElementId(),
-                            sourceActivityElementId,
-                            targetActivityElementId);
+        return Objects.hash(getElementId(), sourceActivityElementId, targetActivityElementId);
     }
 
     @Override
     public String toString() {
-        return "SequenceFlowImpl{" +
-                "sourceActivityElementId='" + sourceActivityElementId + '\'' +
-                ", sourceActivityName='" + sourceActivityName + '\'' +
-                ", sourceActivityType='" + sourceActivityType + '\'' +
-                ", targetActivityElementId='" + targetActivityElementId + '\'' +
-                ", targetActivityName='" + targetActivityName + '\'' +
-                ", targetActivityType='" + targetActivityType + '\'' +
-                '}';
+        return (
+            "SequenceFlowImpl{" +
+            "sourceActivityElementId='" +
+            sourceActivityElementId +
+            '\'' +
+            ", sourceActivityName='" +
+            sourceActivityName +
+            '\'' +
+            ", sourceActivityType='" +
+            sourceActivityType +
+            '\'' +
+            ", targetActivityElementId='" +
+            targetActivityElementId +
+            '\'' +
+            ", targetActivityName='" +
+            targetActivityName +
+            '\'' +
+            ", targetActivityType='" +
+            targetActivityType +
+            '\'' +
+            '}'
+        );
     }
 }

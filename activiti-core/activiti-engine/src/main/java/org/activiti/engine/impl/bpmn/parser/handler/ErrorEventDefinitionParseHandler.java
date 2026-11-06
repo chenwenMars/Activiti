@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,14 +26,16 @@ import org.activiti.engine.impl.bpmn.parser.BpmnParse;
  */
 public class ErrorEventDefinitionParseHandler extends AbstractBpmnParseHandler<ErrorEventDefinition> {
 
-  public Class<? extends BaseElement> getHandledType() {
-    return ErrorEventDefinition.class;
-  }
-
-  protected void executeParse(BpmnParse bpmnParse, ErrorEventDefinition eventDefinition) {
-    if (bpmnParse.getCurrentFlowElement() instanceof BoundaryEvent) {
-      BoundaryEvent boundaryEvent = (BoundaryEvent) bpmnParse.getCurrentFlowElement();
-      boundaryEvent.setBehavior(bpmnParse.getActivityBehaviorFactory().createBoundaryEventActivityBehavior(boundaryEvent, true));
+    public Class<? extends BaseElement> getHandledType() {
+        return ErrorEventDefinition.class;
     }
-  }
+
+    protected void executeParse(BpmnParse bpmnParse, ErrorEventDefinition eventDefinition) {
+        if (bpmnParse.getCurrentFlowElement() instanceof BoundaryEvent) {
+            BoundaryEvent boundaryEvent = (BoundaryEvent) bpmnParse.getCurrentFlowElement();
+            boundaryEvent.setBehavior(
+                bpmnParse.getActivityBehaviorFactory().createBoundaryEventActivityBehavior(boundaryEvent, true)
+            );
+        }
+    }
 }

@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -11,6 +14,8 @@
  * limitations under the License.
  */
 package org.activiti.engine.test.api.event;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.delegate.event.ActivitiEvent;
 import org.activiti.engine.delegate.event.ActivitiEventListener;
@@ -23,90 +28,113 @@ import org.activiti.engine.test.Deployment;
 
 /**
  * Test case for all {@link ActivitiEventListener}s that throw a message BPMN event when an {@link ActivitiEvent} has been dispatched.
- * 
+ *
 
  */
 public class MessageThrowingEventListenerTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testThrowMessage() throws Exception {
-    MessageThrowingEventListener listener = null;
-    try {
-      listener = new MessageThrowingEventListener();
-      listener.setMessageName("Message");
+    @Deployment
+    public void testThrowMessage() throws Exception {
+        MessageThrowingEventListener listener = null;
+        try {
+            listener = new MessageThrowingEventListener();
+            listener.setMessageName("Message");
 
-      processEngineConfiguration.getEventDispatcher().addEventListener(listener, ActivitiEventType.TASK_ASSIGNED);
+            processEngineConfiguration.getEventDispatcher().addEventListener(listener, ActivitiEventType.TASK_ASSIGNED);
 
-      ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testMessage");
-      assertNotNull(processInstance);
+            ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testMessage");
+            assertThat(processInstance).isNotNull();
 
-      // Fetch the task and re-assig it to trigger the event-listener
-      Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-      assertNotNull(task);
-      taskService.setAssignee(task.getId(), "kermit");
+            // Fetch the task and re-assig it to trigger the event-listener
+            Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
+            assertThat(task).isNotNull();
+            taskService.setAssignee(task.getId(), "kermit");
 
-      // Boundary-event should have been messaged and a new task should be
-      // available, on top of the already
-      // existing one, since the cancelActivity='false'
-      task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("subTask").singleResult();
-      assertNotNull(task);
-      assertEquals("kermit", task.getAssignee());
+            // Boundary-event should have been messaged and a new task should be
+            // available, on top of the already
+            // existing one, since the cancelActivity='false'
+            task = taskService
+                .createTaskQuery()
+                .processInstanceId(processInstance.getId())
+                .taskDefinitionKey("subTask")
+                .singleResult();
+            assertThat(task).isNotNull();
+            assertThat(task.getAssignee()).isEqualTo("kermit");
 
-      Task boundaryTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("boundaryTask").singleResult();
-      assertNotNull(boundaryTask);
-
-    } finally {
-      processEngineConfiguration.getEventDispatcher().removeEventListener(listener);
+            Task boundaryTask = taskService
+                .createTaskQuery()
+                .processInstanceId(processInstance.getId())
+                .taskDefinitionKey("boundaryTask")
+                .singleResult();
+            assertThat(boundaryTask).isNotNull();
+        } finally {
+            processEngineConfiguration.getEventDispatcher().removeEventListener(listener);
+        }
     }
-  }
 
-  @Deployment
-  public void testThrowMessageDefinedInProcessDefinition() throws Exception {
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testMessage");
-    assertNotNull(processInstance);
+    @Deployment
+    public void testThrowMessageDefinedInProcessDefinition() throws Exception {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testMessage");
+        assertThat(processInstance).isNotNull();
 
-    // Fetch the task and re-assign it to trigger the event-listener
-    Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-    assertNotNull(task);
-    taskService.setAssignee(task.getId(), "kermit");
+        // Fetch the task and re-assign it to trigger the event-listener
+        Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
+        assertThat(task).isNotNull();
+        taskService.setAssignee(task.getId(), "kermit");
 
-    // Boundary-event should have been messaged and a new task should be available, on top of the already
-    // existing one, since the cancelActivity='false'
-    task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("subTask").singleResult();
-    assertNotNull(task);
-    assertEquals("kermit", task.getAssignee());
+        // Boundary-event should have been messaged and a new task should be available, on top of the already
+        // existing one, since the cancelActivity='false'
+        task = taskService
+            .createTaskQuery()
+            .processInstanceId(processInstance.getId())
+            .taskDefinitionKey("subTask")
+            .singleResult();
+        assertThat(task).isNotNull();
+        assertThat(task.getAssignee()).isEqualTo("kermit");
 
-    Task boundaryTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("boundaryTask").singleResult();
-    assertNotNull(boundaryTask);
-  }
-
-  @Deployment
-  public void testThrowMessageInterrupting() throws Exception {
-    MessageThrowingEventListener listener = null;
-    try {
-      listener = new MessageThrowingEventListener();
-      listener.setMessageName("Message");
-
-      processEngineConfiguration.getEventDispatcher().addEventListener(listener, ActivitiEventType.TASK_ASSIGNED);
-
-      ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testMessage");
-      assertNotNull(processInstance);
-
-      // Fetch the task and re-assig it to trigger the event-listener
-      Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-      assertNotNull(task);
-      taskService.setAssignee(task.getId(), "kermit");
-
-      // Boundary-event should have been messaged and a new task should be
-      // available, the already
-      // existing one should be removed, since the cancelActivity='true'
-      task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("subTask").singleResult();
-      assertNull(task);
-
-      Task boundaryTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("boundaryTask").singleResult();
-      assertNotNull(boundaryTask);
-    } finally {
-      processEngineConfiguration.getEventDispatcher().removeEventListener(listener);
+        Task boundaryTask = taskService
+            .createTaskQuery()
+            .processInstanceId(processInstance.getId())
+            .taskDefinitionKey("boundaryTask")
+            .singleResult();
+        assertThat(boundaryTask).isNotNull();
     }
-  }
+
+    @Deployment
+    public void testThrowMessageInterrupting() throws Exception {
+        MessageThrowingEventListener listener = null;
+        try {
+            listener = new MessageThrowingEventListener();
+            listener.setMessageName("Message");
+
+            processEngineConfiguration.getEventDispatcher().addEventListener(listener, ActivitiEventType.TASK_ASSIGNED);
+
+            ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testMessage");
+            assertThat(processInstance).isNotNull();
+
+            // Fetch the task and re-assig it to trigger the event-listener
+            Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
+            assertThat(task).isNotNull();
+            taskService.setAssignee(task.getId(), "kermit");
+
+            // Boundary-event should have been messaged and a new task should be
+            // available, the already
+            // existing one should be removed, since the cancelActivity='true'
+            task = taskService
+                .createTaskQuery()
+                .processInstanceId(processInstance.getId())
+                .taskDefinitionKey("subTask")
+                .singleResult();
+            assertThat(task).isNull();
+
+            Task boundaryTask = taskService
+                .createTaskQuery()
+                .processInstanceId(processInstance.getId())
+                .taskDefinitionKey("boundaryTask")
+                .singleResult();
+            assertThat(boundaryTask).isNotNull();
+        } finally {
+            processEngineConfiguration.getEventDispatcher().removeEventListener(listener);
+        }
+    }
 }

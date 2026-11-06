@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +18,6 @@ package org.activiti.engine.impl.asyncexecutor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.activiti.engine.impl.persistence.entity.JobEntity;
 
 /**
@@ -23,21 +25,21 @@ import org.activiti.engine.impl.persistence.entity.JobEntity;
  */
 public class AcquiredJobEntities {
 
-  protected Map<String, JobEntity> acquiredJobs = new HashMap<String, JobEntity>();
+    protected Map<String, JobEntity> acquiredJobs = new HashMap<String, JobEntity>();
 
-  public void addJob(JobEntity job) {
-    acquiredJobs.put(job.getId(), job);
-  }
+    public void addJob(JobEntity job) {
+        acquiredJobs.put(job.getId(), job);
+    }
 
-  public Collection<JobEntity> getJobs() {
-    return acquiredJobs.values();
-  }
+    public Collection<JobEntity> getJobs() {
+        return acquiredJobs.values();
+    }
 
-  public boolean contains(String jobId) {
-    return acquiredJobs.containsKey(jobId);
-  }
+    public boolean contains(String jobId) {
+        return acquiredJobs.containsKey(jobId);
+    }
 
-  public int size() {
-    return acquiredJobs.size();
-  }
+    public int size() {
+        return acquiredJobs.size();
+    }
 }

@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,6 +15,8 @@
  */
 package org.activiti.engine.test.api.task;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.activiti.engine.impl.test.PluggableActivitiTestCase;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -19,50 +24,67 @@ import org.activiti.engine.test.Deployment;
 
 public class TaskBatchDeleteTest extends PluggableActivitiTestCase {
 
-  /**
-   * Validating fix for ACT-2070
-   */
-  @Deployment
-  public void testDeleteTaskWithChildren() throws Exception {
+    /**
+     * Validating fix for ACT-2070
+     */
+    @Deployment
+    public void testDeleteTaskWithChildren() throws Exception {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testBatchDeleteOfTask");
+        assertThat(processInstance).isNotNull();
+        assertThat(processInstance.isEnded()).isFalse();
 
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testBatchDeleteOfTask");
-    assertNotNull(processInstance);
-    assertFalse(processInstance.isEnded());
+        // Get first task and finish. This should destroy the scope and trigger
+        // some deletes, including:
+        // Task 1, Identity link pointing to task 1, Task 2
+        // The task deletes shouldn't be batched in this case, keeping the
+        // related entity delete order
+        Task firstTask = taskService
+            .createTaskQuery()
+            .processInstanceId(processInstance.getId())
+            .taskDefinitionKey("taskOne")
+            .singleResult();
+        assertThat(firstTask).isNotNull();
 
-    // Get first task and finish. This should destroy the scope and trigger
-    // some deletes, including:
-    // Task 1, Identity link pointing to task 1, Task 2
-    // The task deletes shouldn't be batched in this case, keeping the
-    // related entity delete order
-    Task firstTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("taskOne").singleResult();
-    assertNotNull(firstTask);
+        taskService.complete(firstTask.getId());
 
-    taskService.complete(firstTask.getId());
+        // Process should have ended fine
+        processInstance = runtimeService
+            .createProcessInstanceQuery()
+            .processInstanceId(processInstance.getId())
+            .singleResult();
+        assertThat(processInstance).isNull();
+    }
 
-    // Process should have ended fine
-    processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstance.getId()).singleResult();
-    assertNull(processInstance);
+    @Deployment
+    public void testDeleteCancelledMultiInstanceTasks() throws Exception {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testBatchDeleteOfTask");
+        assertThat(processInstance).isNotNull();
+        assertThat(processInstance.isEnded()).isFalse();
 
-  }
+        Task lastTask = taskService
+            .createTaskQuery()
+            .processInstanceId(processInstance.getId())
+            .taskDefinitionKey("multiInstance")
+            .listPage(4, 1)
+            .getFirst();
 
-  @Deployment
-  public void testDeleteCancelledMultiInstanceTasks() throws Exception {
+        taskService.addCandidateGroup(lastTask.getId(), "sales");
 
-    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("testBatchDeleteOfTask");
-    assertNotNull(processInstance);
-    assertFalse(processInstance.isEnded());
+        Task firstTask = taskService
+            .createTaskQuery()
+            .processInstanceId(processInstance.getId())
+            .taskDefinitionKey("multiInstance")
+            .listPage(0, 1)
+            .getFirst();
+        assertThat(firstTask).isNotNull();
 
-    Task lastTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("multiInstance").listPage(4, 1).get(0);
+        taskService.complete(firstTask.getId());
 
-    taskService.addCandidateGroup(lastTask.getId(), "sales");
-
-    Task firstTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskDefinitionKey("multiInstance").listPage(0, 1).get(0);
-    assertNotNull(firstTask);
-
-    taskService.complete(firstTask.getId());
-
-    // Process should have ended fine
-    processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(processInstance.getId()).singleResult();
-    assertNull(processInstance);
-  }
+        // Process should have ended fine
+        processInstance = runtimeService
+            .createProcessInstanceQuery()
+            .processInstanceId(processInstance.getId())
+            .singleResult();
+        assertThat(processInstance).isNull();
+    }
 }

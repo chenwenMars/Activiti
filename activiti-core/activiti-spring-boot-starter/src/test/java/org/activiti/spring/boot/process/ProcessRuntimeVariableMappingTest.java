@@ -1,136 +1,170 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.spring.boot.process;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.process.model.ProcessInstance;
+import org.activiti.api.process.model.builders.ProcessPayloadBuilder;
+import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.engine.ActivitiException;
+import org.activiti.spring.boot.security.util.SecurityUtil;
 import org.activiti.spring.boot.test.util.ProcessCleanUpUtil;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import tools.jackson.databind.json.JsonMapper;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@TestPropertySource(
-        locations = {"classpath:application.properties"})
+@TestPropertySource(locations = { "classpath:application.properties" })
 public class ProcessRuntimeVariableMappingTest {
 
     private static final String VARIABLE_MAPPING_PROCESS = "connectorVarMapping";
     private static final String VARIABLE_MAPPING_EXPRESSION_PROCESS = "connectorVarMappingExpression";
     private static final String OUTPUT_MAPPING_EXPRESSION_VARIABLE_PROCESS = "outputMappingExpVar";
     private static final String OUTPUT_MAPPING_EXPRESSION_VALUE_PROCESS = "outputMappingExpValue";
+    private static final String START_OUTPUT_MAPPING_PROCESS = "startOutputMapping";
 
     @Autowired
     private ProcessBaseRuntime processBaseRuntime;
 
     @Autowired
-    private ObjectMapper mapper;
+    private JsonMapper mapper;
 
     @Autowired
     private ProcessCleanUpUtil processCleanUpUtil;
 
-    @Before
+    @Autowired
+    private ProcessRuntime processRuntime;
+
+    @Autowired
+    private SecurityUtil securityUtil;
+
+    @BeforeEach
     public void setUp() {
         processCleanUpUtil.cleanUpWithAdmin();
     }
 
     @Test
     public void shouldMapVariables() {
-        ProcessInstance processInstance = processBaseRuntime.startProcessWithProcessDefinitionKey(VARIABLE_MAPPING_PROCESS);
+        ProcessInstance processInstance = processBaseRuntime.startProcessWithProcessDefinitionKey(
+            VARIABLE_MAPPING_PROCESS
+        );
 
         List<VariableInstance> variables = processBaseRuntime.getProcessVariablesByProcessId(processInstance.getId());
 
-        assertThat(variables).extracting(VariableInstance::getName,
-                                         VariableInstance::getValue)
-                             .containsOnly(
-                                           tuple("name", "outName"),
-                                           tuple("age", 35),
-                                           tuple("input_unmapped_variable_with_matching_name", "inTest"),
-                                           tuple("input_unmapped_variable_with_non_matching_connector_input_name",
-                                                 "inTest"),
-                                           tuple("nickName", "testName"),
-                                           tuple("out_unmapped_variable_matching_name", "default"),
-                                           tuple("output_unmapped_variable_with_non_matching_connector_output_name",
-                                                 "default"));
-
+        assertThat(variables)
+            .extracting(VariableInstance::getName, VariableInstance::getValue)
+            .containsOnly(
+                tuple("name", "outName"),
+                tuple("age", 35),
+                tuple("input_unmapped_variable_with_matching_name", "inTest"),
+                tuple("input_unmapped_variable_with_non_matching_connector_input_name", "inTest"),
+                tuple("nickName", "testName"),
+                tuple("out_unmapped_variable_matching_name", "default"),
+                tuple("output_unmapped_variable_with_non_matching_connector_output_name", "default")
+            );
     }
 
     @Test
     public void should_resolveExpression_when_expressionIsInInputMappingValueOrInMappedProperty() {
-        ProcessInstance processInstance = processBaseRuntime.startProcessWithProcessDefinitionKey(VARIABLE_MAPPING_EXPRESSION_PROCESS);
+        ProcessInstance processInstance = processBaseRuntime.startProcessWithProcessDefinitionKey(
+            VARIABLE_MAPPING_EXPRESSION_PROCESS
+        );
 
         List<VariableInstance> variables = processBaseRuntime.getProcessVariablesByProcessId(processInstance.getId());
 
-        String[] array = {"first", "${name}", "${surname}", "last"};
-        List<String> list = Arrays.asList(array);
+        String[] array = { "first", "John", "Doe", "last" };
+        List<String> list = asList(array);
 
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("age-in-months",
-                    "${age * 12}");
-        dataMap.put("full-name",
-                    "${name} ${surname}");
-        dataMap.put("demoString",
-                    "expressionResolved");
-        dataMap.put("list",
-                    list);
-        JsonNode data = mapper.convertValue(dataMap, JsonNode.class);
+        Map<String, Object> data = new HashMap<>();
+        data.put("age-in-months", 240);
+        data.put("full-name", "John Doe");
+        data.put("demoString", "expressionResolved");
+        data.put("list", list);
 
-        assertThat(variables).extracting(VariableInstance::getName,
-                                         VariableInstance::getValue)
-                             .containsOnly(
-                                           tuple("age", 30),
-                                           tuple("name", "outName"),
-                                           tuple("surname", "Doe"),
-                                           tuple("data", data),
-                                           tuple("user-msg",
-                                                 "Hello ${name.concat(' ').concat(surname)}, today is your ${age}th birthday! It means ${age * 365.25} days of life"),
-                                           tuple("input-unmapped-variable-with-matching-name", "${surname}"),
-                                           tuple("input-unmapped-variable-with-non-matching-connector-input-name",
-                                                 "inTestExpression"),
-                                           tuple("variableToResolve", "${name}"),
-                                           tuple("out-unmapped-variable-matching-name", "defaultExpression"),
-                                           tuple("output-unmapped-variable-with-non-matching-connector-output-name",
-                                                 "defaultExpression"),
-                                           tuple("resident", true));
-
+        assertThat(variables)
+            .extracting(VariableInstance::getName, VariableInstance::getValue)
+            .containsOnly(
+                tuple("age", 30),
+                tuple("name", "outName"),
+                tuple("surname", "Doe"),
+                tuple("data", data),
+                tuple("user-msg", "Hello John Doe, today is your 20th birthday! It means 7305.0 days of life"),
+                tuple("input-unmapped-variable-with-matching-name", "Doe"),
+                tuple("input-unmapped-variable-with-non-matching-connector-input-name", "inTestExpression"),
+                tuple("variableToResolve", "John"),
+                tuple("out-unmapped-variable-matching-name", "defaultExpression"),
+                tuple("output-unmapped-variable-with-non-matching-connector-output-name", "defaultExpression"),
+                tuple("resident", true)
+            );
     }
 
     @Test
     public void should_throwActivitiException_when_expressionIsInOutputMapping() {
+        Throwable throwable = catchThrowable(() ->
+            processBaseRuntime.startProcessWithProcessDefinitionKey(OUTPUT_MAPPING_EXPRESSION_VARIABLE_PROCESS)
+        );
 
-        Throwable throwable = catchThrowable(() -> processBaseRuntime.startProcessWithProcessDefinitionKey(OUTPUT_MAPPING_EXPRESSION_VARIABLE_PROCESS));
-
-        assertThat(throwable).isInstanceOf(ActivitiException.class);
-
-        assertThat(throwable.getMessage()).contains("Expressions are not allowed as variable values in the output mapping");
+        assertThat(throwable)
+            .isInstanceOf(ActivitiException.class)
+            .hasMessageContaining("Expressions are not allowed as variable values in the output mapping");
     }
 
     @Test
     public void should_resolveExpression_when_expressionIsInOutputMappingValueOrInMappedProperty() {
-        ProcessInstance processInstance = processBaseRuntime.startProcessWithProcessDefinitionKey(OUTPUT_MAPPING_EXPRESSION_VALUE_PROCESS);
+        ProcessInstance processInstance = processBaseRuntime.startProcessWithProcessDefinitionKey(
+            OUTPUT_MAPPING_EXPRESSION_VALUE_PROCESS
+        );
 
         List<VariableInstance> variables = processBaseRuntime.getProcessVariablesByProcessId(processInstance.getId());
 
-        assertThat(variables).extracting(VariableInstance::getName,
-                                         VariableInstance::getValue)
-                             .containsOnly(
-                                           tuple("name", "John"),
-                                           tuple("outVar", "Resolved expression: value-set-in-connector"),
-                                 tuple("outVarFromJsonExpression", "Tower of London"));
+        assertThat(variables)
+            .extracting(VariableInstance::getName, VariableInstance::getValue)
+            .containsOnly(
+                tuple("name", "John"),
+                tuple("outVar", "Resolved expression: value-set-in-connector"),
+                tuple("outVarFromJsonExpression", "Tower of London")
+            );
+    }
 
+    @Test
+    public void should_mapStartFormObjectPropertyToStringVariableWithSameName() {
+        securityUtil.logInAs("user");
+
+        ProcessInstance processInstance = processRuntime.start(
+            ProcessPayloadBuilder.start()
+                .withProcessDefinitionKey(START_OUTPUT_MAPPING_PROCESS)
+                .withVariable("approvalOutcome", Map.of("id", "approved", "name", "Approved"))
+                .build()
+        );
+
+        List<VariableInstance> variables = processBaseRuntime.getProcessVariablesByProcessId(processInstance.getId());
+
+        assertThat(variables)
+            .extracting(VariableInstance::getName, VariableInstance::getValue)
+            .containsOnly(tuple("approvalOutcome", "Approved"));
     }
 }

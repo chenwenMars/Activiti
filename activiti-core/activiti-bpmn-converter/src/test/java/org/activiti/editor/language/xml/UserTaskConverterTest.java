@@ -1,11 +1,23 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.editor.language.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-
 import org.activiti.bpmn.model.ActivitiListener;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowElement;
@@ -13,106 +25,109 @@ import org.activiti.bpmn.model.FormProperty;
 import org.activiti.bpmn.model.ImplementationType;
 import org.activiti.bpmn.model.UserTask;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class UserTaskConverterTest extends AbstractConverterTest {
 
-  @Test
-  public void convertXMLToModel() throws Exception {
-    BpmnModel bpmnModel = readXMLFile();
-    validateModel(bpmnModel);
-  }
+    @Test
+    public void convertXMLToModel() throws Exception {
+        BpmnModel bpmnModel = readXMLFile();
+        validateModel(bpmnModel);
+    }
 
-  @Test
-  public void convertModelToXML() throws Exception {
-    BpmnModel bpmnModel = readXMLFile();
-    BpmnModel parsedModel = exportAndReadXMLFile(bpmnModel);
-    validateModel(parsedModel);
-    deployProcess(parsedModel);
-  }
+    @Test
+    public void convertModelToXML() throws Exception {
+        BpmnModel bpmnModel = readXMLFile();
+        BpmnModel parsedModel = exportAndReadXMLFile(bpmnModel);
+        validateModel(parsedModel);
+        deployProcess(parsedModel);
+    }
 
-  protected String getResource() {
-    return "usertaskmodel.bpmn";
-  }
+    protected String getResource() {
+        return "usertaskmodel.bpmn";
+    }
 
-  private void validateModel(BpmnModel model) {
-    FlowElement flowElement = model.getMainProcess().getFlowElement("usertask");
-    assertNotNull(flowElement);
-    assertTrue(flowElement instanceof UserTask);
-    assertEquals("usertask", flowElement.getId());
-    UserTask userTask = (UserTask) flowElement;
-    assertEquals("usertask", userTask.getId());
-    assertEquals("User task", userTask.getName());
-    assertEquals("Test Category", userTask.getCategory());
-    assertEquals("testKey", userTask.getFormKey());
-    assertEquals("40", userTask.getPriority());
-    assertEquals("2012-11-01", userTask.getDueDate());
-    
-    assertEquals("customCalendarName", userTask.getBusinessCalendarName());
+    private void validateModel(BpmnModel model) {
+        FlowElement flowElement = model.getMainProcess().getFlowElement("usertask");
+        assertThat(flowElement).isNotNull();
+        assertThat(flowElement).isInstanceOf(UserTask.class);
+        assertThat(flowElement.getId()).isEqualTo("usertask");
+        UserTask userTask = (UserTask) flowElement;
+        assertThat(userTask.getId()).isEqualTo("usertask");
+        assertThat(userTask.getName()).isEqualTo("User task");
+        assertThat(userTask.getCategory()).isEqualTo("Test Category");
+        assertThat(userTask.getFormKey()).isEqualTo("testKey");
+        assertThat(userTask.getPriority()).isEqualTo("40");
+        assertThat(userTask.getDueDate()).isEqualTo("2012-11-01");
 
-    assertEquals("kermit", userTask.getAssignee());
-    assertEquals(2, userTask.getCandidateUsers().size());
-    assertTrue(userTask.getCandidateUsers().contains("kermit"));
-    assertTrue(userTask.getCandidateUsers().contains("fozzie"));
-    assertEquals(2, userTask.getCandidateGroups().size());
-    assertTrue(userTask.getCandidateGroups().contains("management"));
-    assertTrue(userTask.getCandidateGroups().contains("sales"));
+        assertThat(userTask.getBusinessCalendarName()).isEqualTo("customCalendarName");
 
-    assertEquals(1, userTask.getCustomUserIdentityLinks().size());
-    assertEquals(2, userTask.getCustomGroupIdentityLinks().size());
-    assertTrue(userTask.getCustomUserIdentityLinks().get("businessAdministrator").contains("kermit"));
-    assertTrue(userTask.getCustomGroupIdentityLinks().get("manager").contains("management"));
-    assertTrue(userTask.getCustomGroupIdentityLinks().get("businessAdministrator").contains("management"));
+        assertThat(userTask.getAssignee()).isEqualTo("kermit");
+        assertThat(userTask.getCandidateUsers()).hasSize(2);
+        assertThat(userTask.getCandidateUsers().contains("kermit")).isTrue();
+        assertThat(userTask.getCandidateUsers().contains("fozzie")).isTrue();
+        assertThat(userTask.getCandidateGroups()).hasSize(2);
+        assertThat(userTask.getCandidateGroups().contains("management")).isTrue();
+        assertThat(userTask.getCandidateGroups().contains("sales")).isTrue();
 
-    List<FormProperty> formProperties = userTask.getFormProperties();
-    assertEquals(3, formProperties.size());
-    FormProperty formProperty = formProperties.get(0);
-    assertEquals("formId", formProperty.getId());
-    assertEquals("formName", formProperty.getName());
-    assertEquals("string", formProperty.getType());
-    assertEquals("variable", formProperty.getVariable());
-    assertEquals("${expression}", formProperty.getExpression());
-    formProperty = formProperties.get(1);
-    assertEquals("formId2", formProperty.getId());
-    assertEquals("anotherName", formProperty.getName());
-    assertEquals("long", formProperty.getType());
-    assertTrue(StringUtils.isEmpty(formProperty.getVariable()));
-    assertTrue(StringUtils.isEmpty(formProperty.getExpression()));
-    formProperty = formProperties.get(2);
-    assertEquals("formId3", formProperty.getId());
-    assertEquals("enumName", formProperty.getName());
-    assertEquals("enum", formProperty.getType());
-    assertTrue(StringUtils.isEmpty(formProperty.getVariable()));
-    assertTrue(StringUtils.isEmpty(formProperty.getExpression()));
-    assertEquals(2, formProperty.getFormValues().size());
+        assertThat(userTask.getCustomUserIdentityLinks()).hasSize(1);
+        assertThat(userTask.getCustomGroupIdentityLinks()).hasSize(2);
+        assertThat(userTask.getCustomUserIdentityLinks().get("businessAdministrator").contains("kermit")).isTrue();
+        assertThat(userTask.getCustomGroupIdentityLinks().get("manager").contains("management")).isTrue();
+        assertThat(userTask.getCustomGroupIdentityLinks().get("businessAdministrator").contains("management")).isTrue();
 
-    List<ActivitiListener> listeners = userTask.getTaskListeners();
-    assertEquals(3, listeners.size());
-    ActivitiListener listener = listeners.get(0);
-    assertTrue(ImplementationType.IMPLEMENTATION_TYPE_CLASS.equals(listener.getImplementationType()));
-    assertEquals("org.test.TestClass", listener.getImplementation());
-    assertEquals("create", listener.getEvent());
-    assertEquals("before-commit", listener.getOnTransaction());
-    assertEquals("org.test.TestResolverClass", listener.getCustomPropertiesResolverImplementation());
-    listener = listeners.get(1);
-    assertTrue(ImplementationType.IMPLEMENTATION_TYPE_EXPRESSION.equals(listener.getImplementationType()));
-    assertEquals("${someExpression}", listener.getImplementation());
-    assertEquals("assignment", listener.getEvent());
-    assertEquals("committed", listener.getOnTransaction());
-    assertEquals("${testResolverExpression}", listener.getCustomPropertiesResolverImplementation());
-    listener = listeners.get(2);
-    assertTrue(ImplementationType.IMPLEMENTATION_TYPE_DELEGATEEXPRESSION.equals(listener.getImplementationType()));
-    assertEquals("${someDelegateExpression}", listener.getImplementation());
-    assertEquals("complete", listener.getEvent());
-    assertEquals("rolled-back", listener.getOnTransaction());
-    assertEquals("${delegateResolverExpression}", listener.getCustomPropertiesResolverImplementation());
+        List<FormProperty> formProperties = userTask.getFormProperties();
+        assertThat(formProperties).hasSize(3);
+        FormProperty formProperty = formProperties.getFirst();
+        assertThat(formProperty.getId()).isEqualTo("formId");
+        assertThat(formProperty.getName()).isEqualTo("formName");
+        assertThat(formProperty.getType()).isEqualTo("string");
+        assertThat(formProperty.getVariable()).isEqualTo("variable");
+        assertThat(formProperty.getExpression()).isEqualTo("${expression}");
+        formProperty = formProperties.get(1);
+        assertThat(formProperty.getId()).isEqualTo("formId2");
+        assertThat(formProperty.getName()).isEqualTo("anotherName");
+        assertThat(formProperty.getType()).isEqualTo("long");
+        assertThat(StringUtils.isEmpty(formProperty.getVariable())).isTrue();
+        assertThat(StringUtils.isEmpty(formProperty.getExpression())).isTrue();
+        formProperty = formProperties.get(2);
+        assertThat(formProperty.getId()).isEqualTo("formId3");
+        assertThat(formProperty.getName()).isEqualTo("enumName");
+        assertThat(formProperty.getType()).isEqualTo("enum");
+        assertThat(StringUtils.isEmpty(formProperty.getVariable())).isTrue();
+        assertThat(StringUtils.isEmpty(formProperty.getExpression())).isTrue();
+        assertThat(formProperty.getFormValues()).hasSize(2);
 
-    List<ActivitiListener> executionListeners = userTask.getExecutionListeners();
-    assertEquals(1, executionListeners.size());
-    ActivitiListener executionListener = executionListeners.get(0);
-    assertEquals("end", executionListener.getEvent());
-    assertEquals("before-commit", executionListener.getOnTransaction());
-    assertEquals("org.test.TestResolverClass", executionListener.getCustomPropertiesResolverImplementation());
+        List<ActivitiListener> listeners = userTask.getTaskListeners();
+        assertThat(listeners).hasSize(3);
+        ActivitiListener listener = listeners.getFirst();
+        assertThat(ImplementationType.IMPLEMENTATION_TYPE_CLASS.equals(listener.getImplementationType())).isTrue();
+        assertThat(listener.getImplementation()).isEqualTo("org.test.TestClass");
+        assertThat(listener.getEvent()).isEqualTo("create");
+        assertThat(listener.getOnTransaction()).isEqualTo("before-commit");
+        assertThat(listener.getCustomPropertiesResolverImplementation()).isEqualTo("org.test.TestResolverClass");
+        listener = listeners.get(1);
+        assertThat(ImplementationType.IMPLEMENTATION_TYPE_EXPRESSION.equals(listener.getImplementationType())).isTrue();
+        assertThat(listener.getImplementation()).isEqualTo("${someExpression}");
+        assertThat(listener.getEvent()).isEqualTo("assignment");
+        assertThat(listener.getOnTransaction()).isEqualTo("committed");
+        assertThat(listener.getCustomPropertiesResolverImplementation()).isEqualTo("${testResolverExpression}");
+        listener = listeners.get(2);
+        assertThat(
+            ImplementationType.IMPLEMENTATION_TYPE_DELEGATEEXPRESSION.equals(listener.getImplementationType())
+        ).isTrue();
+        assertThat(listener.getImplementation()).isEqualTo("${someDelegateExpression}");
+        assertThat(listener.getEvent()).isEqualTo("complete");
+        assertThat(listener.getOnTransaction()).isEqualTo("rolled-back");
+        assertThat(listener.getCustomPropertiesResolverImplementation()).isEqualTo("${delegateResolverExpression}");
 
-  }
+        List<ActivitiListener> executionListeners = userTask.getExecutionListeners();
+        assertThat(executionListeners).hasSize(1);
+        ActivitiListener executionListener = executionListeners.getFirst();
+        assertThat(executionListener.getEvent()).isEqualTo("end");
+        assertThat(executionListener.getOnTransaction()).isEqualTo("before-commit");
+        assertThat(executionListener.getCustomPropertiesResolverImplementation()).isEqualTo(
+            "org.test.TestResolverClass"
+        );
+    }
 }

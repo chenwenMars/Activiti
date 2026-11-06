@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,73 +21,80 @@ import org.activiti.engine.delegate.event.ActivitiEventType;
 
 /**
  * Base class for all {@link ActivitiEvent} implementations.
- * 
+ *
 
  */
 public class ActivitiEventImpl implements ActivitiEvent {
 
-  protected ActivitiEventType type;
-  protected String executionId;
-  protected String processInstanceId;
-  protected String processDefinitionId;
-  private String reason;
+    protected ActivitiEventType type;
+    protected String executionId;
+    protected String processInstanceId;
+    protected String processDefinitionId;
+    private String reason;
+    private String actor;
+    protected String commandId;
 
-  /**
-   * Creates a new event implementation, not part of an execution context.
-   */
-  public ActivitiEventImpl(ActivitiEventType type) {
-    this(type, null, null, null);
-  }
-
-  /**
-   * Creates a new event implementation, part of an execution context.
-   */
-  public ActivitiEventImpl(ActivitiEventType type, String executionId, String processInstanceId, String processDefinitionId) {
-    if (type == null) {
-      throw new ActivitiIllegalArgumentException("type is null");
+    /**
+     * Creates a new event implementation, not part of an execution context.
+     */
+    public ActivitiEventImpl(ActivitiEventType type) {
+        this(type, null, null, null);
     }
-    this.type = type;
-    this.executionId = executionId;
-    this.processInstanceId = processInstanceId;
-    this.processDefinitionId = processDefinitionId;
-  }
 
-  public ActivitiEventType getType() {
-    return type;
-  }
+    /**
+     * Creates a new event implementation, part of an execution context.
+     */
+    public ActivitiEventImpl(
+        ActivitiEventType type,
+        String executionId,
+        String processInstanceId,
+        String processDefinitionId
+    ) {
+        if (type == null) {
+            throw new ActivitiIllegalArgumentException("type is null");
+        }
+        this.type = type;
+        this.executionId = executionId;
+        this.processInstanceId = processInstanceId;
+        this.processDefinitionId = processDefinitionId;
+    }
 
-  public void setType(ActivitiEventType type) {
-    this.type = type;
-  }
+    public ActivitiEventType getType() {
+        return type;
+    }
 
-  public String getExecutionId() {
-    return executionId;
-  }
+    public void setType(ActivitiEventType type) {
+        this.type = type;
+    }
 
-  public void setExecutionId(String executionId) {
-    this.executionId = executionId;
-  }
+    public String getExecutionId() {
+        return executionId;
+    }
 
-  public String getProcessDefinitionId() {
-    return processDefinitionId;
-  }
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
 
-  public void setProcessDefinitionId(String processDefinitionId) {
-    this.processDefinitionId = processDefinitionId;
-  }
+    public String getProcessDefinitionId() {
+        return processDefinitionId;
+    }
 
-  public String getProcessInstanceId() {
-    return processInstanceId;
-  }
+    public void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
 
-  public void setProcessInstanceId(String processInstanceId) {
-    this.processInstanceId = processInstanceId;
-  }
+    public String getProcessInstanceId() {
+        return processInstanceId;
+    }
 
-  @Override
-  public String toString() {
-    return getClass() + " - " + type;
-  }
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
+    @Override
+    public String toString() {
+        return getClass() + " - " + type;
+    }
 
     public String getReason() {
         return reason;
@@ -92,5 +102,22 @@ public class ActivitiEventImpl implements ActivitiEvent {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public String getActor() {
+        return actor;
+    }
+
+    public void setActor(String actor) {
+        this.actor = actor;
+    }
+
+    @Override
+    public String getCommandId() {
+        return commandId;
+    }
+
+    public void setCommandId(String commandId) {
+        this.commandId = commandId;
     }
 }

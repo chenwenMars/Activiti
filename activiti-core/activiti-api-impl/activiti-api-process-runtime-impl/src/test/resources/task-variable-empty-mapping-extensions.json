@@ -1,5 +1,5 @@
 {
-  "id":"taskVariableEmptyMapping",
+  "id": "taskVariableEmptyMapping",
   "extensions": {
     "Process_taskVariableEmptyMapping": {
       "properties": {
@@ -25,12 +25,7 @@
           "value": "outputmap1Value"
         }
       },
-      "mappings": {
-        "simpleTask": {
-          "inputs": {},
-          "outputs": {}
-        }
-      }
+      "mappings": {}
     }
   }
 }

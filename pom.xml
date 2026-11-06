@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.activiti.build</groupId>
+  <groupId>org.activiti</groupId>
   <artifactId>activiti-parent</artifactId>
-  <version>7.1.0-SNAPSHOT</version>
+  <version>9.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Activiti :: Parent</name>
   <description>${project.name}</description>
   <url>https://www.activiti.org</url>
   <inceptionYear>2010</inceptionYear>
   <organization>
-    <name>Alfresco</name>
-    <url>http://www.alfresco.com</url>
+    <name>Hyland Software, Inc. and its affiliates</name>
+    <url>https://www.hyland.com</url>
   </organization>
   <licenses>
     <license>
-      <name>Apache v2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
   <developers>
@@ -30,32 +31,32 @@
     <developer>
       <id>balsarori</id>
       <name>Bassam Al-Sarori</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>daisuke-yoshimoto</id>
       <name>Daisuke Yoshimoto</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>erdemedeiros</id>
       <name>Elias De Medeiros</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>eromano</id>
       <name>Eugenio Romano</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>ffazzini</id>
       <name>Francesco Fazzini</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>igdianov</id>
@@ -66,26 +67,26 @@
     <developer>
       <id>jesty</id>
       <name>Davide Cerbo</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>magemello</id>
       <name>Mario Romano</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>mauriziovitale</id>
       <name>Maurizio Vitale</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>miguelruizdev</id>
       <name>Miguel Ruiz</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>mmartinadanx</id>
@@ -96,8 +97,8 @@
     <developer>
       <id>mteodori</id>
       <name>Marcello Teodori</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>nazarethjim</id>
@@ -114,20 +115,20 @@
     <developer>
       <id>popovicsandras</id>
       <name>András Popovics</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>robfrank</id>
       <name>Roberto Franchini</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>zoltanpalfi</id>
       <name>Zoltan Palfi</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>CTI777</id>
@@ -138,14 +139,14 @@
     <developer>
       <id>EquinoxBlack</id>
       <name>Rodion Savchuk</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
     <developer>
       <id>VitoAlbano</id>
       <name>Vito Albano</name>
-      <organization>Alfresco</organization>
-      <organizationUrl>http://alfresco.com</organizationUrl>
+      <organization>${project.organization.name}</organization>
+      <organizationUrl>${project.organization.url}</organizationUrl>
     </developer>
   </developers>
   <modules>
@@ -157,81 +158,111 @@
     <module>activiti-examples</module>
   </modules>
   <scm>
-    <url>http://github.com/${project.scm.organisation}/${project.scm.repository}</url>
-    <connection>scm:git:git://github.com/${project.scm.organisation}/${project.scm.repository}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/${project.scm.organisation}/${project.scm.repository}.git</developerConnection>
+    <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
+    <connection>
+      scm:git:git://github.com/${project.scm.organization}/${project.scm.repository}.git
+    </connection>
+    <developerConnection>
+      scm:git:ssh://git@github.com/${project.scm.organization}/${project.scm.repository}.git
+    </developerConnection>
     <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/${project.scm.organisation}/Activiti/issues</url>
+    <url>https://github.com/${project.scm.organization}/Activiti/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Travis</system>
-    <url>https://travis-ci.com/${project.scm.organisation}/${project.scm.repository}</url>
+    <url>https://travis-ci.com/${project.scm.organization}/${project.scm.repository}</url>
   </ciManagement>
   <distributionManagement>
     <site>
       <id>${project.scm.repository}-site</id>
-      <url>https://${project.scm.organisation}.github.io/${project.scm.repository}</url>
+      <url>https://${project.scm.organization}.github.io/${project.scm.repository}</url>
     </site>
   </distributionManagement>
   <properties>
     <!-- configuration properties -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <project.scm.organisation>Activiti</project.scm.organisation>
+    <project.scm.organization>Activiti</project.scm.organization>
     <project.scm.repository>Activiti</project.scm.repository>
-    <project.year>2020</project.year>
+    <project.year>2026</project.year>
 
-    <java.release>8</java.release>
-    <java.version>1.${java.release}</java.version>
+    <java.release>${java.version}</java.release>
+    <java.version>25</java.version>
+    <maven.compiler.release>${java.release}</maven.compiler.release>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
 
     <!-- versions -->
-    <asm.version>6.2</asm.version>
-    <assertj-assertions-generator-maven-plugin.version>2.0.0</assertj-assertions-generator-maven-plugin.version>
-    <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
-    <dependency-check-maven.version>5.3.0</dependency-check-maven.version>
-    <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
-    <extra-enforcer-rules.version>1.2</extra-enforcer-rules.version>
-    <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
-    <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-    <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
-    <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
-    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-    <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
-    <maven-jar-plugin.version>3.1.2</maven-jar-plugin.version>
-    <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
-    <maven-jxr-plugin.version>3.0.0</maven-jxr-plugin.version>
-    <maven-pmd-plugin.version>3.12.0</maven-pmd-plugin.version>
-    <maven-project-info-reports-plugin.version>3.0.0</maven-project-info-reports-plugin.version>
-    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-    <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
-    <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
-    <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-    <spring-boot.version>2.1.12.RELEASE</spring-boot.version>
-    <versions-maven-plugin.version>2.7</versions-maven-plugin.version>
-    <commons-io.version>2.6</commons-io.version>
-    <awaitility.version>3.0.0</awaitility.version>
+    <asm.version>9.11.1</asm.version>
+    <build-helper-maven-plugin.version>3.6.2</build-helper-maven-plugin.version>
+    <dependency-check-maven.version>13.0.0</dependency-check-maven.version>
+    <exec-maven-plugin.version>3.6.4</exec-maven-plugin.version>
+    <extra-enforcer-rules.version>1.12.1</extra-enforcer-rules.version>
+    <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
+    <license-maven-plugin.version>5.1.2</license-maven-plugin.version>
+    <third-party-license-maven-plugin.version>2.7.1</third-party-license-maven-plugin.version>
+    <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
+    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <checkstyle.version>14.3.0</checkstyle.version>
+    <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+    <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
+    <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
+    <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
+    <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
+    <maven-failsafe-plugin.version>3.6.1</maven-failsafe-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+    <maven-install-plugin.version>3.2.0</maven-install-plugin.version>
+    <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-jxr-plugin.version>3.6.0</maven-jxr-plugin.version>
+    <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
+    <maven-project-info-reports-plugin.version>3.9.0</maven-project-info-reports-plugin.version>
+    <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
+    <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
+    <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+    <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
+    <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
+    <spring-boot.version>4.0.9</spring-boot.version>
+    <jakarta.el-api.version>6.0.1</jakarta.el-api.version>
+    <!-- AAE-44603 temporary security fix (CVE-2025-7962). -->
+    <sun-jakarta-mail.version>2.0.2</sun-jakarta-mail.version>
+    <versions-maven-plugin.version>2.23.0</versions-maven-plugin.version>
 
     <!-- configuration properties for tests -->
-    <generated-assertions-folder>${project.build.directory}/generated-test-sources/assertions</generated-assertions-folder>
+    <generated-assertions-folder>
+      ${project.build.directory}/generated-test-sources/assertions
+    </generated-assertions-folder>
     <generated-assertions-package>org.activiti.test</generated-assertions-package>
+    <mockito.agent.arg>-javaagent:"${org.mockito:mockito-core:jar}"</mockito.agent.arg>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.activiti.build</groupId>
+        <groupId>org.activiti</groupId>
         <artifactId>activiti-dependency-check</artifactId>
         <version>${project.version}</version>
         <type>xml</type>
         <classifier>suppression</classifier>
+      </dependency>
+      <!-- AAE-49313 / AAE-47589: Jackson BOM overrides have to precede spring-boot-dependencies. -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.22.4</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- AAE-49313 / AAE-47587: Jackson 3.x BOM override, see note above on import order. -->
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>3.2.4</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -240,21 +271,93 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- AAE-44603 temporary security fix (CVE-2025-7962). -->
       <dependency>
-        <groupId>org.awaitility</groupId>
-        <artifactId>awaitility</artifactId>
-        <version>${awaitility.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons-io.version}</version>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>jakarta.mail</artifactId>
+        <version>${sun-jakarta-mail.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </pluginRepository>
+    <pluginRepository>
+      <id>alfresco-internal-plugin</id>
+      <name>Alfresco Internal Repository</name>
+      <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+    </pluginRepository>
+  </pluginRepositories>
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>${license-maven-plugin.version}</version>
+          <configuration>
+            <licenseSets>
+              <licenseSet>
+                <inlineHeader>
+                  <![CDATA[
+Copyright ${project.inceptionYear}-${project.year} ${project.organization.name}.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+                  ]]>
+                </inlineHeader>
+                <includes>
+                  <include>**/*.java</include>
+                </includes>
+              </licenseSet>
+            </licenseSets>
+            <mapping>
+              <java>SLASHSTAR_STYLE</java>
+            </mapping>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <version>${third-party-license-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>third-party-licenses</id>
+              <goals>
+                <goal>add-third-party</goal>
+              </goals>
+              <phase>generate-resources</phase>
+              <configuration>
+                <failOnMissing>true</failOnMissing>
+                <excludedScopes>provided,test</excludedScopes>
+                <excludedGroups>^(org\.alfresco|com\.alfresco|org\.activiti|org\.gytheio).*</excludedGroups>
+                <failOnBlacklist>true</failOnBlacklist>
+                <includedLicenses>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/includedLicensesPlusNashorn.txt</includedLicenses>
+                <licenseMergesUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/licenseMerges.txt</licenseMergesUrl>
+                <overrideUrl>https://raw.githubusercontent.com/Alfresco/third-party-license-overrides/master/override-THIRD-PARTY.properties</overrideUrl>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
@@ -262,7 +365,6 @@
           <executions>
             <execution>
               <id>attach-sources</id>
-              <phase>deploy</phase>
               <goals>
                 <goal>jar-no-fork</goal>
               </goals>
@@ -281,6 +383,11 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${maven-antrun-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>${maven-clean-plugin.version}</version>
         </plugin>
@@ -288,6 +395,13 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>${maven-checkstyle-plugin.version}</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>${checkstyle.version}</version>
+            </dependency>
+          </dependencies>
           <executions>
             <execution>
               <id>validate</id>
@@ -306,6 +420,7 @@
                     <module name="TreeWalker">
                       <!-- Import settings: getting rid of redundant import, forbid star notation, defined order of imports. -->
                       <module name="RedundantImport"/>
+                      <module name="UnusedImports"/>
                       <module name="AvoidStarImport">
                         <property name="excludes"
                                   value="org.junit.Assert,org.assertj.core.api.Assertions,org.mockito.Mockito"/>
@@ -426,18 +541,35 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.assertj</groupId>
-          <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-          <version>${assertj-assertions-generator-maven-plugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco-maven-plugin.version}</version>
         </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${sonar-maven-plugin.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>validate-license</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -449,7 +581,9 @@
         <configuration>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
-          <optimize>true</optimize>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -496,6 +630,17 @@
             </configuration>
           </execution>
           <execution>
+            <id>no-duplicate-declared-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <banDuplicatePomDependencyVersions />
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
             <id>ban-blacklisted-dependencies</id>
             <phase>validate</phase>
             <goals>
@@ -505,9 +650,6 @@
               <rules>
                 <bannedDependencies>
                   <excludes combine.children="append">
-                    <!-- Ban blacklisted logging deps (we only use SLF4J + Logback) -->
-                    <!-- In case of transitive dependency, exclude it and use 'org.slf4j:jcl-over-slf4j' instead -->
-                    <exclude>commons-logging:commons-log*</exclude>
                     <!-- In case of transitive dependency, exclude it and use 'org.slf4j:log4j-over-slf4j' instead -->
                     <exclude>log4j:log4j</exclude>
                     <!-- In case of transitive dependency, exclude it and use 'org.javassist:javassist' instead -->
@@ -537,13 +679,13 @@
                          properly exclude everything. There were no real issues with this so far as mostly the APIs
                          are just duplicates of the exactly same sources. In ideal world, this get eventually fixed,
                          but it may very well not be worth the effort. -->
-                    <ignoreClass>javax.servlet.*</ignoreClass>
-                    <!-- Classes in javax.annotation package are just marker annotations used to aid the programmers.
+                    <ignoreClass>jakarta.servlet.*</ignoreClass>
+                    <!-- Classes in jakarta.annotation package are just marker annotations used to aid the programmers.
                          These annotations do not influence the actual behavior of the code, so it's reasonable to
                          ignore them. Following dependencies contain these classes: 'com.google.code.findbugs:jsr305'
                          and 'com.google.code.findbugs:annotations'. -->
-                    <ignoreClass>javax.annotation.*</ignoreClass>
-                    <!-- Exactly the same case as for above 'javax.annotation.*' classes. Following dependencies contain
+                    <ignoreClass>jakarta.annotation.*</ignoreClass>
+                    <!-- Exactly the same case as for above 'jakarta.annotation.*' classes. Following dependencies contain
                          these classes: 'net.jcip:jcip-annotations' and 'com.google.code.findbugs:annotations'. -->
                     <ignoreClass>net.jcip.annotations.*</ignoreClass>
                   </ignoreClasses>
@@ -551,6 +693,42 @@
                 </banDuplicateClasses>
               </rules>
             </configuration>
+          </execution>
+          <execution>
+            <id>ban-test-dependencies-in-compile</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <!-- These should only be test-scoped -->
+                    <exclude>org.assertj:*:*:*:compile</exclude>
+                    <exclude>org.mockito:*:*:*:compile</exclude>
+                    <exclude>org.springframework:spring-test:*:*:compile</exclude>
+                    <exclude>junit:*:*:*:compile</exclude>
+                    <exclude>org.junit.jupiter:*:*:*:compile</exclude>
+                  </excludes>
+                  <searchTransitive>true</searchTransitive>
+                </bannedDependencies>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>${maven-dependency-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>resolve-dependency-properties</id>
+            <phase>initialize</phase>
+            <goals>
+              <goal>properties</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -560,7 +738,7 @@
         <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <!-- use syntax for Jacoco late property evaluation -->
-          <argLine>@{argLine} -Xmx1024m -XX:MaxMetaspaceSize=256m</argLine>
+          <argLine>@{argLine} -Xmx1024m -XX:MaxMetaspaceSize=256m ${mockito.agent.arg}</argLine>
           <redirectTestOutputToFile>true</redirectTestOutputToFile>
           <failIfNoTests>false</failIfNoTests>
           <trimStackTrace>false</trimStackTrace>
@@ -604,6 +782,25 @@
             <goals>
               <goal>report-integration</goal>
             </goals>
+          </execution>
+          <!-- Merge execution reports configuration-->
+          <execution>
+            <id>merge</id>
+            <goals>
+              <goal>merge</goal>
+            </goals>
+            <configuration>
+              <!--   This change is required to get all reports scanned while executing `jacoco:merge` on the root pom (`-N` option) -->
+              <fileSets>
+                <fileSet>
+                  <directory>${project.basedir}</directory>
+                  <includes>
+                    <include>**/*.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+              <destFile>${project.build.directory}/jacoco.exec</destFile>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -670,14 +867,25 @@
     </plugins>
   </reporting>
   <profiles>
+    <profile>
+      <id>cloudsmith</id>
+      <distributionManagement>
+        <repository>
+          <id>cloudsmith</id>
+          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-releases/</url>
+        </repository>
+        <snapshotRepository>
+          <id>cloudsmith</id>
+          <url>https://maven.cloudsmith.io/${env.CLOUDSMITH_NAMESPACE}/activiti-snapshots/</url>
+        </snapshotRepository>
+      </distributionManagement>
+    </profile>
     <!-- Activate integration tests -->
     <profile>
       <id>integration-test</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
         <property>
-          <name>skipITs</name>
-          <value>false</value>
+          <name>!skipITs</name>
         </property>
       </activation>
       <build>
@@ -685,6 +893,9 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <argLine>@{argLine} -Xmx1024m -XX:MaxMetaspaceSize=256m ${mockito.agent.arg}</argLine>
+            </configuration>
             <executions>
               <execution>
                 <id>integration-test</id>
@@ -733,9 +944,16 @@
             <executions>
               <execution>
                 <id>sign-artifacts</id>
+                <phase>verify</phase>
                 <goals>
                   <goal>sign</goal>
                 </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -783,22 +1001,6 @@
                         </execute>
                       </action>
                     </pluginExecution>
-                    <pluginExecution>
-                      <pluginExecutionFilter>
-                        <groupId>org.assertj</groupId>
-                        <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
-                        <versionRange>[${assertj-assertions-generator-maven-plugin.version},)</versionRange>
-                        <goals>
-                          <goal>generate-assertions</goal>
-                        </goals>
-                      </pluginExecutionFilter>
-                      <action>
-                        <execute>
-                          <runOnIncremental>true</runOnIncremental>
-                          <runOnConfiguration>true</runOnConfiguration>
-                        </execute>
-                      </action>
-                    </pluginExecution>
                   </pluginExecutions>
                 </lifecycleMappingMetadata>
               </configuration>
@@ -826,7 +1028,7 @@
             </configuration>
             <dependencies>
               <dependency>
-                <groupId>org.activiti.build</groupId>
+                <groupId>org.activiti</groupId>
                 <artifactId>activiti-dependency-check</artifactId>
                 <version>${project.version}</version>
                 <type>xml</type>
@@ -844,14 +1046,36 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>jdk9+</id>
-      <activation>
-        <jdk>[9,)</jdk>
-      </activation>
-      <properties>
-        <maven.compiler.release>${java.release}</maven.compiler.release>
-      </properties>
-    </profile>
   </profiles>
+  <repositories>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>activiti-releases</id>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-releases/maven/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>activiti-snapshots</id>
+      <url>https://dl.cloudsmith.io/basic/hyland/activiti-snapshots/maven/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

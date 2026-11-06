@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,29 +23,26 @@ import org.activiti.engine.impl.interceptor.CommandInvoker;
  */
 public class LoggingCommandInvoker extends CommandInvoker {
 
-  protected ProcessExecutionLogger processExecutionLogger;
+    protected ProcessExecutionLogger processExecutionLogger;
 
-  public LoggingCommandInvoker(ProcessExecutionLogger processExecutionLogger) {
-    this.processExecutionLogger = processExecutionLogger;
-  }
-
-  @Override
-  public void executeOperation(Runnable runnable) {
-
-    DebugInfoOperationExecuted debugInfo = null;
-    if (runnable instanceof AbstractOperation) {
-
-      debugInfo = new DebugInfoOperationExecuted((AbstractOperation) runnable);
-      debugInfo.setPreExecutionTime(System.currentTimeMillis());
-
-      processExecutionLogger.addDebugInfo(debugInfo, true);
+    public LoggingCommandInvoker(ProcessExecutionLogger processExecutionLogger) {
+        this.processExecutionLogger = processExecutionLogger;
     }
 
-    super.executeOperation(runnable);
+    @Override
+    public void executeOperation(Runnable runnable) {
+        DebugInfoOperationExecuted debugInfo = null;
+        if (runnable instanceof AbstractOperation) {
+            debugInfo = new DebugInfoOperationExecuted((AbstractOperation) runnable);
+            debugInfo.setPreExecutionTime(System.currentTimeMillis());
 
-    if (debugInfo != null) {
-      debugInfo.setPostExecutionTime(System.currentTimeMillis());
+            processExecutionLogger.addDebugInfo(debugInfo, true);
+        }
+
+        super.executeOperation(runnable);
+
+        if (debugInfo != null) {
+            debugInfo.setPostExecutionTime(System.currentTimeMillis());
+        }
     }
-  }
-
 }

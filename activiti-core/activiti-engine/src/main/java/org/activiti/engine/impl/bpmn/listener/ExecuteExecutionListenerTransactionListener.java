@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,31 +26,40 @@ import org.activiti.engine.impl.interceptor.CommandExecutor;
 
 /**
  * A {@link TransactionListener} that invokes an {@link ExecutionListener}.
- * 
+ *
 
  */
 public class ExecuteExecutionListenerTransactionListener implements TransactionListener {
 
-  protected TransactionDependentExecutionListener listener;
-  protected TransactionDependentExecutionListenerExecutionScope scope;
-  
-  public ExecuteExecutionListenerTransactionListener(TransactionDependentExecutionListener listener, 
-      TransactionDependentExecutionListenerExecutionScope scope) {
-    this.listener = listener;
-    this.scope = scope;
-  }
-  
-  @Override
-  public void execute(CommandContext commandContext) {
-    CommandExecutor commandExecutor = commandContext.getProcessEngineConfiguration().getCommandExecutor();
-    CommandConfig commandConfig = new CommandConfig(false, TransactionPropagation.REQUIRES_NEW);
-    commandExecutor.execute(commandConfig, new Command<Void>() {
-      public Void execute(CommandContext commandContext) {
-        listener.notify(scope.getProcessInstanceId(), scope.getExecutionId(), scope.getFlowElement(), 
-            scope.getExecutionVariables(), scope.getCustomPropertiesMap());
-        return null;
-      }
-    });
-  }
+    protected TransactionDependentExecutionListener listener;
+    protected TransactionDependentExecutionListenerExecutionScope scope;
 
+    public ExecuteExecutionListenerTransactionListener(
+        TransactionDependentExecutionListener listener,
+        TransactionDependentExecutionListenerExecutionScope scope
+    ) {
+        this.listener = listener;
+        this.scope = scope;
+    }
+
+    @Override
+    public void execute(CommandContext commandContext) {
+        CommandExecutor commandExecutor = commandContext.getProcessEngineConfiguration().getCommandExecutor();
+        CommandConfig commandConfig = new CommandConfig(false, TransactionPropagation.REQUIRES_NEW);
+        commandExecutor.execute(
+            commandConfig,
+            new Command<Void>() {
+                public Void execute(CommandContext commandContext) {
+                    listener.notify(
+                        scope.getProcessInstanceId(),
+                        scope.getExecutionId(),
+                        scope.getFlowElement(),
+                        scope.getExecutionVariables(),
+                        scope.getCustomPropertiesMap()
+                    );
+                    return null;
+                }
+            }
+        );
+    }
 }

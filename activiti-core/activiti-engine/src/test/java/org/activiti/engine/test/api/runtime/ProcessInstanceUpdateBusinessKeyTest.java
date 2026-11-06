@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -11,6 +14,8 @@
  * limitations under the License.
  */
 package org.activiti.engine.test.api.runtime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.ExecutionListener;
@@ -24,49 +29,56 @@ import org.activiti.engine.test.Deployment;
 
 public class ProcessInstanceUpdateBusinessKeyTest extends PluggableActivitiTestCase {
 
-  @Deployment
-  public void testProcessInstanceUpdateBusinessKey() {
-    runtimeService.startProcessInstanceByKey("businessKeyProcess");
+    @Deployment
+    public void testProcessInstanceUpdateBusinessKey() {
+        runtimeService.startProcessInstanceByKey("businessKeyProcess");
 
-    ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().singleResult();
-    assertEquals("bzKey", processInstance.getBusinessKey());
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().singleResult();
+        assertThat(processInstance.getBusinessKey()).isEqualTo("bzKey");
 
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
-      HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().singleResult();
-      assertEquals("bzKey", historicProcessInstance.getBusinessKey());
-    }
-  }
-
-  @Deployment
-  public void testUpdateExistingBusinessKey() {
-    runtimeService.startProcessInstanceByKey("businessKeyProcess", "testKey");
-
-    ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().singleResult();
-    assertEquals("testKey", processInstance.getBusinessKey());
-
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
-      HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().singleResult();
-      assertEquals("testKey", historicProcessInstance.getBusinessKey());
+        if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
+            HistoricProcessInstance historicProcessInstance = historyService
+                .createHistoricProcessInstanceQuery()
+                .singleResult();
+            assertThat(historicProcessInstance.getBusinessKey()).isEqualTo("bzKey");
+        }
     }
 
-    runtimeService.updateBusinessKey(processInstance.getId(), "newKey");
+    @Deployment
+    public void testUpdateExistingBusinessKey() {
+        runtimeService.startProcessInstanceByKey("businessKeyProcess", "testKey");
 
-    processInstance = runtimeService.createProcessInstanceQuery().singleResult();
-    assertEquals("newKey", processInstance.getBusinessKey());
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().singleResult();
+        assertThat(processInstance.getBusinessKey()).isEqualTo("testKey");
 
-    if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
-      HistoricProcessInstance historicProcessInstance = historyService.createHistoricProcessInstanceQuery().singleResult();
-      assertEquals("newKey", historicProcessInstance.getBusinessKey());
+        if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
+            HistoricProcessInstance historicProcessInstance = historyService
+                .createHistoricProcessInstanceQuery()
+                .singleResult();
+            assertThat(historicProcessInstance.getBusinessKey()).isEqualTo("testKey");
+        }
+
+        runtimeService.updateBusinessKey(processInstance.getId(), "newKey");
+
+        processInstance = runtimeService.createProcessInstanceQuery().singleResult();
+        assertThat(processInstance.getBusinessKey()).isEqualTo("newKey");
+
+        if (processEngineConfiguration.getHistoryLevel().isAtLeast(HistoryLevel.ACTIVITY)) {
+            HistoricProcessInstance historicProcessInstance = historyService
+                .createHistoricProcessInstanceQuery()
+                .singleResult();
+            assertThat(historicProcessInstance.getBusinessKey()).isEqualTo("newKey");
+        }
     }
-  }
 
-  public static class UpdateBusinessKeyExecutionListener implements ExecutionListener {
+    public static class UpdateBusinessKeyExecutionListener implements ExecutionListener {
 
-    private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-    public void notify(DelegateExecution delegateExecution) {
-      Context.getCommandContext().getExecutionEntityManager().updateProcessInstanceBusinessKey((ExecutionEntity)delegateExecution, "bzKey");
+        public void notify(DelegateExecution delegateExecution) {
+            Context.getCommandContext()
+                .getExecutionEntityManager()
+                .updateProcessInstanceBusinessKey((ExecutionEntity) delegateExecution, "bzKey");
+        }
     }
-  }
-
 }

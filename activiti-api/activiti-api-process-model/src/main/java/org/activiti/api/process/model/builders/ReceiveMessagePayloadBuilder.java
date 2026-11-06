@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.process.model.builders;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-
 import org.activiti.api.process.model.payloads.ReceiveMessagePayload;
 
 public class ReceiveMessagePayloadBuilder {
@@ -31,9 +29,10 @@ public class ReceiveMessagePayloadBuilder {
     public static ReceiveMessagePayloadBuilder from(ReceiveMessagePayload messagePayload) {
         Objects.requireNonNull(messagePayload, "messagePayload must not be null");
 
-        return new ReceiveMessagePayloadBuilder().withName(messagePayload.getName())
-                                                 .withCorrelationKey(messagePayload.getCorrelationKey())
-                                                 .withVariables(messagePayload.getVariables());
+        return new ReceiveMessagePayloadBuilder()
+            .withName(messagePayload.getName())
+            .withCorrelationKey(messagePayload.getCorrelationKey())
+            .withVariables(messagePayload.getVariables());
     }
 
     public static ReceiveMessagePayloadBuilder receive(String name) {
@@ -54,13 +53,11 @@ public class ReceiveMessagePayloadBuilder {
         return this;
     }
 
-    public ReceiveMessagePayloadBuilder withVariable(String name,
-                                                     Object value) {
+    public ReceiveMessagePayloadBuilder withVariable(String name, Object value) {
         if (this.variables == null) {
             this.variables = new LinkedHashMap<>();
         }
-        this.variables.put(name,
-                           value);
+        this.variables.put(name, value);
         return this;
     }
 
@@ -71,9 +68,7 @@ public class ReceiveMessagePayloadBuilder {
     }
 
     public ReceiveMessagePayload build() {
-        return new ReceiveMessagePayload(name,
-                                         correlationKey,
-                                         this.variables);
+        return new ReceiveMessagePayload(name, correlationKey, this.variables);
     }
 
     @Override
@@ -96,15 +91,14 @@ public class ReceiveMessagePayloadBuilder {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         ReceiveMessagePayloadBuilder other = (ReceiveMessagePayloadBuilder) obj;
-        return Objects.equals(correlationKey, other.correlationKey) 
-                && Objects.equals(name, other.name) 
-                && Objects.equals(variables, other.variables);
+        return (
+            Objects.equals(correlationKey, other.correlationKey) &&
+            Objects.equals(name, other.name) &&
+            Objects.equals(variables, other.variables)
+        );
     }
 }

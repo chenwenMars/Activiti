@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,12 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.spring.process;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -28,15 +24,17 @@ import org.activiti.spring.process.model.ProcessExtensionModel;
 import org.activiti.spring.process.model.VariableDefinition;
 import org.activiti.spring.process.variable.types.VariableType;
 import org.activiti.spring.resources.ResourceReader;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 public class ProcessExtensionResourceReader implements ResourceReader<ProcessExtensionModel> {
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
     private final Map<String, VariableType> variableTypeMap;
 
-    public ProcessExtensionResourceReader(ObjectMapper objectMapper,
-                                          Map<String, VariableType> variableTypeMap) {
-        this.objectMapper = objectMapper;
+    public ProcessExtensionResourceReader(JsonMapper jsonMapper, Map<String, VariableType> variableTypeMap) {
+        this.jsonMapper = jsonMapper;
         this.variableTypeMap = variableTypeMap;
     }
 
@@ -47,9 +45,8 @@ public class ProcessExtensionResourceReader implements ResourceReader<ProcessExt
 
     @Override
     public ProcessExtensionModel read(InputStream inputStream) throws IOException {
-        objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
-        ProcessExtensionModel mappedModel = objectMapper.readValue(inputStream,
-                                                                   ProcessExtensionModel.class);
+        JsonMapper mapper = jsonMapper.rebuild().enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS).build();
+        ProcessExtensionModel mappedModel = mapper.readValue(inputStream, ProcessExtensionModel.class);
 
         return convertJsonVariables(mappedModel);
     }
@@ -59,26 +56,28 @@ public class ProcessExtensionResourceReader implements ResourceReader<ProcessExt
      * Do this for any var marked as json or whose type is not recognised from the extension file
      */
     private ProcessExtensionModel convertJsonVariables(ProcessExtensionModel processExtensionModel) {
-        if (processExtensionModel != null &&
+        if (
+            processExtensionModel != null &&
             processExtensionModel.getAllExtensions() != null &&
-            processExtensionModel.getAllExtensions().size() > 0) {
+            processExtensionModel.getAllExtensions().size() > 0
+        ) {
             for (Extension extension : processExtensionModel.getAllExtensions().values()) {
                 if (extension.getProperties() != null) {
                     saveVariableAsJsonObject(extension);
                 }
             }
-
         }
         return processExtensionModel;
     }
 
     private void saveVariableAsJsonObject(Extension extension) {
         for (VariableDefinition variableDefinition : extension.getProperties().values()) {
-            if (!variableTypeMap.containsKey(variableDefinition.getType()) || variableDefinition.getType().equals("json")) {
-                variableDefinition.setValue(objectMapper.convertValue(variableDefinition.getValue(),
-                    JsonNode.class));
+            if (
+                !variableTypeMap.containsKey(variableDefinition.getType()) ||
+                variableDefinition.getType().equals("json")
+            ) {
+                variableDefinition.setValue(jsonMapper.convertValue(variableDefinition.getValue(), JsonNode.class));
             }
         }
     }
-
 }

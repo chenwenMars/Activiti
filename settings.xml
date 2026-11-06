@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>alfresco</id>
+      <username>${env.MAVEN_USERNAME}</username>
+      <password>${env.MAVEN_PASSWORD}</password>
+      <repositoryOrigins>
+        <repositoryOrigin>https://artifacts.alfresco.com</repositoryOrigin>
+      </repositoryOrigins>
+    </server>
+    <server>
+      <id>cloudsmith</id>
+      <username>${env.CLOUDSMITH_USERNAME}</username>
+      <password>${env.CLOUDSMITH_API_KEY}</password>
+      <repositoryOrigins>
+        <repositoryOrigin>https://maven.cloudsmith.io</repositoryOrigin>
+      </repositoryOrigins>
+    </server>
+  </servers>
+
+   <profiles>
+    <profile>
+      <id>alfresco</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <altDeploymentRepository>alfresco::https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</altDeploymentRepository>
+        <altReleaseDeploymentRepository>alfresco::https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</altReleaseDeploymentRepository>
+        <altSnapshotDeploymentRepository>alfresco::https://artifacts.alfresco.com/nexus/content/repositories/activiti-snapshots/</altSnapshotDeploymentRepository>
+      </properties>
+    </profile>
+  </profiles>
+
+</settings>

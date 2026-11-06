@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.activiti</groupId>
     <artifactId>activiti-core-dependencies</artifactId>
-    <version>7.1.0-SNAPSHOT</version>
+    <version>9.1.0-SNAPSHOT</version>
     <relativePath>../activiti-core-dependencies</relativePath>
   </parent>
-
   <artifactId>activiti-process-validation</artifactId>
   <name>Activiti :: Process Validation</name>
-
+  <properties>
+    <mockito.agent.arg/>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.activiti</groupId>
@@ -23,8 +23,16 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-juel-jakarta</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.el</groupId>
+      <artifactId>jakarta.el-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -32,6 +40,9 @@
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+    </dependency>
   </dependencies>
-
 </project>

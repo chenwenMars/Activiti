@@ -1,20 +1,21 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.impl.persistence.entity;
 
 import java.util.Date;
-
 import org.activiti.engine.api.internal.Internal;
 import org.activiti.engine.impl.db.HasRevision;
 
@@ -24,45 +25,43 @@ import org.activiti.engine.impl.db.HasRevision;
  */
 @Internal
 public interface EventSubscriptionEntity extends Entity, HasRevision {
-  
-  String getEventType();
+    String getEventType();
 
-  void setEventType(String eventType);
+    void setEventType(String eventType);
 
-  String getEventName();
+    String getEventName();
 
-  void setEventName(String eventName);
+    void setEventName(String eventName);
 
-  String getExecutionId();
+    String getExecutionId();
 
-  void setExecutionId(String executionId);
-  
-  ExecutionEntity getExecution();
+    void setExecutionId(String executionId);
 
-  void setExecution(ExecutionEntity execution);
+    ExecutionEntity getExecution();
 
-  String getProcessInstanceId();
+    void setExecution(ExecutionEntity execution);
 
-  void setProcessInstanceId(String processInstanceId);
+    String getProcessInstanceId();
 
-  String getConfiguration();
+    void setProcessInstanceId(String processInstanceId);
 
-  void setConfiguration(String configuration);
+    String getConfiguration();
 
-  String getActivityId();
+    void setConfiguration(String configuration);
 
-  void setActivityId(String activityId);
+    String getActivityId();
 
-  Date getCreated();
+    void setActivityId(String activityId);
 
-  void setCreated(Date created);
+    Date getCreated();
 
-  String getProcessDefinitionId();
+    void setCreated(Date created);
 
-  void setProcessDefinitionId(String processDefinitionId);
+    String getProcessDefinitionId();
 
-  String getTenantId();
+    void setProcessDefinitionId(String processDefinitionId);
 
-  void setTenantId(String tenantId);
+    String getTenantId();
 
+    void setTenantId(String tenantId);
 }

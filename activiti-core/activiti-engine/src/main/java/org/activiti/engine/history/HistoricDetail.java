@@ -1,21 +1,22 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.history;
 
-import org.activiti.engine.api.internal.Internal;
-
 import java.util.Date;
+import org.activiti.engine.api.internal.Internal;
 
 /**
  * Base class for all kinds of information that is related to either a {@link HistoricProcessInstance} or a {@link HistoricActivityInstance}.
@@ -23,24 +24,23 @@ import java.util.Date;
  */
 @Internal
 public interface HistoricDetail extends HistoricData {
+    /** The unique DB id for this historic detail */
+    String getId();
 
-  /** The unique DB id for this historic detail */
-  String getId();
+    /** The process instance reference. */
+    String getProcessInstanceId();
 
-  /** The process instance reference. */
-  String getProcessInstanceId();
+    /**
+     * The activity reference in case this detail is related to an activity instance.
+     */
+    String getActivityInstanceId();
 
-  /**
-   * The activity reference in case this detail is related to an activity instance.
-   */
-  String getActivityInstanceId();
+    /** The identifier for the path of execution. */
+    String getExecutionId();
 
-  /** The identifier for the path of execution. */
-  String getExecutionId();
+    /** The identifier for the task. */
+    String getTaskId();
 
-  /** The identifier for the task. */
-  String getTaskId();
-
-  /** The time when this detail occurred */
-  Date getTime();
+    /** The time when this detail occurred */
+    Date getTime();
 }

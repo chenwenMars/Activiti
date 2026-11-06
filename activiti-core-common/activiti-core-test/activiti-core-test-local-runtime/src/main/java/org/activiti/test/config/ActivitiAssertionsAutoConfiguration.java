@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.test.config;
 
 import java.util.List;
-
 import org.activiti.api.model.shared.event.VariableCreatedEvent;
 import org.activiti.api.model.shared.event.VariableDeletedEvent;
 import org.activiti.api.model.shared.event.VariableUpdatedEvent;
@@ -56,10 +54,10 @@ import org.activiti.test.LocalTaskSource;
 import org.activiti.test.TaskSource;
 import org.activiti.test.operations.ProcessRuntimeOperations;
 import org.activiti.test.operations.TaskRuntimeOperations;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@AutoConfiguration
 public class ActivitiAssertionsAutoConfiguration {
 
     private final LocalEventSource localEventProvider = new LocalEventSource();
@@ -75,21 +73,21 @@ public class ActivitiAssertionsAutoConfiguration {
     }
 
     @Bean
-    public ProcessRuntimeOperations processRuntimeOperations(ProcessRuntime processRuntime,
-                                                             EventSource eventSource,
-                                                             List<TaskSource> taskSources) {
-        return new ProcessRuntimeOperations(processRuntime,
-                                            eventSource,
-                                            taskSources);
+    public ProcessRuntimeOperations processRuntimeOperations(
+        ProcessRuntime processRuntime,
+        EventSource eventSource,
+        List<TaskSource> taskSources
+    ) {
+        return new ProcessRuntimeOperations(processRuntime, eventSource, taskSources);
     }
 
     @Bean
-    public TaskRuntimeOperations taskRuntimeOperations(TaskRuntime taskRuntime,
-                                                       EventSource eventSource,
-                                                       List<TaskSource> taskSources) {
-        return new TaskRuntimeOperations(taskRuntime,
-                                         eventSource,
-                                         taskSources);
+    public TaskRuntimeOperations taskRuntimeOperations(
+        TaskRuntime taskRuntime,
+        EventSource eventSource,
+        List<TaskSource> taskSources
+    ) {
+        return new TaskRuntimeOperations(taskRuntime, eventSource, taskSources);
     }
 
     @Bean
@@ -193,34 +191,32 @@ public class ActivitiAssertionsAutoConfiguration {
     }
 
     @Bean
-    public  BPMNElementEventListener<BPMNTimerScheduledEvent> keepInMemoryTimerScheduledListener() {
+    public BPMNElementEventListener<BPMNTimerScheduledEvent> keepInMemoryTimerScheduledListener() {
         return localEventProvider::addCollectedEvents;
     }
 
     @Bean
-    public  BPMNElementEventListener<BPMNTimerFiredEvent> keepInMemoryTimerFiredListener() {
+    public BPMNElementEventListener<BPMNTimerFiredEvent> keepInMemoryTimerFiredListener() {
         return localEventProvider::addCollectedEvents;
     }
 
     @Bean
-    public  BPMNElementEventListener<BPMNTimerExecutedEvent> keepInMemoryTimerExecutedListener() {
+    public BPMNElementEventListener<BPMNTimerExecutedEvent> keepInMemoryTimerExecutedListener() {
         return localEventProvider::addCollectedEvents;
     }
 
     @Bean
-    public  BPMNElementEventListener<BPMNTimerFailedEvent> keepInMemoryTimerFailedListener() {
+    public BPMNElementEventListener<BPMNTimerFailedEvent> keepInMemoryTimerFailedListener() {
         return localEventProvider::addCollectedEvents;
     }
 
     @Bean
-    public  BPMNElementEventListener<BPMNTimerCancelledEvent> keepInMemoryTimerCancelledListener() {
+    public BPMNElementEventListener<BPMNTimerCancelledEvent> keepInMemoryTimerCancelledListener() {
         return localEventProvider::addCollectedEvents;
     }
 
     @Bean
-    public  BPMNElementEventListener<BPMNErrorReceivedEvent> keepInMemoryErrorReceivedListener() {
+    public BPMNElementEventListener<BPMNErrorReceivedEvent> keepInMemoryErrorReceivedListener() {
         return localEventProvider::addCollectedEvents;
     }
-
-
 }

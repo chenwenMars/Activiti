@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.task.runtime;
 
 import java.util.List;
-
 import org.activiti.api.model.shared.model.VariableInstance;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
 import org.activiti.api.task.model.Task;
 import org.activiti.api.task.model.payloads.AssignTaskPayload;
+import org.activiti.api.task.model.payloads.AssignTasksPayload;
 import org.activiti.api.task.model.payloads.CandidateGroupsPayload;
 import org.activiti.api.task.model.payloads.CandidateUsersPayload;
 import org.activiti.api.task.model.payloads.ClaimTaskPayload;
@@ -39,7 +38,6 @@ import org.activiti.api.task.model.payloads.UpdateTaskVariablePayload;
  * All the methods require an authenticated Admin user
  */
 public interface TaskAdminRuntime {
-
     /**
      * Deletes a task
      * - no matter the assignee or if the admin user can see the task
@@ -57,10 +55,14 @@ public interface TaskAdminRuntime {
     Page<Task> tasks(Pageable pageable);
 
     /**
+     * Finds the last created task by process instance id and task definition key
+     */
+    Task lastCreatedTaskByProcessInstanceIdAndTaskDefinitionKey(String processInstanceId, String taskDefinitionKey);
+
+    /**
      * Get all tasks with payload filters
      */
-    Page<Task> tasks(Pageable pageable,
-                     GetTasksPayload getTasksPayload);
+    Page<Task> tasks(Pageable pageable, GetTasksPayload getTasksPayload);
 
     /**
      * Claim a task with the currently authenticated user
@@ -84,7 +86,7 @@ public interface TaskAdminRuntime {
      * - This method return a shallow Task object with the basic information needed to validate that the task was completed
      */
     Task complete(CompleteTaskPayload completeTaskPayload);
-    
+
     /**
      * Updates details of a task
      */
@@ -100,14 +102,15 @@ public interface TaskAdminRuntime {
      *  - after the assign the task should be in assigned status
      */
     Task assign(AssignTaskPayload assignTaskPayload);
-    
+
+    Page<Task> assignMultiple(AssignTasksPayload assignTasksPayload);
+
     void addCandidateUsers(CandidateUsersPayload candidateUsersPayload);
     void deleteCandidateUsers(CandidateUsersPayload candidateUsersPayload);
-    
+
     void addCandidateGroups(CandidateGroupsPayload candidateGroupsPayload);
     void deleteCandidateGroups(CandidateGroupsPayload candidateGroupsPayload);
-    
+
     List<String> userCandidates(String taskId);
     List<String> groupCandidates(String taskId);
-    
 }

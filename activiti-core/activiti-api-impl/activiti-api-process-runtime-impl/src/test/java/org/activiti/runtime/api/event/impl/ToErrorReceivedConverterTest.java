@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.event.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.activiti.api.process.model.events.BPMNErrorReceivedEvent;
 import org.activiti.api.runtime.model.impl.BPMNErrorImpl;
 import org.activiti.engine.delegate.event.ActivitiErrorEvent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class ToErrorReceivedConverterTest {
 
     @InjectMocks
@@ -36,11 +36,6 @@ public class ToErrorReceivedConverterTest {
 
     @Mock
     private BPMNErrorConverter bpmnErrorConverter;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-    }
 
     @Test
     public void fromShouldReturnConvertedEventAndSetProcessInstanceIdAndProcessDefinitionId() {
@@ -50,7 +45,7 @@ public class ToErrorReceivedConverterTest {
         given(internalEvent.getProcessInstanceId()).willReturn("procInstId");
 
         BPMNErrorImpl bpmnError = new BPMNErrorImpl("myError");
-        
+
         given(bpmnErrorConverter.convertToBPMNError(internalEvent)).willReturn(bpmnError);
 
         //when
@@ -62,5 +57,4 @@ public class ToErrorReceivedConverterTest {
         assertThat(errorEvent.getProcessDefinitionId()).isEqualTo("procDefId");
         assertThat(errorEvent.getEntity()).isEqualTo(bpmnError);
     }
-
 }

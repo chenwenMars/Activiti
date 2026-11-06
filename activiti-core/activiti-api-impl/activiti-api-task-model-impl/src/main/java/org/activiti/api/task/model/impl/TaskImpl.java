@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.task.model.impl;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
 import org.activiti.api.runtime.model.impl.ApplicationElementImpl;
 import org.activiti.api.task.model.Task;
 
@@ -37,6 +35,7 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
     private int priority;
     private String processDefinitionId;
     private String processInstanceId;
+    private String taskProcessRootProcessInstanceId;
     private String parentTaskId;
     private String formKey;
     private Date completedDate;
@@ -44,15 +43,14 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
     private Integer processDefinitionVersion;
     private String businessKey;
     private String taskDefinitionKey;
+    private Boolean allowSelfService;
     private List<String> candidateUsers;
     private List<String> candidateGroups;
+    private String completedBy;
 
-    public TaskImpl() {
-    }
+    public TaskImpl() {}
 
-    public TaskImpl(String id,
-                    String name,
-                    Task.TaskStatus status) {
+    public TaskImpl(String id, String name, Task.TaskStatus status) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -176,6 +174,15 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
     }
 
     @Override
+    public String getTaskProcessRootProcessInstanceId() {
+        return taskProcessRootProcessInstanceId;
+    }
+
+    public void setTaskProcessRootProcessInstanceId(String taskProcessRootProcessInstanceId) {
+        this.taskProcessRootProcessInstanceId = taskProcessRootProcessInstanceId;
+    }
+
+    @Override
     public TaskStatus getStatus() {
         return status;
     }
@@ -219,16 +226,16 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
     public void setDuration(Long duration) {
         this.duration = duration;
     }
-    
+
     @Override
-    public Integer getProcessDefinitionVersion() { 
-        return processDefinitionVersion; 
+    public Integer getProcessDefinitionVersion() {
+        return processDefinitionVersion;
     }
-    
+
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-    
+
     @Override
     public String getBusinessKey() {
         return businessKey;
@@ -242,7 +249,7 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
-    
+
     @Override
     public String getTaskDefinitionKey() {
         return taskDefinitionKey;
@@ -251,7 +258,25 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
     public void setTaskDefinitionKey(String taskDefinitionKey) {
         this.taskDefinitionKey = taskDefinitionKey;
     }
-    
+
+    @Override
+    public Boolean isAllowSelfService() {
+        return allowSelfService;
+    }
+
+    public void setAllowSelfService(Boolean allowSelfService) {
+        this.allowSelfService = allowSelfService;
+    }
+
+    @Override
+    public String getCompletedBy() {
+        return this.completedBy;
+    }
+
+    public void setCompletedBy(String completedBy) {
+        this.completedBy = completedBy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -264,89 +289,116 @@ public class TaskImpl extends ApplicationElementImpl implements Task {
             return false;
         }
         TaskImpl task = (TaskImpl) o;
-        return priority == task.priority &&
-                Objects.equals(id,
-                               task.id) &&
-                Objects.equals(name,
-                               task.name) &&
-                status == task.status &&
-                Objects.equals(owner,
-                               task.owner) &&
-                Objects.equals(assignee,
-                               task.assignee) &&
-                Objects.equals(description,
-                               task.description) &&
-                Objects.equals(createdDate,
-                               task.createdDate) &&
-                Objects.equals(claimedDate,
-                               task.claimedDate) &&
-                Objects.equals(dueDate,
-                               task.dueDate) &&
-                Objects.equals(processDefinitionId,
-                               task.processDefinitionId) &&
-                Objects.equals(processInstanceId,
-                               task.processInstanceId) &&
-                Objects.equals(parentTaskId,
-                               task.parentTaskId) &&
-                Objects.equals(formKey,
-                               task.formKey) &&
-                Objects.equals(completedDate,
-                               task.completedDate) &&
-                Objects.equals(duration,
-                               task.duration) &&
-                Objects.equals(processDefinitionVersion,
-                               task.processDefinitionVersion) &&
-                Objects.equals(businessKey,
-                               task.businessKey) &&
-                Objects.equals(taskDefinitionKey,
-                               task.taskDefinitionKey);
+        return (
+            priority == task.priority &&
+            Objects.equals(allowSelfService, task.allowSelfService) &&
+            Objects.equals(id, task.id) &&
+            Objects.equals(name, task.name) &&
+            status == task.status &&
+            Objects.equals(owner, task.owner) &&
+            Objects.equals(assignee, task.assignee) &&
+            Objects.equals(description, task.description) &&
+            Objects.equals(createdDate, task.createdDate) &&
+            Objects.equals(claimedDate, task.claimedDate) &&
+            Objects.equals(dueDate, task.dueDate) &&
+            Objects.equals(processDefinitionId, task.processDefinitionId) &&
+            Objects.equals(processInstanceId, task.processInstanceId) &&
+            Objects.equals(taskProcessRootProcessInstanceId, task.taskProcessRootProcessInstanceId) &&
+            Objects.equals(parentTaskId, task.parentTaskId) &&
+            Objects.equals(formKey, task.formKey) &&
+            Objects.equals(completedDate, task.completedDate) &&
+            Objects.equals(duration, task.duration) &&
+            Objects.equals(processDefinitionVersion, task.processDefinitionVersion) &&
+            Objects.equals(businessKey, task.businessKey) &&
+            Objects.equals(taskDefinitionKey, task.taskDefinitionKey) &&
+            Objects.equals(completedBy, task.completedBy)
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(),
-                            id,
-                            name,
-                            status,
-                            owner,
-                            assignee,
-                            description,
-                            createdDate,
-                            claimedDate,
-                            dueDate,
-                            priority,
-                            processDefinitionId,
-                            processInstanceId,
-                            parentTaskId,
-                            formKey,
-                            completedDate,
-                            duration,
-                            processDefinitionVersion,
-                            businessKey,
-                            taskDefinitionKey);
+        return Objects.hash(
+            super.hashCode(),
+            id,
+            name,
+            status,
+            owner,
+            assignee,
+            description,
+            createdDate,
+            claimedDate,
+            dueDate,
+            priority,
+            processDefinitionId,
+            processInstanceId,
+            taskProcessRootProcessInstanceId,
+            parentTaskId,
+            formKey,
+            completedDate,
+            duration,
+            processDefinitionVersion,
+            businessKey,
+            taskDefinitionKey,
+            allowSelfService,
+            completedBy
+        );
     }
 
     @Override
     public String toString() {
-        return "TaskImpl{" +
-                "id='" + id + '\'' +
-                ", owner='" + owner + '\'' +
-                ", assignee='" + assignee + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", createdDate=" + createdDate +
-                ", claimedDate=" + claimedDate +
-                ", dueDate=" + dueDate +
-                ", priority=" + priority +
-                ", processDefinitionId='" + processDefinitionId + '\'' +
-                ", processInstanceId='" + processInstanceId + '\'' +
-                ", parentTaskId='" + parentTaskId + '\'' +
-                ", formKey='" + formKey + '\'' +
-                ", status=" + status +
-                ", processDefinitionVersion=" + processDefinitionVersion +
-                ", businessKey=" + businessKey +
-                ", taskDefinitionKey=" + taskDefinitionKey +
-                '}';
+        return (
+            "TaskImpl{" +
+            "id='" +
+            id +
+            '\'' +
+            ", owner='" +
+            owner +
+            '\'' +
+            ", assignee='" +
+            assignee +
+            '\'' +
+            ", name='" +
+            name +
+            '\'' +
+            ", description='" +
+            description +
+            '\'' +
+            ", createdDate=" +
+            createdDate +
+            ", claimedDate=" +
+            claimedDate +
+            ", dueDate=" +
+            dueDate +
+            ", priority=" +
+            priority +
+            ", processDefinitionId='" +
+            processDefinitionId +
+            '\'' +
+            ", processInstanceId='" +
+            processInstanceId +
+            '\'' +
+            ", taskProcessRootProcessInstanceId='" +
+            taskProcessRootProcessInstanceId +
+            '\'' +
+            ", parentTaskId='" +
+            parentTaskId +
+            '\'' +
+            ", formKey='" +
+            formKey +
+            '\'' +
+            ", status=" +
+            status +
+            ", processDefinitionVersion=" +
+            processDefinitionVersion +
+            ", businessKey=" +
+            businessKey +
+            ", taskDefinitionKey=" +
+            taskDefinitionKey +
+            ", allowSelfService=" +
+            allowSelfService +
+            ", completedBy=" +
+            completedBy +
+            '}'
+        );
     }
-
 }

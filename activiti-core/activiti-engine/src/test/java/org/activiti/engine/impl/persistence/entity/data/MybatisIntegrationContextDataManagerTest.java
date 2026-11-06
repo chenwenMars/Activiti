@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,54 +13,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.engine.impl.persistence.entity.data;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.util.List;
+import org.activiti.engine.impl.IntegrationContextQueryImpl;
+import org.activiti.engine.impl.Page;
 import org.activiti.engine.impl.db.DbSqlSession;
 import org.activiti.engine.impl.persistence.entity.data.integration.MybatisIntegrationContextDataManager;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntity;
 import org.activiti.engine.impl.persistence.entity.integration.IntegrationContextEntityImpl;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-public class MybatisIntegrationContextDataManagerTest {
+@ExtendWith(MockitoExtension.class)
+class MybatisIntegrationContextDataManagerTest {
 
     @Spy
-    @InjectMocks
-    private MybatisIntegrationContextDataManager manager;
+    private MybatisIntegrationContextDataManager manager = new MybatisIntegrationContextDataManager(null);
 
     @Mock
     private DbSqlSession dbSqlSession;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-        doReturn(dbSqlSession).when(manager).getDbSqlSession();
-    }
-
     @Test
-    public void createShouldReturnANewInstanceOfIntegrationContextEntityImpl() {
-        //when
+    void createShouldReturnANewInstanceOfIntegrationContextEntityImpl() {
         IntegrationContextEntity entity = manager.create();
 
-        //then
         assertThat(entity).isInstanceOf(IntegrationContextEntityImpl.class);
     }
 
     @Test
-    public void getManagedEntityClassShouldReturnIntegrationContextEntityImpl() {
-        //when
+    void getManagedEntityClassShouldReturnIntegrationContextEntityImpl() {
         Class<? extends IntegrationContextEntity> managedEntityClass = manager.getManagedEntityClass();
 
-        //then
         assertThat(managedEntityClass).isEqualTo(IntegrationContextEntityImpl.class);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_selectListByQueryCriteria_when_findByQueryCriteriaIsCalled() {
+        doReturn(dbSqlSession).when(manager).getDbSqlSession();
+        var query = mock(IntegrationContextQueryImpl.class);
+        var page = mock(Page.class);
+        var entity = mock(IntegrationContextEntity.class);
+        given(
+            dbSqlSession.<IntegrationContextEntity>selectList("selectIntegrationContextByQueryCriteria", query, page)
+        ).willReturn(List.of(entity));
+
+        var result = manager.findByQueryCriteria(query, page);
+
+        assertThat(result).containsExactly(entity);
+    }
+
+    @Test
+    void should_selectCountByQueryCriteria_when_findCountByQueryCriteriaIsCalled() {
+        doReturn(dbSqlSession).when(manager).getDbSqlSession();
+        var query = mock(IntegrationContextQueryImpl.class);
+        given(dbSqlSession.selectOne("selectIntegrationContextCountByQueryCriteria", query)).willReturn(5L);
+
+        var result = manager.findCountByQueryCriteria(query);
+
+        assertThat(result).isEqualTo(5L);
+        verify(dbSqlSession).selectOne("selectIntegrationContextCountByQueryCriteria", query);
+    }
 }

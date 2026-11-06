@@ -1,18 +1,23 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.spring;
 
+import jakarta.el.ELResolver;
+import java.util.List;
+import org.activiti.core.el.CustomFunctionProvider;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.cfg.SpringBeanFactoryProxyMap;
@@ -31,61 +36,76 @@ import org.springframework.context.ApplicationContextAware;
  */
 public class ProcessEngineFactoryBean implements FactoryBean<ProcessEngine>, DisposableBean, ApplicationContextAware {
 
-  protected ProcessEngineConfigurationImpl processEngineConfiguration;
+    protected ProcessEngineConfigurationImpl processEngineConfiguration;
 
-  protected ApplicationContext applicationContext;
-  protected ProcessEngine processEngine;
+    protected ApplicationContext applicationContext;
+    protected ProcessEngine processEngine;
 
-  public void destroy() throws Exception {
-    if (processEngine != null) {
-      processEngine.close();
-    }
-  }
-
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.applicationContext = applicationContext;
-  }
-
-  public ProcessEngine getObject() throws Exception {
-    configureExpressionManager();
-    configureExternallyManagedTransactions();
-
-    if (processEngineConfiguration.getBeans() == null) {
-      processEngineConfiguration.setBeans(new SpringBeanFactoryProxyMap(applicationContext));
+    public void destroy() throws Exception {
+        if (processEngine != null) {
+            processEngine.close();
+        }
     }
 
-    this.processEngine = processEngineConfiguration.buildProcessEngine();
-    return this.processEngine;
-  }
-
-  protected void configureExpressionManager() {
-    if (processEngineConfiguration.getExpressionManager() == null && applicationContext != null) {
-      processEngineConfiguration.setExpressionManager(new SpringExpressionManager(applicationContext, processEngineConfiguration.getBeans()));
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
-  }
 
-  protected void configureExternallyManagedTransactions() {
-    if (processEngineConfiguration instanceof SpringProcessEngineConfiguration) { // remark: any config can be injected, so we cannot have SpringConfiguration as member
-      SpringProcessEngineConfiguration engineConfiguration = (SpringProcessEngineConfiguration) processEngineConfiguration;
-      if (engineConfiguration.getTransactionManager() != null) {
-        processEngineConfiguration.setTransactionsExternallyManaged(true);
-      }
+    public ProcessEngine getObject() throws Exception {
+        configureExpressionManager();
+        configureExternallyManagedTransactions();
+
+        if (processEngineConfiguration.getBeans() == null) {
+            processEngineConfiguration.setBeans(new SpringBeanFactoryProxyMap(applicationContext));
+        }
+
+        this.processEngine = processEngineConfiguration.buildProcessEngine();
+        return this.processEngine;
     }
-  }
 
-  public Class<ProcessEngine> getObjectType() {
-    return ProcessEngine.class;
-  }
+    protected void configureExpressionManager() {
+        if (processEngineConfiguration.getExpressionManager() == null && applicationContext != null) {
+            SpringExpressionManager expressionManager = new SpringExpressionManager(
+                applicationContext,
+                processEngineConfiguration.getBeans()
+            );
+            List<CustomFunctionProvider> customFunctionProviders =
+                processEngineConfiguration.getCustomFunctionProviders();
+            List<ELResolver> customELResolvers = processEngineConfiguration.getCustomELResolvers();
+            if (customFunctionProviders != null) {
+                expressionManager.setCustomFunctionProviders(customFunctionProviders);
+            }
+            if (customELResolvers != null) {
+                expressionManager.setCustomELResolvers(customELResolvers);
+            }
+            processEngineConfiguration.setExpressionManager(expressionManager);
+        }
+    }
 
-  public boolean isSingleton() {
-    return true;
-  }
+    protected void configureExternallyManagedTransactions() {
+        if (processEngineConfiguration instanceof SpringProcessEngineConfiguration) {
+            // remark: any config can be injected, so we cannot have SpringConfiguration as member
+            SpringProcessEngineConfiguration engineConfiguration =
+                (SpringProcessEngineConfiguration) processEngineConfiguration;
+            if (engineConfiguration.getTransactionManager() != null) {
+                processEngineConfiguration.setTransactionsExternallyManaged(true);
+            }
+        }
+    }
 
-  public ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
-    return processEngineConfiguration;
-  }
+    public Class<ProcessEngine> getObjectType() {
+        return ProcessEngine.class;
+    }
 
-  public void setProcessEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfiguration) {
-    this.processEngineConfiguration = processEngineConfiguration;
-  }
+    public boolean isSingleton() {
+        return true;
+    }
+
+    public ProcessEngineConfigurationImpl getProcessEngineConfiguration() {
+        return processEngineConfiguration;
+    }
+
+    public void setProcessEngineConfiguration(ProcessEngineConfigurationImpl processEngineConfiguration) {
+        this.processEngineConfiguration = processEngineConfiguration;
+    }
 }

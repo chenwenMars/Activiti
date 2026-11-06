@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.api.runtime.model.impl;
 
-import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.activiti.api.process.model.IntegrationContext;
 
 public class IntegrationContextImpl implements IntegrationContext {
 
     private String id;
-    private Map<String, Object> inboundVariables = new HashMap<>();
-    private Map<String, Object> outBoundVariables = new HashMap<>();
+    private ProcessVariablesMap<String, Object> inBoundVariables = new ProcessVariablesMap<>();
+    private ProcessVariablesMap<String, Object> outBoundVariables = new ProcessVariablesMap<>();
     private String processInstanceId;
     private String parentProcessInstanceId;
+    private String rootProcessInstanceId;
     private String processDefinitionId;
+    private String executionId;
     private String processDefinitionKey;
     private Integer processDefinitionVersion;
     private String businessKey;
@@ -38,9 +43,36 @@ public class IntegrationContextImpl implements IntegrationContext {
     private String clientType;
     private String appVersion;
     private String connectorType;
+    private Boolean ephemeralVariables;
 
     public IntegrationContextImpl() {
         this.id = UUID.randomUUID().toString();
+    }
+
+    public IntegrationContextImpl(IntegrationContext other) {
+        this.id = other.getId();
+        Map<String, Object> otherInBoundVariables = other.getInBoundVariables();
+        if (otherInBoundVariables != null) {
+            this.inBoundVariables.putAll(otherInBoundVariables);
+        }
+        Map<String, Object> otherOutBoundVariables = other.getOutBoundVariables();
+        if (otherOutBoundVariables != null) {
+            this.outBoundVariables.putAll(otherOutBoundVariables);
+        }
+        this.processInstanceId = other.getProcessInstanceId();
+        this.parentProcessInstanceId = other.getParentProcessInstanceId();
+        this.rootProcessInstanceId = other.getRootProcessInstanceId();
+        this.processDefinitionId = other.getProcessDefinitionId();
+        this.executionId = other.getExecutionId();
+        this.processDefinitionKey = other.getProcessDefinitionKey();
+        this.processDefinitionVersion = other.getProcessDefinitionVersion();
+        this.businessKey = other.getBusinessKey();
+        this.clientId = other.getClientId();
+        this.clientName = other.getClientName();
+        this.clientType = other.getClientType();
+        this.appVersion = other.getAppVersion();
+        this.connectorType = other.getConnectorType();
+        this.ephemeralVariables = other.hasEphemeralVariables();
     }
 
     @Override
@@ -50,6 +82,15 @@ public class IntegrationContextImpl implements IntegrationContext {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public String getRootProcessInstanceId() {
+        return rootProcessInstanceId;
+    }
+
+    public void setRootProcessInstanceId(String rootProcessInstanceId) {
+        this.rootProcessInstanceId = rootProcessInstanceId;
     }
 
     @Override
@@ -90,11 +131,15 @@ public class IntegrationContextImpl implements IntegrationContext {
 
     @Override
     public Map<String, Object> getInBoundVariables() {
-        return inboundVariables;
+        return inBoundVariables;
     }
 
-    public void setInBoundVariables(Map<String, Object> inboundVariables) {
-        this.inboundVariables = inboundVariables;
+    public void addInBoundVariables(Map<String, Object> inboundVariables) {
+        this.inBoundVariables.putAll(inboundVariables);
+    }
+
+    public void addInBoundVariable(String name, Object value) {
+        this.inBoundVariables.put(name, value);
     }
 
     @Override
@@ -103,24 +148,24 @@ public class IntegrationContextImpl implements IntegrationContext {
     }
 
     @Override
-    public void addOutBoundVariable(String name,
-                                    Object value) {
+    public void addOutBoundVariable(String name, Object value) {
         outBoundVariables.put(name, value);
     }
+
     @Override
     public void addOutBoundVariables(Map<String, Object> variables) {
         outBoundVariables.putAll(variables);
     }
-    
+
     @Override
     public String getProcessDefinitionKey() {
         return processDefinitionKey;
     }
-    
+
     public void setProcessDefinitionKey(String processDefinitionKey) {
         this.processDefinitionKey = processDefinitionKey;
     }
-    
+
     @Override
     public Integer getProcessDefinitionVersion() {
         return processDefinitionVersion;
@@ -129,13 +174,12 @@ public class IntegrationContextImpl implements IntegrationContext {
     public void setProcessDefinitionVersion(Integer processDefinitionVersion) {
         this.processDefinitionVersion = processDefinitionVersion;
     }
-    
+
     @Override
     public String getClientName() {
         return clientName;
     }
 
-    
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
@@ -145,17 +189,15 @@ public class IntegrationContextImpl implements IntegrationContext {
         return clientType;
     }
 
-    
     public void setClientType(String clientType) {
         this.clientType = clientType;
     }
 
-    
     @Override
-    public String getBusinessKey() { 
+    public String getBusinessKey() {
         return businessKey;
     }
-    
+
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -164,7 +206,7 @@ public class IntegrationContextImpl implements IntegrationContext {
     public String getParentProcessInstanceId() {
         return parentProcessInstanceId;
     }
-    
+
     public void setParentProcessInstanceId(String parentProcessInstanceId) {
         this.parentProcessInstanceId = parentProcessInstanceId;
     }
@@ -176,5 +218,166 @@ public class IntegrationContextImpl implements IntegrationContext {
 
     public void setAppVersion(String appVersion) {
         this.appVersion = appVersion;
+    }
+
+    @Override
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
+    }
+
+    public void setEphemeralVariables(Boolean ephemeralVariables) {
+        this.ephemeralVariables = ephemeralVariables;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            appVersion,
+            businessKey,
+            clientId,
+            clientName,
+            clientType,
+            connectorType,
+            executionId,
+            id,
+            inBoundVariables,
+            outBoundVariables,
+            parentProcessInstanceId,
+            processDefinitionId,
+            processDefinitionKey,
+            processDefinitionVersion,
+            processInstanceId,
+            rootProcessInstanceId,
+            ephemeralVariables
+        );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        IntegrationContextImpl other = (IntegrationContextImpl) obj;
+        return (
+            Objects.equals(appVersion, other.appVersion) &&
+            Objects.equals(businessKey, other.businessKey) &&
+            Objects.equals(clientId, other.clientId) &&
+            Objects.equals(clientName, other.clientName) &&
+            Objects.equals(clientType, other.clientType) &&
+            Objects.equals(connectorType, other.connectorType) &&
+            Objects.equals(executionId, other.executionId) &&
+            Objects.equals(id, other.id) &&
+            Objects.equals(inBoundVariables, other.inBoundVariables) &&
+            Objects.equals(outBoundVariables, other.outBoundVariables) &&
+            Objects.equals(parentProcessInstanceId, other.parentProcessInstanceId) &&
+            Objects.equals(processDefinitionId, other.processDefinitionId) &&
+            Objects.equals(processDefinitionKey, other.processDefinitionKey) &&
+            Objects.equals(processDefinitionVersion, other.processDefinitionVersion) &&
+            Objects.equals(processInstanceId, other.processInstanceId) &&
+            Objects.equals(rootProcessInstanceId, other.rootProcessInstanceId) &&
+            Objects.equals(ephemeralVariables, other.ephemeralVariables)
+        );
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder
+            .append("IntegrationContextImpl [id=")
+            .append(id)
+            .append(", inboundVariablesKeys=")
+            .append(inBoundVariables != null ? printKeys(inBoundVariables.keySet()) : null)
+            .append(", outBoundVariableKeys=")
+            .append(outBoundVariables != null ? printKeys(outBoundVariables.keySet()) : null)
+            .append(", rootProcessInstanceId=")
+            .append(rootProcessInstanceId)
+            .append(", processInstanceId=")
+            .append(processInstanceId)
+            .append(", parentProcessInstanceId=")
+            .append(parentProcessInstanceId)
+            .append(", processDefinitionId=")
+            .append(processDefinitionId)
+            .append(", executionId=")
+            .append(executionId)
+            .append(", processDefinitionKey=")
+            .append(processDefinitionKey)
+            .append(", processDefinitionVersion=")
+            .append(processDefinitionVersion)
+            .append(", businessKey=")
+            .append(businessKey)
+            .append(", clientId=")
+            .append(clientId)
+            .append(", clientName=")
+            .append(clientName)
+            .append(", clientType=")
+            .append(clientType)
+            .append(", appVersion=")
+            .append(appVersion)
+            .append(", connectorType=")
+            .append(connectorType)
+            .append(", ephemeralVariables=")
+            .append(ephemeralVariables)
+            .append("]");
+        return builder.toString();
+    }
+
+    private String printKeys(Set<String> keys) {
+        return Stream.ofNullable(keys).map(String::valueOf).collect(Collectors.joining(", "));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getInBoundVariable(String name) {
+        return Optional.ofNullable(inBoundVariables)
+            .map(it -> (T) inBoundVariables.get(name))
+            .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getInBoundVariable(String name, Class<T> type) {
+        return Optional.ofNullable(inBoundVariables)
+            .map(it -> (T) inBoundVariables.get(name))
+            .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getOutBoundVariable(String name) {
+        return Optional.ofNullable(outBoundVariables)
+            .map(it -> (T) it.get(name))
+            .orElse(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getOutBoundVariable(String name, Class<T> type) {
+        return Optional.ofNullable(outBoundVariables)
+            .map(it -> (T) it.get(name))
+            .orElse(null);
+    }
+
+    @Override
+    @JsonProperty("ephemeralVariables")
+    public boolean hasEphemeralVariables() {
+        return Boolean.TRUE.equals(this.ephemeralVariables);
+    }
+
+    public void clearOutBoundVariables() {
+        this.outBoundVariables.clear();
+    }
+
+    public void clearInBoundVariables() {
+        this.inBoundVariables.clear();
     }
 }

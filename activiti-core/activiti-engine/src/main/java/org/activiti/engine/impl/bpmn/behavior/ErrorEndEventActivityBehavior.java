@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,25 +24,24 @@ import org.activiti.engine.impl.bpmn.helper.ErrorPropagation;
  */
 public class ErrorEndEventActivityBehavior extends FlowNodeActivityBehavior {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  protected String errorRef;
+    protected String errorRef;
 
-  public ErrorEndEventActivityBehavior(String errorRef) {
-    this.errorRef = errorRef;
-  }
+    public ErrorEndEventActivityBehavior(String errorRef) {
+        this.errorRef = errorRef;
+    }
 
-  @Override
-  public void execute(DelegateExecution execution) {
-    ErrorPropagation.propagateError(errorRef, execution);
-  }
+    @Override
+    public void execute(DelegateExecution execution) {
+        ErrorPropagation.propagateError(errorRef, execution);
+    }
 
-  public String getErrorRef() {
-    return errorRef;
-  }
+    public String getErrorRef() {
+        return errorRef;
+    }
 
-  public void setErrorRef(String errorRef) {
-    this.errorRef = errorRef;
-  }
-
+    public void setErrorRef(String errorRef) {
+        this.errorRef = errorRef;
+    }
 }

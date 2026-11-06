@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.engine.test.profiler;
 
 import java.util.ArrayList;
@@ -11,10 +26,10 @@ import java.util.Map;
 public class CommandStats {
 
     protected long getTotalCommandTime = 0L;
-    
+
     protected List<Long> commandExecutionTimings = new ArrayList<Long>();
     protected List<Long> databaseTimings = new ArrayList<Long>();
-    
+
     protected Map<String, Long> dbSelects = new HashMap<String, Long>();
     protected Map<String, Long> dbInserts = new HashMap<String, Long>();
     protected Map<String, Long> dbUpdates = new HashMap<String, Long>();
@@ -23,7 +38,7 @@ public class CommandStats {
     public CommandStats(List<CommandExecutionResult> executions) {
         for (CommandExecutionResult execution : executions) {
             getTotalCommandTime += execution.getTotalTimeInMs();
-            
+
             commandExecutionTimings.add(execution.getTotalTimeInMs());
             databaseTimings.add(execution.getDatabaseTimeInMs());
 
@@ -55,7 +70,7 @@ public class CommandStats {
     public double getAverageExecutionTime() {
         long total = 0;
         for (Long timing : commandExecutionTimings) {
-          total += timing.longValue();
+            total += timing.longValue();
         }
         double average = (double) total / (double) commandExecutionTimings.size();
         return Math.round(average * 100.0) / 100.0;
@@ -69,12 +84,12 @@ public class CommandStats {
     }
 
     public double getAverageDatabaseExecutionTime() {
-      long total = 0;
-      for (Long timing : databaseTimings) {
-        total += timing.longValue();
-      }
-      double average = (double) total / (double) commandExecutionTimings.size();
-      return Math.round(average * 100.0) / 100.0;
+        long total = 0;
+        for (Long timing : databaseTimings) {
+            total += timing.longValue();
+        }
+        double average = (double) total / (double) commandExecutionTimings.size();
+        return Math.round(average * 100.0) / 100.0;
     }
 
     public Map<String, Long> getDbSelects() {
@@ -108,5 +123,4 @@ public class CommandStats {
     public void setDbDeletes(Map<String, Long> dbDeletes) {
         this.dbDeletes = dbDeletes;
     }
-
 }

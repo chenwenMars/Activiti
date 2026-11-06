@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,43 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.impl;
 
-import java.util.Collections;
-import java.util.Map;
+import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
+import java.util.Map;
 import org.activiti.engine.delegate.DelegateExecution;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.activiti.runtime.api.impl.MappingExecutionContext.buildMappingExecutionContext;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-
+@ExtendWith(MockitoExtension.class)
 public class MappingAwareUserTaskBehaviorTest {
 
     @InjectMocks
     private MappingAwareUserTaskBehavior behavior;
 
     @Mock
-    private VariablesMappingProvider mappingProvider;
-
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-    }
+    private ExtensionsVariablesMappingProvider mappingProvider;
 
     @Test
     public void calculateInputVariablesShouldReturnValueFromMappingProvider() {
         //given
         DelegateExecution execution = buildExecution();
-        Map<String, Object> providerVariables = Collections.singletonMap("var",
-                                                         "value");
+        Map<String, Object> providerVariables = singletonMap("var", "value");
         given(mappingProvider.calculateInputVariables(execution)).willReturn(providerVariables);
 
         //when
@@ -57,23 +49,6 @@ public class MappingAwareUserTaskBehaviorTest {
 
         //then
         assertThat(inputVariables).isEqualTo(providerVariables);
-    }
-
-    @Test
-    public void calculateOutBoundVariablesShouldReturnValueFromMappingProvider() {
-        //given
-        DelegateExecution execution = buildExecution();
-        Map<String, Object> availableVariables = Collections.emptyMap();
-        Map<String, Object> providerVariables = Collections.singletonMap("var",
-                                                         "value");
-        given(mappingProvider.calculateOutPutVariables(buildMappingExecutionContext(execution),
-                                                       availableVariables))
-                .willReturn(providerVariables);
-        //when
-        Map<String, Object> outBoundVariables = behavior.calculateOutBoundVariables(execution,
-                                                                                    availableVariables);
-        //then
-        assertThat(outBoundVariables).isEqualTo(providerVariables);
     }
 
     private DelegateExecution buildExecution() {

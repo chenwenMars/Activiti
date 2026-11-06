@@ -1,0 +1,36 @@
+name: Setup Java and Maven cache
+description: Restores the Maven ~/.m2 cache, sets up the JDK and installs the requested Maven version.
+
+inputs:
+  maven-version:
+    description: The Maven version to set up.
+    required: true
+  java-version:
+    description: The Java version to set up.
+    required: false
+    default: "25"
+  java-distribution:
+    description: The Java distribution to set up.
+    required: false
+    default: "corretto"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Setup Java JDK ${{ inputs.java-version }}
+      uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # 6.1.0
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.java-distribution }}
+
+    - name: Setup Maven ${{ inputs.maven-version }}
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
+      with:
+        version: ${{ inputs.maven-version }}

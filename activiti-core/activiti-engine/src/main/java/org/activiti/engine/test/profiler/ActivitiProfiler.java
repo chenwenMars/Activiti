@@ -1,9 +1,23 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.engine.test.profiler;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import org.activiti.engine.cfg.ProcessEngineConfigurator;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.interceptor.CommandInterceptor;
@@ -24,7 +38,6 @@ public class ActivitiProfiler implements ProcessEngineConfigurator {
 
     @Override
     public void beforeInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
-
         // Command interceptor
         List<CommandInterceptor> interceptors = new ArrayList<CommandInterceptor>();
         interceptors.add(new TotalExecutionTimeCommandInterceptor());
@@ -35,21 +48,19 @@ public class ActivitiProfiler implements ProcessEngineConfigurator {
     }
 
     @Override
-    public void configure(ProcessEngineConfigurationImpl processEngineConfiguration) {
-
-    }
+    public void configure(ProcessEngineConfigurationImpl processEngineConfiguration) {}
 
     @Override
     public int getPriority() {
         return 0;
     }
-    
+
     public void reset() {
-      if (currentProfileSession != null) {
-        stopCurrentProfileSession();
-      }
-      this.currentProfileSession = null;
-      this.profileSessions.clear();
+        if (currentProfileSession != null) {
+            stopCurrentProfileSession();
+        }
+        this.currentProfileSession = null;
+        this.profileSessions.clear();
     }
 
     public void startProfileSession(String name) {
@@ -77,5 +88,4 @@ public class ActivitiProfiler implements ProcessEngineConfigurator {
     public void setProfileSessions(List<ProfileSession> profileSessions) {
         this.profileSessions = profileSessions;
     }
-
 }

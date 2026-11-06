@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,29 +15,29 @@
  */
 package org.activiti.engine.test.jobexecutor;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
-
 import org.activiti.engine.impl.interceptor.CommandContext;
 import org.activiti.engine.impl.jobexecutor.JobHandler;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.JobEntity;
-import org.junit.Assert;
 
 public class TweetHandler implements JobHandler {
 
-  List<String> messages = new ArrayList<String>();
+    List<String> messages = new ArrayList<String>();
 
-  public String getType() {
-    return "tweet";
-  }
+    public String getType() {
+        return "tweet";
+    }
 
-  public void execute(JobEntity job, String configuration, ExecutionEntity execution, CommandContext commandContext) {
-    messages.add(configuration);
-    Assert.assertNotNull(commandContext);
-  }
+    public void execute(JobEntity job, String configuration, ExecutionEntity execution, CommandContext commandContext) {
+        messages.add(configuration);
+        assertThat(commandContext).isNotNull();
+    }
 
-  public List<String> getMessages() {
-    return messages;
-  }
+    public List<String> getMessages() {
+        return messages;
+    }
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.core.common.spring.connector;
 
 import java.io.IOException;
@@ -23,28 +22,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import tools.jackson.databind.json.JsonMapper;
 
 public class ConnectorDefinitionService {
 
     private String connectorRoot;
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     private ResourcePatternResolver resourceLoader;
 
-    public ConnectorDefinitionService(String connectorRoot, ObjectMapper objectMapper, ResourcePatternResolver resourceLoader) {
+    public ConnectorDefinitionService(
+        String connectorRoot,
+        JsonMapper jsonMapper,
+        ResourcePatternResolver resourceLoader
+    ) {
         this.connectorRoot = connectorRoot;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
         this.resourceLoader = resourceLoader;
     }
 
     private Optional<Resource[]> retrieveResources() throws IOException {
-
         Optional<Resource[]> resources = Optional.empty();
 
         Resource connectorRootPath = resourceLoader.getResource(connectorRoot);
@@ -55,12 +56,10 @@ public class ConnectorDefinitionService {
     }
 
     private ConnectorDefinition read(InputStream inputStream) throws IOException {
-        return objectMapper.readValue(inputStream,
-                ConnectorDefinition.class);
+        return jsonMapper.readValue(inputStream, ConnectorDefinition.class);
     }
 
     public List<ConnectorDefinition> get() throws IOException {
-
         List<ConnectorDefinition> connectorDefinitions = new ArrayList<>();
         Optional<Resource[]> resourcesOptional = retrieveResources();
         if (resourcesOptional.isPresent()) {
@@ -85,10 +84,11 @@ public class ConnectorDefinitionService {
                     throw new IllegalStateException("connectorDefinition name cannot have '.' character");
                 }
                 if (!processedNames.add(name)) {
-                    throw new IllegalStateException("More than one connectorDefinition with name '" + name + "' was found. Names must be unique.");
+                    throw new IllegalStateException(
+                        "More than one connectorDefinition with name '" + name + "' was found. Names must be unique."
+                    );
                 }
             }
         }
     }
 }
-

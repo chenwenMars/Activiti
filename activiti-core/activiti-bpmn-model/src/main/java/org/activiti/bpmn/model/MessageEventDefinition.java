@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,53 +20,54 @@ import java.util.List;
 
 public class MessageEventDefinition extends EventDefinition {
 
-  protected String messageRef;
-  protected String messageExpression;
-  protected String correlationKey;
-  protected List<FieldExtension> fieldExtensions = new ArrayList<FieldExtension>();
-  
-  public List<FieldExtension> getFieldExtensions() {
-    return fieldExtensions;
-  }
-  public void setFieldExtensions(List<FieldExtension> fieldExtensions) {
-    this.fieldExtensions = fieldExtensions;
-  }
-  
-  public String getMessageRef() {
-    return messageRef;
-  }
+    protected String messageRef;
+    protected String messageExpression;
+    protected String correlationKey;
+    protected List<FieldExtension> fieldExtensions = new ArrayList<FieldExtension>();
 
-  public void setMessageRef(String messageRef) {
-    this.messageRef = messageRef;
-  }
+    public List<FieldExtension> getFieldExtensions() {
+        return fieldExtensions;
+    }
 
-  public String getMessageExpression() {
-    return messageExpression;
-  }
+    public void setFieldExtensions(List<FieldExtension> fieldExtensions) {
+        this.fieldExtensions = fieldExtensions;
+    }
 
-  public void setMessageExpression(String messageExpression) {
-    this.messageExpression = messageExpression;
-  }
+    public String getMessageRef() {
+        return messageRef;
+    }
 
-  public String getCorrelationKey() {
-      return correlationKey;
-  }
+    public void setMessageRef(String messageRef) {
+        this.messageRef = messageRef;
+    }
 
-  public void setCorrelationKey(String correlationKey) {
-      this.correlationKey = correlationKey;
-  }
+    public String getMessageExpression() {
+        return messageExpression;
+    }
 
-  public MessageEventDefinition clone() {
-    MessageEventDefinition clone = new MessageEventDefinition();
-    clone.setValues(this);
-    return clone;
-  }
+    public void setMessageExpression(String messageExpression) {
+        this.messageExpression = messageExpression;
+    }
 
-  public void setValues(MessageEventDefinition otherDefinition) {
-    super.setValues(otherDefinition);
-    setMessageRef(otherDefinition.getMessageRef());
-    setMessageExpression(otherDefinition.getMessageExpression());
-    setFieldExtensions(otherDefinition.getFieldExtensions());
-    setCorrelationKey(otherDefinition.getCorrelationKey());
-  }
+    public String getCorrelationKey() {
+        return correlationKey;
+    }
+
+    public void setCorrelationKey(String correlationKey) {
+        this.correlationKey = correlationKey;
+    }
+
+    public MessageEventDefinition clone() {
+        MessageEventDefinition clone = new MessageEventDefinition();
+        clone.setValues(this);
+        return clone;
+    }
+
+    public void setValues(MessageEventDefinition otherDefinition) {
+        super.setValues(otherDefinition);
+        setMessageRef(otherDefinition.getMessageRef());
+        setMessageExpression(otherDefinition.getMessageExpression());
+        setFieldExtensions(otherDefinition.getFieldExtensions());
+        setCorrelationKey(otherDefinition.getCorrelationKey());
+    }
 }

@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,30 +23,29 @@ import org.activiti.engine.impl.interceptor.CommandContext;
 
 /**
  * Command that dispatches an event.
- * 
+ *
 
  */
 public class DispatchEventCommand implements Command<Void> {
 
-  protected ActivitiEvent event;
+    protected ActivitiEvent event;
 
-  public DispatchEventCommand(ActivitiEvent event) {
-    this.event = event;
-  }
-
-  @Override
-  public Void execute(CommandContext commandContext) {
-    if (event == null) {
-      throw new ActivitiIllegalArgumentException("event is null");
+    public DispatchEventCommand(ActivitiEvent event) {
+        this.event = event;
     }
 
-    if (commandContext.getEventDispatcher().isEnabled()) {
-      commandContext.getEventDispatcher().dispatchEvent(event);
-    } else {
-      throw new ActivitiException("Message dispatcher is disabled, cannot dispatch event");
+    @Override
+    public Void execute(CommandContext commandContext) {
+        if (event == null) {
+            throw new ActivitiIllegalArgumentException("event is null");
+        }
+
+        if (commandContext.getEventDispatcher().isEnabled()) {
+            commandContext.getEventDispatcher().dispatchEvent(event);
+        } else {
+            throw new ActivitiException("Message dispatcher is disabled, cannot dispatch event");
+        }
+
+        return null;
     }
-
-    return null;
-  }
-
 }

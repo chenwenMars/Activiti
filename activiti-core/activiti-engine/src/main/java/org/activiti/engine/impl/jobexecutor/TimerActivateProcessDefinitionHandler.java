@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,19 +26,24 @@ import org.activiti.engine.impl.util.json.JSONObject;
  */
 public class TimerActivateProcessDefinitionHandler extends TimerChangeProcessDefinitionSuspensionStateJobHandler {
 
-  public static final String TYPE = "activate-processdefinition";
+    public static final String TYPE = "activate-processdefinition";
 
-  public String getType() {
-    return TYPE;
-  }
+    public String getType() {
+        return TYPE;
+    }
 
-  public void execute(JobEntity job, String configuration, ExecutionEntity execution, CommandContext commandContext) {
-    JSONObject cfgJson = new JSONObject(configuration);
-    String processDefinitionId = job.getProcessDefinitionId();
-    boolean activateProcessInstances = getIncludeProcessInstances(cfgJson);
+    public void execute(JobEntity job, String configuration, ExecutionEntity execution, CommandContext commandContext) {
+        JSONObject cfgJson = new JSONObject(configuration);
+        String processDefinitionId = job.getProcessDefinitionId();
+        boolean activateProcessInstances = getIncludeProcessInstances(cfgJson);
 
-    ActivateProcessDefinitionCmd activateProcessDefinitionCmd = new ActivateProcessDefinitionCmd(processDefinitionId, null, activateProcessInstances, null, job.getTenantId());
-    activateProcessDefinitionCmd.execute(commandContext);
-  }
-
+        ActivateProcessDefinitionCmd activateProcessDefinitionCmd = new ActivateProcessDefinitionCmd(
+            processDefinitionId,
+            null,
+            activateProcessInstances,
+            null,
+            job.getTenantId()
+        );
+        activateProcessDefinitionCmd.execute(commandContext);
+    }
 }

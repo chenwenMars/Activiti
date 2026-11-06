@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,43 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.core.common.spring.connector.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.util.Collections.emptyList;
+
+import java.io.IOException;
+import java.util.List;
 import org.activiti.core.common.model.connector.ConnectorDefinition;
 import org.activiti.core.common.spring.connector.ConnectorDefinitionService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
-@Configuration
+@AutoConfiguration
 public class ConnectorAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnMissingClass(value = "org.springframework.http.converter.json.Jackson2ObjectMapperBuilder")
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+    public ConnectorDefinitionService connectorDefinitionService(
+        @Value("${activiti.connectors.dir:classpath:/connectors/}") String connectorRoot,
+        JsonMapper jsonMapper,
+        ResourcePatternResolver resourceLoader
+    ) {
+        return new ConnectorDefinitionService(connectorRoot, jsonMapper, resourceLoader);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ConnectorDefinitionService connectorDefinitionService(@Value("${activiti.connectors.dir:classpath:/connectors/}") String connectorRoot, ObjectMapper objectMapper, ResourcePatternResolver resourceLoader) {
-        return new ConnectorDefinitionService(connectorRoot, objectMapper, resourceLoader);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public List<ConnectorDefinition> connectorDefinitions(ConnectorDefinitionService connectorDefinitionService) throws IOException {
+    public List<ConnectorDefinition> connectorDefinitions(ConnectorDefinitionService connectorDefinitionService)
+        throws IOException {
         List<ConnectorDefinition> connectorDefinitions = connectorDefinitionService.get();
-        return connectorDefinitions == null? Collections.emptyList() : connectorDefinitions;
+        return connectorDefinitions == null ? emptyList() : connectorDefinitions;
     }
 }

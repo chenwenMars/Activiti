@@ -1,11 +1,11 @@
 /*
- * Copyright 2018 Alfresco, Inc. and/or its affiliates.
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.model.impl;
 
 import java.util.Objects;
-
 import org.activiti.api.process.model.ProcessInstance;
 import org.activiti.api.runtime.model.impl.ProcessInstanceImpl;
 
-public class APIProcessInstanceConverter extends ListConverter<org.activiti.engine.runtime.ProcessInstance, ProcessInstance>
-        implements ModelConverter<org.activiti.engine.runtime.ProcessInstance, ProcessInstance> {
+public class APIProcessInstanceConverter
+    extends ListConverter<org.activiti.engine.runtime.ProcessInstance, ProcessInstance>
+    implements ModelConverter<org.activiti.engine.runtime.ProcessInstance, ProcessInstance>
+{
 
     @Override
     public ProcessInstance from(org.activiti.engine.runtime.ProcessInstance internalProcessInstance) {
@@ -40,14 +40,20 @@ public class APIProcessInstanceConverter extends ListConverter<org.activiti.engi
         processInstance.setStatus(calculateStatus(internalProcessInstance));
         processInstance.setProcessDefinitionVersion(internalProcessInstance.getProcessDefinitionVersion());
         processInstance.setAppVersion(Objects.toString(internalProcessInstance.getAppVersion(), null));
+        processInstance.setProcessDefinitionName(internalProcessInstance.getProcessDefinitionName());
+        processInstance.setRootProcessInstanceId(internalProcessInstance.getRootProcessInstanceId());
         return processInstance;
     }
 
-    private ProcessInstance.ProcessInstanceStatus calculateStatus(org.activiti.engine.runtime.ProcessInstance internalProcessInstance) {
+    private ProcessInstance.ProcessInstanceStatus calculateStatus(
+        org.activiti.engine.runtime.ProcessInstance internalProcessInstance
+    ) {
         if (internalProcessInstance.isSuspended()) {
             return ProcessInstance.ProcessInstanceStatus.SUSPENDED;
         } else if (internalProcessInstance.isEnded()) {
             return ProcessInstance.ProcessInstanceStatus.COMPLETED;
+        } else if (internalProcessInstance.getStartTime() == null) {
+            return ProcessInstance.ProcessInstanceStatus.CREATED;
         }
         return ProcessInstance.ProcessInstanceStatus.RUNNING;
     }

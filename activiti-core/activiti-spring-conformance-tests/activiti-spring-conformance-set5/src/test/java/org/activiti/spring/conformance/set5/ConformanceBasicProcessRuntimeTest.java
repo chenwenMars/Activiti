@@ -1,5 +1,23 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.spring.conformance.set5;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 import org.activiti.api.process.model.ProcessDefinition;
 import org.activiti.api.process.runtime.ProcessRuntime;
 import org.activiti.api.process.runtime.conf.ProcessRuntimeConfiguration;
@@ -7,21 +25,13 @@ import org.activiti.api.process.runtime.events.listener.ProcessRuntimeEventListe
 import org.activiti.api.runtime.shared.events.VariableEventListener;
 import org.activiti.api.runtime.shared.query.Page;
 import org.activiti.api.runtime.shared.query.Pageable;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.activiti.spring.conformance.util.security.SecurityUtil;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.activiti.spring.conformance.util.security.SecurityUtil;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class ConformanceBasicProcessRuntimeTest {
-
 
     @Autowired
     private ProcessRuntime processRuntime;
@@ -42,7 +52,6 @@ public class ConformanceBasicProcessRuntimeTest {
         //then
         assertThat(processRuntimeEventListeners).hasSize(11);
         assertThat(variableEventListeners).hasSize(3);
-
     }
 
     @Test
@@ -52,14 +61,9 @@ public class ConformanceBasicProcessRuntimeTest {
         Page<ProcessDefinition> processDefinitionPage = processRuntime.processDefinitions(Pageable.of(0, 50));
 
         List<ProcessDefinition> processDefinitions = processDefinitionPage.getContent();
-        assertThat(processDefinitions).extracting(ProcessDefinition::getName).contains(
-                "Basic Call Activity",
-                "Basic Call Activity With Service Task",
-                "Sub Process A",
-                "Sub Process B"
-
-        );
-
+        assertThat(processDefinitions)
+            .extracting(ProcessDefinition::getName)
+            .contains("Basic Call Activity", "Basic Call Activity With Service Task", "Sub Process A", "Sub Process B");
     }
 
     @Test
@@ -69,18 +73,8 @@ public class ConformanceBasicProcessRuntimeTest {
         Page<ProcessDefinition> processDefinitionPage = processRuntime.processDefinitions(Pageable.of(0, 50));
 
         List<ProcessDefinition> processDefinitions = processDefinitionPage.getContent();
-        assertThat(processDefinitions).extracting(ProcessDefinition::getName).contains(
-                "Basic Call Activity",
-                "Basic Call Activity With Service Task",
-                "Sub Process A",
-                "Sub Process B"
-
-        );
-
-
+        assertThat(processDefinitions)
+            .extracting(ProcessDefinition::getName)
+            .contains("Basic Call Activity", "Basic Call Activity With Service Task", "Sub Process A", "Sub Process B");
     }
-
-
-
-
 }

@@ -1,8 +1,11 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -10,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.activiti.runtime.api.impl;
 
 import java.util.List;
-
 import org.activiti.bpmn.model.MapExceptionEntry;
+import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.engine.delegate.Expression;
 import org.activiti.engine.impl.bpmn.behavior.CallActivityBehavior;
+import org.activiti.engine.impl.bpmn.behavior.SetVariablesTaskActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
+import org.activiti.engine.impl.bpmn.behavior.VariablesCalculator;
+import org.activiti.engine.impl.bpmn.behavior.VariablesPropagator;
 import org.activiti.engine.impl.bpmn.parser.factory.ActivityBehaviorFactory;
 import org.activiti.engine.impl.bpmn.parser.factory.DefaultActivityBehaviorFactory;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.impl.delegate.ActivityBehavior;
 import org.activiti.spring.process.ProcessVariablesInitiator;
 
 /**
@@ -30,39 +36,58 @@ import org.activiti.spring.process.ProcessVariablesInitiator;
  */
 public class MappingAwareActivityBehaviorFactory extends DefaultActivityBehaviorFactory {
 
-    private VariablesMappingProvider variablesMappingProvider;
-
+    private VariablesCalculator variablesCalculator;
     private ProcessVariablesInitiator processVariablesInitiator;
+    private final VariablesPropagator variablesPropagator;
 
-    public MappingAwareActivityBehaviorFactory(VariablesMappingProvider variablesMappingProvider,
-                                               ProcessVariablesInitiator processVariablesInitiator) {
+    public MappingAwareActivityBehaviorFactory(
+        VariablesCalculator variablesCalculator,
+        ProcessVariablesInitiator processVariablesInitiator,
+        VariablesPropagator variablesPropagator
+    ) {
         super();
-        this.variablesMappingProvider = variablesMappingProvider;
+        this.variablesCalculator = variablesCalculator;
         this.processVariablesInitiator = processVariablesInitiator;
-        
-        this.setMessagePayloadMappingProviderFactory(new JsonMessagePayloadMappingProviderFactory(variablesMappingProvider));
+        this.variablesPropagator = variablesPropagator;
+
+        this.setMessagePayloadMappingProviderFactory(new JsonMessagePayloadMappingProviderFactory(variablesCalculator));
     }
 
     @Override
     public UserTaskActivityBehavior createUserTaskActivityBehavior(UserTask userTask) {
-        return new MappingAwareUserTaskBehavior(userTask,
-                                                variablesMappingProvider);
+        return new MappingAwareUserTaskBehavior(userTask, variablesCalculator, variablesPropagator);
     }
 
     @Override
-    protected CallActivityBehavior createCallActivityBehavior(Expression expression, List<MapExceptionEntry> mapExceptions) {
-        return new MappingAwareCallActivityBehavior(expression,
-                                                    mapExceptions,
-                                                    variablesMappingProvider,
-                                                    processVariablesInitiator);
+    public ActivityBehavior createSetVariablesTaskBehavior(ServiceTask serviceTask) {
+        return new SetVariablesTaskActivityBehavior(variablesCalculator);
     }
 
     @Override
-    protected CallActivityBehavior createCallActivityBehavior(String calledElement,
-                                                              List<MapExceptionEntry> mapExceptions) {
-        return new MappingAwareCallActivityBehavior(calledElement,
-                                                    mapExceptions,
-                                                    variablesMappingProvider,
-                                                    processVariablesInitiator);
+    protected CallActivityBehavior createCallActivityBehavior(
+        Expression expression,
+        List<MapExceptionEntry> mapExceptions
+    ) {
+        return new MappingAwareCallActivityBehavior(
+            expression,
+            mapExceptions,
+            variablesCalculator,
+            processVariablesInitiator,
+            variablesPropagator
+        );
+    }
+
+    @Override
+    protected CallActivityBehavior createCallActivityBehavior(
+        String calledElement,
+        List<MapExceptionEntry> mapExceptions
+    ) {
+        return new MappingAwareCallActivityBehavior(
+            calledElement,
+            mapExceptions,
+            variablesCalculator,
+            processVariablesInitiator,
+            variablesPropagator
+        );
     }
 }

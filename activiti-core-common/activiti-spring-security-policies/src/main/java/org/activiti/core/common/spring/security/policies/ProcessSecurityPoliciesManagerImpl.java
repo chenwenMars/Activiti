@@ -1,16 +1,33 @@
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.activiti.core.common.spring.security.policies;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.activiti.api.process.model.payloads.GetProcessDefinitionsPayload;
 import org.activiti.api.process.model.payloads.GetProcessInstancesPayload;
 import org.activiti.api.runtime.shared.security.SecurityManager;
 import org.activiti.core.common.spring.security.policies.conf.SecurityPoliciesProperties;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-public class ProcessSecurityPoliciesManagerImpl extends BaseSecurityPoliciesManagerImpl implements ProcessSecurityPoliciesManager{
+public class ProcessSecurityPoliciesManagerImpl
+    extends BaseSecurityPoliciesManagerImpl
+    implements ProcessSecurityPoliciesManager
+{
 
     private final SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier;
 
@@ -19,10 +36,12 @@ public class ProcessSecurityPoliciesManagerImpl extends BaseSecurityPoliciesMana
     @Value("${spring.application.name:application}")
     private String applicationName;
 
-    public ProcessSecurityPoliciesManagerImpl(SecurityManager securityManager,
-                                              SecurityPoliciesProperties securityPoliciesProperties,
-                                              SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier,
-                                              SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier) {
+    public ProcessSecurityPoliciesManagerImpl(
+        SecurityManager securityManager,
+        SecurityPoliciesProperties securityPoliciesProperties,
+        SecurityPoliciesRestrictionApplier<GetProcessDefinitionsPayload> processDefinitionRestrictionApplier,
+        SecurityPoliciesRestrictionApplier<GetProcessInstancesPayload> processInstanceRestrictionApplier
+    ) {
         super(securityManager, securityPoliciesProperties);
         this.processDefinitionRestrictionApplier = processDefinitionRestrictionApplier;
         this.processInstanceRestrictionApplier = processInstanceRestrictionApplier;
@@ -47,12 +66,14 @@ public class ProcessSecurityPoliciesManagerImpl extends BaseSecurityPoliciesMana
         return keys;
     }
 
-
     public GetProcessInstancesPayload restrictProcessInstQuery(SecurityPolicyAccess securityPolicyAccess) {
         return restrictQuery(processInstanceRestrictionApplier, securityPolicyAccess);
     }
 
-    private <T> T restrictQuery(SecurityPoliciesRestrictionApplier<T> restrictionApplier, SecurityPolicyAccess securityPolicyAccess) {
+    private <T> T restrictQuery(
+        SecurityPoliciesRestrictionApplier<T> restrictionApplier,
+        SecurityPolicyAccess securityPolicyAccess
+    ) {
         if (!arePoliciesDefined()) {
             return restrictionApplier.allowAll();
         }
@@ -60,7 +81,6 @@ public class ProcessSecurityPoliciesManagerImpl extends BaseSecurityPoliciesMana
         Set<String> keys = definitionKeysAllowedForApplicationPolicy(securityPolicyAccess);
 
         if (keys != null && !keys.isEmpty()) {
-
             if (keys.contains(getSecurityPoliciesProperties().getWildcard())) {
                 return restrictionApplier.allowAll();
             }
@@ -81,8 +101,10 @@ public class ProcessSecurityPoliciesManagerImpl extends BaseSecurityPoliciesMana
     }
 
     public boolean canRead(String processDefinitionKey) {
-        return hasPermission(processDefinitionKey, SecurityPolicyAccess.READ, applicationName)
-                || hasPermission(processDefinitionKey, SecurityPolicyAccess.WRITE, applicationName);
+        return (
+            hasPermission(processDefinitionKey, SecurityPolicyAccess.READ, applicationName) ||
+            hasPermission(processDefinitionKey, SecurityPolicyAccess.WRITE, applicationName)
+        );
     }
 
     protected boolean anEntryInSetStartsKey(Set<String> keys, String processDefinitionKey) {
@@ -94,5 +116,4 @@ public class ProcessSecurityPoliciesManagerImpl extends BaseSecurityPoliciesMana
         }
         return false;
     }
-
 }

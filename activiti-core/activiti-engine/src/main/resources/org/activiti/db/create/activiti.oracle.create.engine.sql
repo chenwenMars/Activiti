@@ -6,10 +6,10 @@ create table ACT_GE_PROPERTY (
 );
 
 insert into ACT_GE_PROPERTY
-values ('schema.version', '7.0.0.0', 1);
+values ('schema.version', '9.1.1', 1);
 
 insert into ACT_GE_PROPERTY
-values ('schema.history', 'create(7.0.0.0)', 1);
+values ('schema.history', 'create(9.1.1)', 1);
 
 insert into ACT_GE_PROPERTY
 values ('next.dbid', '1', 1);
@@ -210,6 +210,7 @@ create table ACT_RU_TASK (
     TENANT_ID_ NVARCHAR2(255) DEFAULT '',
     FORM_KEY_ NVARCHAR2(255),
     CLAIM_TIME_ TIMESTAMP(6),
+    CLAIM_TOKEN_ NVARCHAR2(64),
     APP_VERSION_ INTEGER,
     primary key (ID_)
 );
@@ -223,6 +224,7 @@ create table ACT_RU_IDENTITYLINK (
     TASK_ID_ NVARCHAR2(64),
     PROC_INST_ID_ NVARCHAR2(64),
     PROC_DEF_ID_ NVARCHAR2(64),
+    DETAILS_ BLOB,
     primary key (ID_)
 );
 
@@ -296,10 +298,12 @@ create table ACT_RU_INTEGRATION (
 create index ACT_IDX_EXEC_BUSKEY on ACT_RU_EXECUTION(BUSINESS_KEY_);
 create index ACT_IDX_EXEC_ROOT on ACT_RU_EXECUTION(ROOT_PROC_INST_ID_);
 create index ACT_IDX_TASK_CREATE on ACT_RU_TASK(CREATE_TIME_);
+create index ACT_IDX_TASK_CLAIM_TOKEN on ACT_RU_TASK(CLAIM_TOKEN_);
 create index ACT_IDX_IDENT_LNK_USER on ACT_RU_IDENTITYLINK(USER_ID_);
 create index ACT_IDX_IDENT_LNK_GROUP on ACT_RU_IDENTITYLINK(GROUP_ID_);
 create index ACT_IDX_EVENT_SUBSCR_CONFIG_ on ACT_RU_EVENT_SUBSCR(CONFIGURATION_);
 create index ACT_IDX_VARIABLE_TASK_ID on ACT_RU_VARIABLE(TASK_ID_);
+create index ACT_IDX_RE_PROCDEF_DEPLOYMENT_ID on ACT_RE_PROCDEF(DEPLOYMENT_ID_ ASC, ID_ ASC);
 
 create index ACT_IDX_BYTEAR_DEPL on ACT_GE_BYTEARRAY(DEPLOYMENT_ID_);
 alter table ACT_GE_BYTEARRAY
@@ -335,7 +339,7 @@ alter table ACT_RU_EXECUTION
     foreign key (PROC_DEF_ID_)
     references ACT_RE_PROCDEF (ID_);
 
-create index ACT_IDX_TSKASS_TASK on ACT_RU_IDENTITYLINK(TASK_ID_);
+create index ACT_IDX_TSKASS_TASK on ACT_RU_IDENTITYLINK(TASK_ID_ ASC);
 alter table ACT_RU_IDENTITYLINK
     add constraint ACT_FK_TSKASS_TASK
     foreign key (TASK_ID_)

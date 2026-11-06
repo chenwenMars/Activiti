@@ -1,9 +1,12 @@
-/* Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Copyright 2010-2026 Hyland Software, Inc. and its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,32 +21,30 @@ import org.activiti.engine.impl.variable.ValueFields;
 
 /**
 
- * 
+ *
  * Generic variable class that can be reused for Activiti 6 and 5 engine
  */
 @Internal
 public interface VariableInstance extends ValueFields, Entity, HasRevision {
-  
-  void setName(String name);
+    void setName(String name);
 
-  void setProcessInstanceId(String processInstanceId);
+    void setProcessInstanceId(String processInstanceId);
 
-  void setExecutionId(String executionId);
+    void setExecutionId(String executionId);
 
-  Object getValue();
+    Object getValue();
 
-  void setValue(Object value);
+    void setValue(Object value);
 
-  String getTypeName();
+    String getTypeName();
 
-  void setTypeName(String typeName);
+    void setTypeName(String typeName);
 
-  String getProcessInstanceId();
+    String getProcessInstanceId();
 
-  String getTaskId();
+    String getTaskId();
 
-  void setTaskId(String taskId);
+    void setTaskId(String taskId);
 
-  String getExecutionId();
-
+    String getExecutionId();
 }
